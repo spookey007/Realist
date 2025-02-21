@@ -34,4 +34,10 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    port: 3131,
+  },
+  preview: {
+    port: 5101,
+  },
 });
