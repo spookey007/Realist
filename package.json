@@ -1,5 +1,5 @@
 {
-  "name": "maggiesmagictouch",
+  "name": "realist_app",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -95,7 +95,7 @@
     "vite": "^5.4.1"
   },
   "config": {
-    "production_url": "https://maggiesmagictouch.com"
+    "production_url": "https://realist.galico.io"
   },
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
   "main": "eslint.config.js",
