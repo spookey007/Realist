@@ -1,0 +1,21 @@
+/* src/assets/css/videos.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.videos {
+    padding: 4rem 0;
+    background-color: #f9f9f9;
+  }
+  
+  .videos h2 {
+    font-size: 2.5rem;
+    color: #002B5C;
+    margin-bottom: 2rem;
+  }
+  
+  .videos p {
+    font-size: 1.1rem;
+    color: #555;
+  }
+  

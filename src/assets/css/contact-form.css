@@ -1,0 +1,52 @@
+/* src/assets/css/contact-form.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.contact-form {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contact-form div {
+    margin-bottom: 1.5rem;
+  }
+  
+  .contact-form label {
+    font-weight: bold;
+    color: #002B5C;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+  }
+  
+  .contact-form textarea {
+    resize: vertical;
+  }
+  
+  .contact-form button {
+    background-color: #ffda00;
+    color: #002B5C;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .contact-form button:hover {
+    background-color: #ffc700;
+  }
+  
+  .contact-form span {
+    color: red;
+    font-size: 0.9rem;
+  }
+  

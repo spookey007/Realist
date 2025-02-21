@@ -1,0 +1,43 @@
+/* src/assets/css/services.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.services {
+    background-color: #f9f9f9;
+    padding: 4rem 0;
+  }
+  
+  .services .service-card {
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    text-align: center;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+  
+  .services .service-card:hover {
+    transform: translateY(-10px);
+  }
+  
+  .services h2 {
+    font-size: 2.5rem;
+    color: #002B5C;
+    margin-bottom: 2rem;
+  }
+  
+  .services .service-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #ffda00;
+  }
+  
+  .services .service-card p {
+    font-size: 1rem;
+    color: #555;
+  }
+  /* styles.css */
+.image-padding {
+  padding: 15px; /* Adjust this value as needed */
+}

@@ -1,0 +1,53 @@
+/* src/assets/css/base.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #002B5C;
+  margin: 0 0 1rem;
+  font-weight: bold;
+}
+
+p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+button {
+  background-color: #ffda00;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  color: #002B5C;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #ffc700;
+}
+
+a {
+  text-decoration: none;
+  color: #002B5C;
+}
+
+a:hover {
+  color: #ffda00;
+}

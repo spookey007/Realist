@@ -1,0 +1,27 @@
+/* src/assets/css/contact-form.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#datepicker-to-date {
+  display: none;
+}
+#rangeButton0  {
+  display: none;
+}
+
+#datepicker-fromto-label
+{
+  display: none;
+}
+#datepicker-hour-container-from-date > div:nth-of-type(2) {
+  display: none;
+}
+
+#startNotifierID {
+  display: none;
+}
+
+#datepicker {
+  position: relative !important;
+}

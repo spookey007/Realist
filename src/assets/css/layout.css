@@ -1,0 +1,49 @@
+/* src/assets/css/layout.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Header Styling */
+header {
+  background-color: #002B5C;
+  color: #ffffff;
+  padding: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-info {
+  text-align: right;
+}
+
+.header-info p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav ul li a {
+  color: #ffffff;
+  font-weight: bold;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+  color: #ffda00;
+}
+
+/* Footer Styling */
+footer {
+  background-color: #002B5C;
+  color: #ffffff;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+}
