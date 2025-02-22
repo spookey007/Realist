@@ -37,14 +37,14 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #fff;
+    color: black
   }
   
   .modal-title {
     font-size: 1.8rem;
     margin-bottom: 1rem;
     text-align: center;
-    color: #fff; /* White text for better contrast */
+    color: black; /* White text for better contrast */
   }
   
   .form-group {

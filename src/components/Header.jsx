@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/images/slate-R-logo.svg';
 import '@fortawesome/fontawesome-free/css/all.css';
 import '../assets/css/header.css';
-
+import LoginModal from './LoginModal'; // Import Modal
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -11,6 +11,11 @@ const Header = () => {
   
   // New function to close the menu
   const closeMenu = () => setIsMenuOpen(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openLModal = () => setIsModalOpen(true);
+  const closeLModal = () => setIsModalOpen(false);
 
   return (
     <header className="w-full shadow-md bg-white">
@@ -69,14 +74,14 @@ const Header = () => {
             About Us
           </Link>
           <Link
-            to="/about"
-            onClick={closeMenu} // Close menu on click
+            onClick={openLModal}
             className="bg-black block py-4 px-6 md:py-1 md:px-5 text-white hover:bg-white text-lg transition duration-300 border border-gray-400 rounded-lg"
           >
             Sign In
           </Link>
         </nav>
       </div>
+      <LoginModal isOpen={isModalOpen} closeModal={closeLModal} />
     </header>
   );
 };

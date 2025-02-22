@@ -3,7 +3,7 @@ import heroImage from '../assets/images/front_info.png';
 import '../assets/css/hero.css';
 import Testimonials from './Testimonials';
 import Talk from './Talk';
-import ContactModal from './ContactModal'; // Import Modal
+import RegisterModal from './RegisterModal'; // Import Modal
 
 const Hero = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +62,7 @@ const Hero = () => {
       </div>
 
       {/* Include Modal */}
-      <ContactModal isOpen={isModalOpen} closeModal={closeModal} />
+      <RegisterModal isOpen={isModalOpen} closeModal={closeModal} />
 
       <div className="container mx-auto px-6 py-12 bg-white">
           {/* <WhyChoose /> */}
