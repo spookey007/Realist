@@ -15,7 +15,7 @@
     "node": "node server/index.mjs",
     "vite": "vite preview",
     "serve": "serve -s dist -l 5137",
-    "start": "concurrently \"npm run node\" \"npm run vite\""
+    "start": "concurrently \"npm run node\" \"npm run serve\""
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
