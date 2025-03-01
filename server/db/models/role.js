@@ -8,26 +8,34 @@ export default (sequelize, DataTypes) => {
     }
   }
 
-  Role.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+  Role.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true, // Ensures unique IDs
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // No default, must be provided explicitly
+      },
     },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1
+    {
+      sequelize,
+      modelName: 'Role',
+      timestamps: true,
     }
-  }, {
-    sequelize,
-    modelName: 'Role',
-    timestamps: true
-  });
+  );
 
   return Role;
 };

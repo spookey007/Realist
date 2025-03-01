@@ -2,28 +2,32 @@ import { pool } from '../db/db.js';
 
 // Create a new role
 export const createRole = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, status } = req.body;
 
   if (!name) {
-    return res.status(400).json({ message: 'Role name is required' });
+    return res.status(400).json({ message: "Role name is required" });
   }
 
   try {
-    const query = `
-      INSERT INTO "Roles" (name, description, "createdAt", "updatedAt")
-      VALUES ($1, $2, NOW(), NOW()) RETURNING id, name, description;
-    `;
-    const values = [name, description || null];
-    const result = await pool.query(query, values);
+    // Ensure `status` is always provided, default to `1` (or any value you prefer)
+    const roleStatus = status !== undefined ? status : 1;
 
+    const query = `
+      INSERT INTO "Roles" (name, description, status, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, name, description, status;
+    `;
+    const values = [name, description || null, roleStatus];
+
+    const result = await pool.query(query, values);
     const role = result.rows[0];
 
-    res.status(201).json({ message: 'Role created successfully', role });
+    res.status(201).json({ message: "Role created successfully", role });
   } catch (error) {
-    console.error('Error creating role:', error);
-    res.status(500).json({ message: 'Failed to create role' });
+    console.error("Error creating role:", error);
+    res.status(500).json({ message: "Failed to create role" });
   }
 };
+
 
 // Get all roles
 export const getAllRoles = async (req, res) => {

@@ -1,6 +1,7 @@
 import express from "express";
 import {
-  createUser,
+  createUserA,
+  createUserB,
   updateUser,
   getAllUsers,
   getUserById,
@@ -18,7 +19,8 @@ router.post("/login", loginUser); // Authenticate user and return token
 // User Management
 router.get("/", getAllUsers); // Retrieve all users
 router.get("/:id", getUserById); // Retrieve a specific user by ID
-router.post("/", createUser); // Create a new user
+router.post("/", createUserA); // Create a new user
+router.post("/admin", createUserB); // Create a new user Admin
 router.put("/update/:id", updateUser); // Update user details directly
 router.delete("/:id", deleteUser); // Delete a user by ID
 

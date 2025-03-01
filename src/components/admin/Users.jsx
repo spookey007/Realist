@@ -16,54 +16,124 @@ import axios from "axios";
 import alertify from "alertifyjs";
 import "alertifyjs/build/css/alertify.css";
 import "preline";
+import * as Yup from "yup";
 
-const Users = () => {
-  const [users, setUsers] = useState([]);
+const Users = ({ apiUrl, rolesApi }) => {
+  const initialData = { name: "", role: "", status: 1 };
+  const [data, setData] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [editUser, setEditUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
+  const [formData, setFormData] = useState(initialData);
+  const [editItem, setEditItem] = useState(null);
   const [password, setPassword] = useState({ newPassword: "", confirmPassword: "" });
 
   useEffect(() => {
-    fetchUsers();
-    fetchRoles();
+    const fetchAllData = async () => {
+      await fetchRoles(); // ✅ Ensure roles are available first
+      fetchData();        // ✅ Fetch users only after roles are ready
+    };
+  
+    fetchAllData();
   }, []);
+  
+  
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`);
-      setUsers(response.data.users);
+      setData(response.data.users || []);
     } catch (error) {
-      alertify.error("Failed to fetch users.");
+      alertify.error("Failed to fetch data.");
     }
   };
 
   const fetchRoles = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/user-roles`);
-      setRoles(response.data.roles);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/roles/getRoles`);
+      setRoles(response.data.roles || []);
     } catch (error) {
-      alertify.error("Failed to fetch roles.");
+      console.error("Error fetching roles:", error);
+      setRoles([]);
     }
   };
 
-  const handleEditUser = (user) => {
-    setEditUser(user);
+
+  const openModal = (item = null) => {
+    setFormData(item ? { ...item } : initialData);
+    setEditItem(item);
+    setIsModalOpen(true);
+  };
+   
+  
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSaveUser = async () => {
+
+
+const validationSchema = Yup.object({
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[@$!%*?&]/, "Password must contain at least one special character")
+    .required("Password is required"),
+
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
+
+  // captchaValue: Yup.string().required("Please complete the reCAPTCHA"),
+});
+
+
+  const handleSave = async () => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/update/${editUser.id}`, editUser);
-      alertify.success("User updated successfully!");
-      setEditUser(null);
-      fetchUsers();
+      await validationSchema.validate(formData, { abortEarly: false });
+  
+      if (editItem) {
+        const updatedUser = {
+          name: formData.name.trim(),
+          status: parseInt(formData.status, 10),
+          role: parseInt(formData.role, 10),
+        };
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/update/${editItem.id}`, updatedUser);
+        alertify.success("Updated successfully!");
+      } else {
+        const newUser = {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password.trim(),
+          status: parseInt(formData.status, 10),
+          role: parseInt(formData.role, 10),
+        };
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/users/admin`, newUser);
+        alertify.success("Added successfully!");
+      }
+  
+      fetchData();
+      setIsModalOpen(false);
     } catch (error) {
-      alertify.error("Failed to update user.");
+      if (error instanceof Yup.ValidationError) {
+        error.inner.forEach((err) => alertify.error(err.message));
+      } else {
+        alertify.error("Error saving data.");
+      }
     }
   };
+  
+  
 
-  const handleOpenPasswordModal = (user) => {
-    setEditUser(user);
+  const handleOpenPasswordModal = (item) => {
+    setEditItem(item);
+    setPassword({ newPassword: "", confirmPassword: "" });
     setPasswordModal(true);
   };
 
@@ -72,13 +142,14 @@ const Users = () => {
       alertify.error("Passwords do not match!");
       return;
     }
+
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/reset-password/${editUser.id}`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/reset-password/${editItem.id}`, {
         password: password.newPassword,
       });
+
       alertify.success("Password reset successfully!");
       setPasswordModal(false);
-      setPassword({ newPassword: "", confirmPassword: "" });
     } catch (error) {
       alertify.error("Failed to reset password.");
     }
@@ -89,83 +160,47 @@ const Users = () => {
       {
         header: "Avatar",
         accessorKey: "avatar",
-        cell: (info) => <Avatar src={info.getValue() || "https://i.pravatar.cc/40"} alt="User Avatar" />,
-        size: 80,
+        cell: (info) => <Avatar src={info.getValue() || "https://i.pravatar.cc/40"} alt="Avatar" />,
       },
       {
         header: "Name",
         accessorKey: "name",
-        cell: (info) =>
-          editUser?.id === info.row.original.id ? (
-            <TextField
-              value={editUser.name}
-              onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-              size="small"
-              fullWidth
-            />
-          ) : (
-            <Typography>{info.getValue()}</Typography>
-          ),
+        cell: (info) => <Typography>{info.getValue()}</Typography>,
       },
       {
         header: "Role",
-        accessorKey: "role",
-        cell: (info) =>
-          editUser?.id === info.row.original.id ? (
-            <TextField
-              select
-              value={editUser.role}
-              onChange={(e) => setEditUser({ ...editUser, role: e.target.value })}
-              size="small"
-              fullWidth
-            >
-              {roles.map((role) => (
-                <MenuItem key={role.id} value={role.name}>
-                  {role.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Typography>{info.getValue()}</Typography>
-          ),
+        accessorKey: "role_name",
+        cell: (info) => {
+          const role_name = info.getValue(); // Get the role ID from API response
+          return <Typography>{role_name}</Typography>;
+        },
       },
+      
       {
         header: "Status",
         accessorKey: "status",
-        cell: (info) =>
-          editUser?.id === info.row.original.id ? (
-            <TextField
-              select
-              value={editUser.status}
-              onChange={(e) => setEditUser({ ...editUser, status: e.target.value })}
-              size="small"
-              fullWidth
-            >
-              <MenuItem value={0}>Pending</MenuItem>
-              <MenuItem value={1}>Activated</MenuItem>
-              <MenuItem value={2}>Deactivated</MenuItem>
-            </TextField>
-          ) : (
-            <Chip label={["Pending", "Activated", "Deactivated"][info.getValue()]} />
-          ),
+        cell: (info) => {
+          const statusMap = {
+            0: { label: "Pending", color: "bg-yellow-500 text-black" },
+            1: { label: "Activated", color: "bg-green-500 text-white" },
+            2: { label: "Deactivated", color: "bg-red-500 text-white" },
+          };
+
+          const status = info.getValue();
+          return <Chip label={statusMap[status]?.label} className={`px-2 py-1 rounded-full text-xs font-semibold ${statusMap[status]?.color}`} />;
+        },
       },
       {
         header: "Actions",
         accessorKey: "actions",
         cell: (info) => {
-          const rowUser = info.row.original;
+          const rowItem = info.row.original;
           return (
             <div className="flex space-x-2">
-              {editUser?.id === rowUser.id ? (
-                <Button variant="contained" color="success" size="small" onClick={handleSaveUser}>
-                  Save
-                </Button>
-              ) : (
-                <Button variant="contained" color="primary" size="small" onClick={() => handleEditUser(rowUser)}>
-                  Edit
-                </Button>
-              )}
-              <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenPasswordModal(rowUser)}>
+              <Button variant="contained" color="primary" size="small" onClick={() => openModal(rowItem)}>
+                Edit
+              </Button>
+              <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenPasswordModal(rowItem)}>
                 Reset Password
               </Button>
             </div>
@@ -173,46 +208,93 @@ const Users = () => {
         },
       },
     ],
-    [editUser, roles]
+    []
   );
 
   const table = useReactTable({
-    data: users,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
-    <div className="flex flex-col flex-1 transition-all duration-300 p-6 md:p-8 lg:p-10 bg-gray-100 min-h-screen mt-[64px] ml-[250px] w-full">
-      <Typography variant="h4" className="font-bold mb-4">
-        Users Management
-      </Typography>
-      <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <table className="w-full border-collapse min-w-full">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b bg-gray-200">
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="p-2 text-left">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
+    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
+      <Button variant="contained" color="primary" onClick={() => openModal()}>
+        Add User
+      </Button>
+
+      <table className="w-full mt-4 border-collapse border border-gray-300">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} className="border-b bg-gray-200">
+              {headerGroup.headers.map((header) => (
+                <th key={header.id} className="p-2 text-left">
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id} className="border-b">
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} className="p-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Add/Edit Modal */}
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <DialogTitle>{editItem ? `Update (ID: ${editItem.id})` : "Add New"}</DialogTitle>
+        <DialogContent>
+          <TextField fullWidth label="Name" name="name" value={formData.name} onChange={handleChange} margin="normal" />
+          {!editItem && (
+          <>
+            <TextField fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} margin="normal" />
+            <TextField fullWidth label="Password" name="password" type="password" value={formData.password} onChange={handleChange} margin="normal" />
+            <TextField fullWidth label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} margin="normal" />
+          </>
+          )}
+          <TextField select fullWidth label="Role" name="role" value={formData.role} onChange={handleChange} margin="normal">
+            {roles.map((role) => (
+              <MenuItem key={role.id} value={role.id}>
+                {role.name}
+              </MenuItem>
             ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="p-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          </TextField>
+          
+
+          <TextField select fullWidth label="Status" name="status" value={formData.status} onChange={handleChange} margin="normal">
+            <MenuItem value={0}>Pending</MenuItem>
+            <MenuItem value={1}>Activated</MenuItem>
+            <MenuItem value={2}>Deactivated</MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          <Button onClick={handleSave} variant="contained" color="primary">
+            {editItem ? "Update" : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reset Password Modal */}
+      <Dialog open={passwordModal} onClose={() => setPasswordModal(false)}>
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          <TextField fullWidth label="New Password" type="password" name="newPassword" value={password.newPassword} onChange={(e) => setPassword({ ...password, newPassword: e.target.value })} margin="normal" />
+          <TextField fullWidth label="Confirm Password" type="password" name="confirmPassword" value={password.confirmPassword} onChange={(e) => setPassword({ ...password, confirmPassword: e.target.value })} margin="normal" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPasswordModal(false)}>Cancel</Button>
+          <Button onClick={handleResetPassword} variant="contained" color="primary">
+            Reset Password
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

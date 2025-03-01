@@ -4,7 +4,7 @@ import axios from "axios";
 import alertify from "alertifyjs";
 import "alertifyjs/build/css/alertify.css";
 
-const Roles = () => {
+const Invites = () => {
   const initialData = { name: "", description: "", status: 1 };
   const [data, setData] = useState([]);
   const [editItem, setEditItem] = useState(null);
@@ -54,14 +54,13 @@ const Roles = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
       <Button variant="contained" color="primary" onClick={() => openModal()}>
-        Add Roles
+        Invite
       </Button>
 
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
           <tr className="border-b bg-gray-200">
             <th className="p-2 text-left">Name</th>
-            <th className="p-2 text-left">Description</th>
             <th className="p-2 text-left">Status</th>
             <th className="p-2 text-left">Actions</th>
           </tr>
@@ -70,7 +69,6 @@ const Roles = () => {
           {data.map((item) => (
             <tr key={item.id} className="border-b">
               <td className="p-2">{item.name}</td>
-              <td className="p-2">{item.description}</td>
               <td className="p-2">
                 <Chip
                   label={["Pending", "Activated", "Deactivated"][item.status]}
@@ -112,4 +110,4 @@ const Roles = () => {
   );
 };
 
-export default Roles;
+export default Invites;

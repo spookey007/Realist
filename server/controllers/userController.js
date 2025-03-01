@@ -19,7 +19,7 @@ function generateNameFromEmail(email) {
 }
 
 // Create a new user
-export const createUser = async (req, res) => {
+export const createUserA = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -35,6 +35,32 @@ export const createUser = async (req, res) => {
       VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, name, email;
     `;
     const values = [name, email, hashedPassword];
+    const result = await pool.query(query, values);
+
+    const user = result.rows[0];
+
+    res.status(201).json({ message: 'User created successfully', user });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Failed to create user' });
+  }
+};
+
+export const createUserB = async (req, res) => {
+  const { name, email, password, status, role } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  try {
+    const query = `
+      INSERT INTO "Users" (name, email, encrypted_password,role,status, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id, name, email;
+    `;
+    const values = [name, email, hashedPassword, role, status];
     const result = await pool.query(query, values);
 
     const user = result.rows[0];
@@ -84,14 +110,24 @@ export const updateUser = async (req, res) => {
 // Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const query = 'SELECT id, name, email, "createdAt", "updatedAt" FROM "Users";';
+    const query = `
+      SELECT
+        "Users"."id", "Users"."name", "Users"."email", "Users"."status", "Users"."role", 
+        "Users"."createdAt", "Users"."updatedAt",
+        "Roles"."name" AS "role_name" 
+      FROM "Users"
+      LEFT JOIN "Roles" ON "Users"."role" = "Roles"."id";  -- ✅ Correct table references
+    `;
+    
     const result = await pool.query(query);
     res.status(200).json({ users: result.rows });
+
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Failed to retrieve users' });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Failed to fetch users" });
   }
 };
+
 
 // Get user by ID
 export const getUserById = async (req, res) => {

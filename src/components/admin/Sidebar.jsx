@@ -109,16 +109,16 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
             <ListItem
               button
               component={Link}
-              to="/admin/invite"
+              to="/admin/invites"
               onClick={startLoading}
               sx={{
                 pl: open ? 4 : 2,
-                color: location.pathname === "/admin/invite" ? "white" : "#CBD5E1",
-                backgroundColor: location.pathname === "/admin/invite" ? "#6366F1" : "transparent",
+                color: location.pathname === "/admin/invites" ? "white" : "#CBD5E1",
+                backgroundColor: location.pathname === "/admin/invites" ? "#6366F1" : "transparent",
                 "&:hover": { backgroundColor: "#334155", color: "white" },
               }}
             >
-              <ListItemIcon sx={{ color: location.pathname === "/admin/invite" ? "white" : "#93C5FD" }}>
+              <ListItemIcon sx={{ color: location.pathname === "/admin/invites" ? "white" : "#93C5FD" }}>
                 <UserGroupIcon className="h-6 w-6" />
               </ListItemIcon>
               {open && <ListItemText primary="Invite Users" />}
