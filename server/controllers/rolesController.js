@@ -28,7 +28,7 @@ export const createRole = async (req, res) => {
 // Get all roles
 export const getAllRoles = async (req, res) => {
   try {
-    const query = 'SELECT id, name, description, "createdAt", "updatedAt" FROM "Roles";';
+    const query = 'SELECT id, name, description,status, "createdAt", "updatedAt" FROM "Roles";';
     const result = await pool.query(query);
 
     res.status(200).json({ roles: result.rows });
@@ -105,16 +105,17 @@ export const deleteRole = async (req, res) => {
   }
 
   try {
-    const query = 'DELETE FROM "Roles" WHERE "id" = $1 RETURNING *;';
+    const query = 'UPDATE "Roles" SET "status" = 0 WHERE "id" = $1 RETURNING *;';
     const result = await pool.query(query, [id]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Role not found' });
     }
 
-    res.status(200).json({ message: 'Role deleted successfully' });
+    res.status(200).json({ message: 'Role soft deleted successfully' });
   } catch (error) {
-    console.error('Error deleting role:', error);
-    res.status(500).json({ message: 'Failed to delete role' });
+    console.error('Error soft deleting role:', error);
+    res.status(500).json({ message: 'Failed to soft delete role' });
   }
 };
+

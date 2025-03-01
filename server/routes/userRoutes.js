@@ -1,21 +1,29 @@
-import express from 'express';
+import express from "express";
 import {
-    createUser,
-    updateUser,
-    getAllUsers,
-    getUserById,
-    deleteUser,
-    loginUser
-} from '../controllers/userController.js';
+  createUser,
+  updateUser,
+  getAllUsers,
+  getUserById,
+  deleteUser,
+  loginUser,
+//   changeUserStatus,
+//   resetPassword,
+} from "../controllers/userController.js";
 
 const router = express.Router();
 
-// User routes
-router.get('', getAllUsers);           // Retrieve all users
-router.get('/:id', getUserById);       // Retrieve a specific user by ID
-router.post('', createUser);           // Create a new user
-router.put('/:id', updateUser);        // Update an existing user by ID
-router.delete('/:id', deleteUser);     // Delete a user by ID
-router.post('/login', loginUser);      // Authenticate user and return token
+// User Authentication
+router.post("/login", loginUser); // Authenticate user and return token
+
+// User Management
+router.get("/", getAllUsers); // Retrieve all users
+router.get("/:id", getUserById); // Retrieve a specific user by ID
+router.post("/", createUser); // Create a new user
+router.put("/update/:id", updateUser); // Update user details directly
+router.delete("/:id", deleteUser); // Delete a user by ID
+
+// Additional Routes
+// router.put("/status/:id", changeUserStatus); // Activate/Deactivate users
+// router.put("/reset-password/:id", resetPassword); // Reset user password
 
 export default router;

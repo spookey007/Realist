@@ -1,46 +1,52 @@
-// src/components/Header.jsx
-import React from 'react';
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Box,
-  Badge,
-  Avatar,
-} from '@mui/material';
-import { Menu, Notifications } from '@mui/icons-material';
+// src/components/admin/Header.jsx
+import React from "react";
+import { AppBar, Toolbar, IconButton, Typography, Box, Badge, Avatar, InputBase } from "@mui/material";
+import { Bars3Icon, BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
-const Header = ({ handleDrawerToggle, user = { name: 'Guest', notifications: 0 } }) => {
+let userData = JSON.parse(localStorage.getItem("user")) || { name: "Guest", notifications: 0 };
+
+const Header = ({ toggleSidebar }) => {
   return (
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{ mr: 2, display: { sm: 'none' } }}
-        >
-          <Menu />
+    <AppBar
+      position="fixed"
+      className="transition-all"
+      sx={{
+        width: "100%",
+        backgroundColor: "#1E293B", // Updated header color (Dark Gray)
+        color: "white",
+        boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Toolbar className="flex justify-between items-center">
+        {/* Sidebar Toggle Button */}
+        <IconButton color="inherit" edge="start" onClick={toggleSidebar} className="md:hidden" sx={{ mr: 2 }}>
+          <Bars3Icon className="h-6 w-6 text-white" />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          Admin Panel
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body1" sx={{ mr: 2 }}>
-            Welcome, {user.name}
-          </Typography>
+
+        {/* Search Bar */}
+        <Box className="flex items-center bg-gray-700 rounded-lg px-3 py-1 w-full max-w-md">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-300" />
+          <InputBase
+            placeholder="Search..."
+            className="text-white w-full pl-2"
+            sx={{
+              color: "white",
+              "&::placeholder": { color: "gray.300" },
+            }}
+          />
+        </Box>
+
+        {/* Right Side User Info & Notifications */}
+        <Box className="flex items-center space-x-4">
           <IconButton color="inherit">
-            <Badge badgeContent={user.notifications} color="error">
-              <Notifications />
+            <Badge badgeContent={userData.notifications} color="error">
+              <BellIcon className="h-6 w-6 text-white" />
             </Badge>
           </IconButton>
-          <IconButton color="inherit">
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              {user.name.charAt(0)}
-            </Avatar>
-          </IconButton>
+
+          <Avatar sx={{ bgcolor: "primary.main" }}>
+            {userData.name.charAt(0)}
+          </Avatar>
         </Box>
       </Toolbar>
     </AppBar>

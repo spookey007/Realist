@@ -1,13 +1,14 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    './node_modules/preline/preline.js',
   ],
   theme: {
     extend: {},
   },
   plugins: [
-    require('@tailwindcss/aspect-ratio'),
-    // other plugins
-  ],
+    require('preline/plugin'),
+],
 };

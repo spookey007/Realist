@@ -19,8 +19,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Static file serving
-app.use(express.static(path.join(__dirname, '../dist')));
 
+const distPath = path.join(__dirname, "../dist"); // Adjust if needed
+
+app.use(express.static(distPath));
+
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(distPath, "index.html"));
+// })
 // Use routes
 app.use('/api', routes);
 app.use((req, res, next) => {

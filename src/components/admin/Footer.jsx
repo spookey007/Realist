@@ -4,9 +4,9 @@ import { Box, Typography } from '@mui/material';
 
 const Footer = () => {
   return (
-    <Box sx={{ p: 2, bgcolor: 'background.default', textAlign: 'center' }}>
+    <Box sx={{ p: 2, textAlign: 'center' }}>
       <Typography variant="body2" color="textSecondary">
-        © {new Date().getFullYear()} Your Company Name. All rights reserved.
+        © {new Date().getFullYear()} Realist. All rights reserved.
       </Typography>
     </Box>
   );

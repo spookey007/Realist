@@ -4,7 +4,7 @@ import { Model } from 'sequelize';
 export default (sequelize, DataTypes) => {
   class Role extends Model {
     static associate(models) {
-      Role.hasMany(models.User, { foreignKey: 'roleId' }); // Assuming you have a User model
+      Role.hasMany(models.User, { foreignKey: 'roleId' });
     }
   }
 
@@ -17,6 +17,11 @@ export default (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1
     }
   }, {
     sequelize,

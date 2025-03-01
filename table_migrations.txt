@@ -1,0 +1,135 @@
+Sequelize Migration Guide
+
+📌 1. Initialize Sequelize (First Time Setup)
+
+If you are setting up Sequelize for the first time, run:
+
+npx sequelize-cli init
+
+This creates the following directories:
+
+models/
+
+migrations/
+
+seeders/
+
+config/
+
+✅ 2. Generate a New Model with Migration
+
+To create a model and its corresponding migration file:
+
+npx sequelize-cli model:generate --name Role --attributes name:string,description:text,status:integer
+
+This will generate:
+
+A model file in models/
+
+A migration file in migrations/
+
+✅ 3. Generate a Standalone Migration
+
+To modify an existing table (e.g., add a new column), use:
+
+npx sequelize-cli migration:generate --name add-status-to-role
+
+This creates an empty migration file inside migrations/, which you must edit.
+
+Example to add a status column:
+
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.addColumn('Roles', 'status', {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1
+    });
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.removeColumn('Roles', 'status');
+  }
+};
+
+✅ 4. Run Migrations
+
+npx sequelize-cli db:migrate
+
+This applies all pending migrations to the database.
+
+🔄 5. Undo Migrations
+
+Undo the Last Migration:
+
+npx sequelize-cli db:migrate:undo
+
+Undo a Specific Migration:
+
+npx sequelize-cli db:migrate:undo --name 20250226005850-create-role.js
+
+Undo All Migrations:
+
+npx sequelize-cli db:migrate:undo:all
+
+This rolls back all applied migrations.
+
+✅ 6. Seed the Database
+
+Seeding allows you to insert initial data into the database.
+
+Generate a Seeder File:
+
+npx sequelize-cli seed:generate --name demo-user
+
+Run the Seeder:
+
+npx sequelize-cli db:seed:all
+
+Undo the Last Seeder:
+
+npx sequelize-cli db:seed:undo
+
+Undo All Seeders:
+
+npx sequelize-cli db:seed:undo:all
+
+✅ 7. Check Applied Migrations
+
+npx sequelize-cli db:migrate:status
+
+This shows which migrations have been applied (up) and which are pending (down).
+
+✅ 8. Reset and Reapply All Migrations
+
+To reset all migrations and reapply them:
+
+npx sequelize-cli db:migrate:undo:all
+npx sequelize-cli db:migrate
+
+✅ 9. Delete a Migration
+
+If the migration has not been run yet, simply delete the file from migrations/.
+
+If the migration has already been run, first undo it:
+
+npx sequelize-cli db:migrate:undo --name 20250226005850-create-role.js
+
+Then delete the file.
+
+✅ 🔍 Verify Table Structure
+
+After running migrations, verify the changes in the database:
+
+DESCRIBE Roles;
+
+Or check the data:
+
+SELECT * FROM Roles LIMIT 1;
+
+🎯 Conclusion
+
+This guide covers all essential Sequelize migration commands for creating, modifying, and managing database tables. Use it to efficiently handle database changes in your project.
+

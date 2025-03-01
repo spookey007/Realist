@@ -2,69 +2,90 @@
 <html lang="en">
 <head>
   <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-N697D43L');</script>
+  <script>
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N697D43L');
+  </script>
   <!-- End Google Tag Manager -->
+
   <!-- Required Meta Tags -->
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  
+  <!-- Viewport Optimization for All Screens (Mobile, 4K, Ultra-Wide) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover" />
+  
   <!-- SEO Meta Tags -->
   <meta name="description" content="Realist is your go-to cleaning service, offering the best solutions for home and office cleanliness." />
   <meta name="keywords" content="cleaning services, home cleaning, office cleaning, professional cleaning, Realist" />
   <meta name="author" content="Realist" />
 
-  <!-- Open Graph Meta Tags for Social Media Sharing -->
-  <meta property="og:title" content="Realist" />
+  <!-- Open Graph Meta Tags for Social Media -->
+  <meta property="og:title" content="Realist - Professional Cleaning Services" />
   <meta property="og:description" content="We provide top-tier cleaning services to make your home or office spotless!" />
-  <meta property="og:url" content="https://https://realist.galico.io" />
-  <meta property="og:image" content="https://https://realist.galico.io/assets/images/og-image.jpg" />
+  <meta property="og:url" content="https://realist.galico.io" />
+  <meta property="og:image" content="https://realist.galico.io/assets/images/og-image.jpg" />
   <meta property="og:type" content="website" />
 
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Realist - Professional Cleaning Services" />
   <meta name="twitter:description" content="Let us handle all your cleaning needs for your home or office." />
-  <meta name="twitter:image" content="https://https://realist.galico.io/assets/images/twitter-image.jpg" />
+  <meta name="twitter:image" content="https://realist.galico.io/assets/images/twitter-image.jpg" />
 
-  <!-- Favicon -->
-  <link rel="icon" href="src/assets/images/favicon.ico" type="image/x-icon" />
+  <!-- Favicon & Icons -->
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
 
-  <!-- Stylesheets -->
-  <!-- <link rel="stylesheet" href="/assets/styles/main.css" /> -->
-  <!-- <link rel="preload" href="/assets/fonts/font.woff2" as="font" type="font/woff2" crossorigin /> -->
+  <!-- Preload Critical Resources -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Title -->
-  <title>Realist</title>
+  <title>Realist - Professional Cleaning Services</title>
 
-  <!-- Additional Optimization -->
+  <!-- Robots & Canonical -->
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://https://realist.galico.io" />
+  <link rel="canonical" href="https://realist.galico.io" />
 
-  <!-- Preconnect for Performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> -->
+  <!-- Custom CSS for Ultra-Wide Screens -->
+  <style>
+    @media (min-width: 2560px) {
+      body {
+        max-width: 2560px;
+        margin: 0 auto;
+        font-size: 18px;
+      }
+    }
+  </style>
 
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N697D43L"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N697D43L" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- End Google Tag Manager -->
+
+  <!-- React Root -->
   <div id="root"></div>
-  <script src="https://apis.google.com/js/api.js"></script>
+
+  <!-- Google APIs -->
+  <script src="https://apis.google.com/js/api.js" defer></script>
+
   <!-- JavaScript -->
   <script type="module" src="/src/main.jsx"></script>
+  
+  <!-- Google Analytics -->
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
+    function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'UA-XXXXX-Y');
   </script>
