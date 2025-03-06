@@ -7,6 +7,7 @@ import Appointments from "../Appointments"; // Other admin components
 import Users from "../Users"; // Other admin components
 import Roles from "../Roles";
 import Invites from "../Invites";
+import MenuManagement from "../MenuManagement";
 
 const AdminRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AdminRoutes = () => {
         <Route path="users" element={<Users />} />
         <Route path="roles" element={<Roles />} />
         <Route path="invites" element={<Invites />} />
+        <Route path="menu" element={<MenuManagement />} />
       </Routes>
     </AdminLayout>
   );
