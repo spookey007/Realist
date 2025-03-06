@@ -31,25 +31,29 @@ const Roles = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: name === "status" ? Number(value) : value });
   };
+  
 
   const handleSave = async () => {
     try {
+      let response;
       if (editItem) {
-        await axios.put(`${import.meta.env.VITE_API_URL}/api/roles/${editItem.id}`, formData);
+        response = await axios.put(`${import.meta.env.VITE_API_URL}/api/roles/${editItem.id}`, formData);
+        setData((prev) => prev.map((item) => (item.id === editItem.id ? response.data : item)));
         alertify.success("Updated successfully!");
       } else {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/roles/createRoles`, formData);
+        response = await axios.post(`${import.meta.env.VITE_API_URL}/api/roles/createRoles`, formData);
+        setData((prev) => [...prev, response.data]);
         alertify.success("Added successfully!");
       }
-
-      fetchData();
       setIsModalOpen(false);
     } catch (error) {
       alertify.error("Error saving data.");
     }
   };
+  
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
@@ -73,10 +77,23 @@ const Roles = () => {
               <td className="p-2">{item.description}</td>
               <td className="p-2">
                 <Chip
-                  label={["Pending", "Activated", "Deactivated"][item.status]}
-                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    item.status == 1 ? "bg-green-500 text-white" : item.status == 2 ? "bg-red-500 text-white" : "bg-yellow-500 text-black"
-                  }`}
+                  label={
+                    item.status === 0
+                      ? "Pending"
+                      : item.status === 1
+                      ? "Activated"
+                      : "Deactivated"
+                  }
+                  sx={{
+                    backgroundColor:
+                      item.status === 1
+                        ? "#4CAF50"
+                        : item.status === 2
+                        ? "#F44336"
+                        : "#FFC107",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
                 />
               </td>
               <td className="p-2 flex space-x-2">

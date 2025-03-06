@@ -123,6 +123,44 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
               </ListItemIcon>
               {open && <ListItemText primary="Invite Users" />}
             </ListItem>
+            
+            <ListItem
+              button
+              component={Link}
+              to="/admin/userprivileges"
+              onClick={startLoading}
+              sx={{
+                pl: open ? 4 : 2,
+                color: location.pathname === "/admin/userprivileges" ? "white" : "#CBD5E1",
+                backgroundColor: location.pathname === "/admin/userprivileges" ? "#6366F1" : "transparent",
+                "&:hover": { backgroundColor: "#334155", color: "white" },
+              }}
+            >
+              <ListItemIcon sx={{ color: location.pathname === "/admin/userprivileges" ? "white" : "#93C5FD" }}>
+                <Group className="h-6 w-6" />
+              </ListItemIcon>
+              {open && <ListItemText primary="User Privileges" />}
+            </ListItem>
+
+            <ListItem
+              button
+              component={Link}
+              to="/admin/menu"
+              onClick={startLoading}
+              sx={{
+                pl: open ? 4 : 2,
+                color: location.pathname === "/admin/menu" ? "white" : "#CBD5E1",
+                backgroundColor: location.pathname === "/admin/menu" ? "#6366F1" : "transparent",
+                "&:hover": { backgroundColor: "#334155", color: "white" },
+              }}
+            >
+              <ListItemIcon sx={{ color: location.pathname === "/admin/menu" ? "white" : "#93C5FD" }}>
+                <Bars3Icon className="h-6 w-6" />
+              </ListItemIcon>
+              {open && <ListItemText primary="Menu Management" />}
+            </ListItem>
+
+
           </List>
         </Collapse>
 

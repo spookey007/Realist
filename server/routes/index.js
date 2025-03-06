@@ -4,7 +4,7 @@ import appointmentRoutes from './appointmentRoutes.js';
 import userRoutes from './userRoutes.js';
 import userPermissionsRoutes from './userPermissionsRoutes.js';
 import RolesRoutes from './RolesRoutes.js';
-
+import InviteRoutes from './InviteRoutes.js';
 const router = express.Router();
 
 // Use the imported routes
@@ -13,5 +13,6 @@ router.use('/appointment', appointmentRoutes);
 router.use('/users', userRoutes);
 router.use('/roles', RolesRoutes);
 router.use('/user-permissions', userPermissionsRoutes);
+router.use('/invites', InviteRoutes);
 
 export default router;

@@ -181,13 +181,23 @@ const validationSchema = Yup.object({
         accessorKey: "status",
         cell: (info) => {
           const statusMap = {
-            0: { label: "Pending", color: "bg-yellow-500 text-black" },
-            1: { label: "Activated", color: "bg-green-500 text-white" },
-            2: { label: "Deactivated", color: "bg-red-500 text-white" },
+            0: { label: "Pending", color: "#FFC107" }, // Yellow
+            1: { label: "Activated", color: "#4CAF50" }, // Green
+            2: { label: "Deactivated", color: "#F44336" }, // Red
           };
-
+      
           const status = info.getValue();
-          return <Chip label={statusMap[status]?.label} className={`px-2 py-1 rounded-full text-xs font-semibold ${statusMap[status]?.color}`} />;
+      
+          return (
+            <Chip
+              label={statusMap[status]?.label}
+              sx={{
+                backgroundColor: statusMap[status]?.color,
+                color: "white",
+                fontWeight: "bold",
+              }}
+            />
+          );
         },
       },
       {
