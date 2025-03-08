@@ -69,10 +69,10 @@ const dummyMenus = [
 ];
 
 const MenuManagement = () => {
-  const initialData = { name: "", icon: "", href: "", status: 1, parent_menu_id: 0, position: 1, createdAt: "", updatedAt: "" };
+  const initialData = { name: "", icon: "", href: "", status: 1, parent_menu_id: null, position: 1, createdAt: "", updatedAt: "" };
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", icon: "", href: "", status: 1, parent_menu_id: 0, position: 1 });
+  const [formData, setFormData] = useState({ name: "", icon: "", href: "", status: 1, parent_menu_id: null, position: 1 });
   const [editItem, setEditItem] = useState(null);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ const MenuManagement = () => {
       icon: item?.icon ?? "",
       href: item?.href ?? "",
       status: item?.status ?? 1,
-      parent_menu_id: item?.parent_menu_id ?? "0",
+      parent_menu_id: item?.parent_menu_id ?? null,
       position: item?.position ?? 1, // Ensure position is included
     };
   
@@ -241,13 +241,13 @@ const MenuManagement = () => {
       name: "" ?? "",
       href: "" ?? "",
       icon: "" ?? "",
-      parent_menu_id: "0" ?? "0",
+      parent_menu_id: null ?? null,
       status: "1" ?? "1",
       position: 1 ?? 1,
     },
     validationSchema: Yup.object({
       name: Yup.string()
-      .matches(/^[a-zA-Z0-9]+$/, "Only alphanumeric characters are allowed")
+      .matches(/^[a-zA-Z0-9 ]+$/, "Only alphanumeric characters and spaces are allowed")    
       .required("Menu Name is required"),    
       href: Yup.string()
       .matches(/^\/[a-zA-Z0-9/-]+$/, "Enter a valid URL starting with '/' and without special characters")
@@ -372,11 +372,11 @@ const MenuManagement = () => {
               fullWidth
               label="Parent Menu"
               name="parent_menu_id"
-              value={formik.values.parent_menu_id}
+              value={formik.values.parent_menu_id ?? null} // Ensure `null` is properly handled
               onChange={formik.handleChange}
               margin="normal"
             >
-              <MenuItem value={0}>None</MenuItem> {/* Ensure "None" is always an option */}
+              <MenuItem value={null}>None</MenuItem>
               {data
                 .filter((menu) => menu.id !== editItem?.id) // Exclude the current menu
                 .map((menu) => (
@@ -385,9 +385,6 @@ const MenuManagement = () => {
                   </MenuItem>
                 ))}
             </TextField>
-
-
-
 
             <TextField
               fullWidth

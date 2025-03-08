@@ -1,10 +1,10 @@
 // src/components/admin/routes/AdminRoutes.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AdminLayout from "../AdminLayout"; // Import the AdminLayout
-import Dashboard from "../Dashboard"; // Import your admin components
-import Appointments from "../Appointments"; // Other admin components
-import Users from "../Users"; // Other admin components
+import AdminLayout from "../AdminLayout";
+import Dashboard from "../Dashboard";
+import Appointments from "../Appointments";
+import Users from "../Users";
 import Roles from "../Roles";
 import Invites from "../Invites";
 import MenuManagement from "../MenuManagement";
