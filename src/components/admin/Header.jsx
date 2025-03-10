@@ -12,7 +12,7 @@ const Header = ({ toggleSidebar }) => {
       className="transition-all"
       sx={{
         width: "100%",
-        backgroundColor: "#1E293B", // Updated header color (Dark Gray)
+        backgroundColor: "#ffffff", // Updated header color (Dark Gray)
         color: "white",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
       }}
@@ -24,14 +24,14 @@ const Header = ({ toggleSidebar }) => {
         </IconButton>
 
         {/* Search Bar */}
-        <Box className="flex items-center bg-gray-700 rounded-lg px-3 py-1 w-full max-w-md">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-300" />
+        <Box className="flex items-center bg-gray-100 rounded-lg px-3 py-1 w-full max-w-md">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
           <InputBase
             placeholder="Search..."
-            className="text-white w-full pl-2"
+            className="text-black w-full pl-2"
             sx={{
-              color: "white",
-              "&::placeholder": { color: "gray.300" },
+              color: "black",
+              "&::placeholder": { color: "black" },
             }}
           />
         </Box>
