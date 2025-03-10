@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { testConnection } from './db/index.js'; // Import the testConnection function
 import routes from './routes/index.js'; // Import your routes
 
+console.log("dev profile loaded")
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,12 +20,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Static file serving
-app.use(express.static(path.join(__dirname, '../dist')));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist', "index.html"));
-});
+const distPath = path.join(__dirname, "../dist"); // Adjust if needed
 
+app.use(express.static(distPath));
+
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(distPath, "index.html"));
+// })
 // Use routes
 app.use('/api', routes);
 app.use((req, res, next) => {

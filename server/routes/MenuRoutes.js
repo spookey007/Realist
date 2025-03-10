@@ -4,7 +4,8 @@ import {
     updateMenu,
     getAllMenus,
     getMenuById,
-    deleteMenu
+    deleteMenu,
+    getMenusSidebar
 } from "../controllers/menuController.js";
 
 const router = express.Router();
@@ -14,6 +15,8 @@ router.post("/", createMenu);
 
 // Get all menus
 router.get("/", getAllMenus);
+
+router.get("/getMenusSidebar", getMenusSidebar);
 
 // Get a menu by ID
 router.get("/:id", getMenuById);

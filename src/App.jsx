@@ -9,6 +9,7 @@ import Contact from './components/Contact';
 import Videos from './components/Videos';
 import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
+import ProtectedRoute from './components/admin/ProtectedRoute';
 import NotFound from './components/NotFound'; // Example 404 page
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -35,8 +36,16 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/login" element={<LoginPage />} />
-          {/* Use AdminRoutes for admin-related paths */}
-          <Route path="/admin/*" element={<AdminRoutes />} />
+            {/* Protect all admin routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute>
+                <AdminRoutes />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

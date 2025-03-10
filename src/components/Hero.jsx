@@ -28,10 +28,7 @@ const Hero = () => {
 
               {/* Slogan and Info */}
               <div className="mt-6 text-center max-w-lg mx-auto">
-              <button
-                className="bg-cyan-600 hover:bg-cyan-500 text-white py-2 md:py-3 lg:py-4 px-4 md:px-6 lg:px-8 transition duration-300 rounded-md text-sm font-medium"
-                onClick={openModal}
-              >
+              <button onClick={openModal} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6 font-medium text-white-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
                 Register
               </button>
               </div>

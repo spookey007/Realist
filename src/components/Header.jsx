@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
 import logo from '../assets/images/slate-R-logo.svg';
 import '@fortawesome/fontawesome-free/css/all.css';
 import '../assets/css/header.css';
 import LoginModal from './LoginModal'; // Import Modal
 const Header = () => {
+  const navigate = useNavigate();
+  const authToken = localStorage.getItem("authToken");
+
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -16,6 +22,19 @@ const Header = () => {
 
   const openLModal = () => setIsModalOpen(true);
   const closeLModal = () => setIsModalOpen(false);
+
+  // Show logout confirmation dialog
+  const handleLogoutClick = () => {
+    setOpenLogoutDialog(true);
+  };
+
+    // Confirm logout & remove session
+    const handleConfirmLogout = () => {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      setOpenLogoutDialog(false);
+      navigate("/"); // Redirect to home/login
+    };
 
   return (
     <header className="w-full shadow-md bg-white">
@@ -68,17 +87,38 @@ const Header = () => {
         >
           <Link
             to="/about"
-            onClick={closeMenu} // Close menu on click
-            className="block py-4 px-6 md:py-2 md:px-4 text-black hover:bg-white text-lg transition duration-300"
+            onClick={closeMenu}
+            className="relative block py-4 px-6 md:py-2 md:px-4 text-black text-lg transition duration-300 
+                      no-underline hover:no-underline
+                      after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full 
+                      after:origin-bottom-right after:scale-x-0 after:bg-neutral-800 
+                      after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] 
+                      hover:after:origin-bottom-left hover:after:scale-x-100"
           >
             About Us
           </Link>
-          <Link
-            onClick={openLModal}
-            className="bg-black block py-4 px-6 md:py-1 md:px-5 text-white hover:bg-white text-lg transition duration-300 border border-gray-400 rounded-lg"
-          >
-            Sign In
-          </Link>
+          <>
+          {authToken ? (
+            // Show Logout button if user is logged in
+            <button onClick={handleLogoutClick} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
+              Logout
+            </button>
+          ) : (
+            // Show Sign In button if user is NOT logged in
+            <button onClick={openLModal} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-gray-900 px-6 font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
+              Sign In
+            </button>
+          )}
+
+          {/* Logout Confirmation Dialog */}
+          <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
+            <DialogTitle>Are you sure you want to logout?</DialogTitle>
+            <DialogActions>
+              <Button onClick={() => setOpenLogoutDialog(false)} color="primary">Cancel</Button>
+              <Button onClick={handleConfirmLogout} color="error">Logout</Button>
+            </DialogActions>
+          </Dialog>
+        </>
         </nav>
       </div>
       <LoginModal isOpen={isModalOpen} closeModal={closeLModal} />

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
@@ -14,6 +15,7 @@ const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
 
 const LoginModal = ({ isOpen, closeModal }) => {
+  const navigate = useNavigate();
   const [selectedDateTime, setSelectedDateTime] = useState(startOfToday);
   const [location, setLocation] = useState({ latitude: '', longitude: '' });
   const recaptchaRef = useRef();
@@ -72,7 +74,8 @@ const LoginModal = ({ isOpen, closeModal }) => {
         closeModal();
   
         // Redirect to dashboard
-        window.location.href = '/admin/dashboard';
+        // window.location.href = '/admin/dashboard';
+        navigate("/admin/dashboard")
       } else {
         alertify.error('Invalid email or password. Please try again.');
       }

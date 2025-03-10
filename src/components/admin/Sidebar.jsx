@@ -41,7 +41,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/getMenusSidebar`);
         setMenuItems(structureMenu(response.data));
       } catch (error) {
         console.error("Error fetching menu:", error);

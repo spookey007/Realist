@@ -1,0 +1,44 @@
+# Changelog
+
+## [1.0.1] - 2025-03-11
+### New Features
+- Updated overall UI color scheme.
+- Improved menu hover and clicked icons/colors.
+- Added a hide tool at the bottom.
+- Introduced a project icon at the top.
+- Implemented Framer Motion for smoother UI transitions.
+- Integrated motion animations for smoother transitions.
+- Implemented modal for adding a new listing.
+- Added dynamic listing generation with random data.
+- Added listing cards to showcase properties.
+- Designed responsive grid layout for property listings.
+- Made sidebar menu dynamic by fetching from the database.
+- Created API `getMenusSidebar` for sidebar menu management.
+- Integrated email notifications in the invite API.
+- Fixed sidebar width and responsive issues,
+- Updated `<Link>` component with custom underline effect on hover on homepage.
+- Added css effects on buttons multiple pages.
+
+### Fixes & Improvements
+- Fixed blank page issue in `ProtectedRoute`.
+- Optimized session handling to prevent unnecessary re-renders.
+- Improved authentication flow with logout confirmation.
+- Enhanced search bar in the header for better usability.
+- Fixed UI inconsistencies in modals and listing cards.
+- Improved sidebar responsiveness and performance.
+- Fixed logout confirmation modal behavior.
+- Added navigate on login instead of redirect to admin dashboard.
+- Added Dev mode using env variable to fix hosting serve and local development issues.
+
+## [1.0.0] - 2025-03-01 - till 11
+### Initial Release
+- Implemented authentication system.
+- Created admin dashboard with role-based access.
+- Developed core frontend UI with header, footer, and modals.
+- Integrated session-based authentication with token validation.
+- Implemented protected routes to secure admin dashboard.
+- Developed user management module with role-based permissions.
+- Created invite module to onboard new users via email.
+- Added API for fetching sidebar menus dynamically.
+- Designed responsive layout for desktop and mobile.
+- Added an invite module for inviting users based on roles.

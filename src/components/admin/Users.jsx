@@ -229,9 +229,12 @@ const validationSchema = Yup.object({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <Button variant="contained" color="primary" onClick={() => openModal()}>
-        Add User
-      </Button>
+      <button
+          onClick={() => openModal()}
+          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+        >
+          Add User
+      </button>
 
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
@@ -284,10 +287,15 @@ const validationSchema = Yup.object({
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
+          <button onClick={() => setIsModalOpen(false)} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+            >
+            Cancel
+          </button>
+          <button onClick={handleSave}
+            className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+            >
             {editItem ? "Update" : "Save"}
-          </Button>
+          </button>
         </DialogActions>
       </Dialog>
 
@@ -299,10 +307,14 @@ const validationSchema = Yup.object({
           <TextField fullWidth label="Confirm Password" type="password" name="confirmPassword" value={password.confirmPassword} onChange={(e) => setPassword({ ...password, confirmPassword: e.target.value })} margin="normal" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPasswordModal(false)}>Cancel</Button>
-          <Button onClick={handleResetPassword} variant="contained" color="primary">
+        <button onClick={() => setPasswordModal(false)} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+          >
+            Cancel
+        </button>
+          <button onClick={() => handleResetPassword(false)} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+          >
             Reset Password
-          </Button>
+        </button>
         </DialogActions>
       </Dialog>
     </div>

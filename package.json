@@ -1,7 +1,7 @@
 {
   "name": "realist_app",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite --host\" \"nodemon server/index.mjs\"",

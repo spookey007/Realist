@@ -1,5 +1,5 @@
-// src/pages/Dashboard.jsx
 import React from "react";
+import { motion } from "framer-motion";
 
 const dashboardData = [
   { title: "Products Sold", value: "4,565", color: "bg-purple-500" },
@@ -10,14 +10,33 @@ const dashboardData = [
 
 const Dashboard = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <motion.div 
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { staggerChildren: 0.2, duration: 0.5 },
+        },
+      }}
+    >
       {dashboardData.map(({ title, value, color }) => (
-        <div key={title} className={`p-6 rounded-lg shadow-lg ${color} text-white`}>
+        <motion.div
+          key={title}
+          className={`p-6 rounded-lg shadow-lg ${color} text-white`}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+        >
           <h2 className="text-lg font-semibold">{title}</h2>
           <p className="text-2xl font-bold">{value}</p>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
