@@ -1,6 +1,8 @@
 import { pool } from '../db/db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import { sendEmail } from '../helpers/emailHelper.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
  
@@ -71,6 +73,287 @@ export const createUserB = async (req, res) => {
     res.status(500).json({ message: 'Failed to create user' });
   }
 };
+
+export const RegisterContractor = async (req, res) => {
+  const {
+    fullName,
+    companyName,
+    email,
+    phone,
+    website,
+    address,
+    city,
+    state,
+    zipCode,
+    serviceCategory,
+    yearsOfExperience,
+    coverageArea,
+    licenseNumber,
+    insurancePolicy,
+    references,
+    description,
+    files,
+    invite_id
+  } = req.body;
+  const role = 3;
+  const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
+  const status = 0;
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const hashedPassword = await hashPassword(password);
+
+    const query = `
+    INSERT INTO "Users" 
+    (name, company_name, email, encrypted_password, role, status, phone, website, address, city, state, postal_code,
+     service_category, years_of_experience, coverage_area, license_number, insurance_policy, "references", description, files, 
+     "createdAt", "updatedAt")
+    VALUES 
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW(), NOW())
+    RETURNING id, name, email;
+  `;
+  
+
+    const values = [
+      fullName,          // name
+      companyName,       // company_name
+      email,             // email
+      hashedPassword,    // encrypted_password
+      role,              // role
+      status,            // status
+      phone,             // phone
+      website,           // website
+      address,           // address
+      city,              // city
+      state,             // state
+      zipCode,           // postal_code
+      serviceCategory,   // service_category
+      yearsOfExperience, // years_of_experience
+      JSON.stringify(coverageArea), // coverage_area as JSON
+      licenseNumber,    // license_number
+      insurancePolicy,  // insurance_policy
+      JSON.stringify(references), // references as JSON
+      description,      // description
+      JSON.stringify(files) // files as JSON
+    ];
+
+    const result = await pool.query(query, values);
+    const user = result.rows[0];
+    if (invite_id) {
+      await pool.query(
+        `UPDATE "Invites" SET status = 0, "updated_at" = NOW() WHERE uuid = $1;`,
+        [invite_id]
+      );
+    }
+    // Example: Enhanced email template for inviting users
+
+    const emailSubject = "We've Received Your Contractor Registration Request!";
+
+    const emailText = `
+    <html>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 40px 0;">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <tr>
+                  <td align="center" style="padding: 20px 0;">
+                    <img src="https://realist.galico.io/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <h2 style="color: #333333; margin-bottom: 10px;">Thank You for Registering!</h2>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      Hello,
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      We have received your contractor registration request on <strong>Realist</strong>. Our team is currently reviewing your application to ensure everything is in order.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      You will receive a confirmation email once your account has been approved and activated.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      In the meantime, if you have any questions, feel free to reach out to us.
+                    </p>
+                    <a href="https://realist.galico.io/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                      Contact Support
+                    </a>
+                    <p style="color: #333333; font-size: 14px; margin-top: 30px;">
+                      Best regards,<br>The Realist Team
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background-color: #f0f0f0; border-radius: 0 0 8px 8px;">
+                    <p style="color: #888888; font-size: 12px; margin: 0;">
+                      © ${new Date().getFullYear()} Realist by Galico. All rights reserved.
+                    </p>
+                    <p style="color: #888888; font-size: 12px; margin: 5px 0 0;">
+                      <a href="https://realist.galico.io" style="color: #007bff; text-decoration: none;">Visit our website</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `;
+    
+    await sendEmail(email, emailSubject, emailText);
+    res.status(201).json({ message: 'Contractor registered successfully', user });
+
+  } catch (error) {
+    console.error('Error registering contractor:', error);
+    res.status(500).json({ message: 'Failed to register contractor', error: error.message });
+  }
+};
+
+
+export const registerRea = async (req, res) => {
+  const {
+    fullName,
+    companyName,
+    email,
+    phone,
+    website,
+    address,
+    city,
+    state,
+    zipCode,
+    serviceCategory,
+    yearsOfExperience,
+    coverageArea,
+    licenseNumber,
+    issuingAuthority, // ✅ New field
+    specialties,      // ✅ New field
+    affiliations,     // ✅ New field
+    insurancePolicy,
+    references,
+    description,
+    files
+  } = req.body;
+
+  const role = 2;
+  const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
+  const status = 0;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const hashedPassword = await hashPassword(password);
+
+    const query = `
+    INSERT INTO "Users" 
+    (name, company_name, email, encrypted_password, role, status, phone, website, address, city, state, postal_code,
+     service_category, years_of_experience, coverage_area, license_number, "issuingAuthority", specialties, affiliations, 
+     insurance_policy, "references", description, files, "createdAt", "updatedAt")
+    VALUES 
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, NOW(), NOW())
+    RETURNING id, name, email;
+  `;
+
+    const values = [
+      fullName,              // name
+      companyName,           // company_name
+      email,                 // email
+      hashedPassword,        // encrypted_password
+      role,                  // role
+      status,                // status
+      phone,                 // phone
+      website,               // website
+      address,               // address
+      city,                  // city
+      state,                 // state
+      zipCode,               // postal_code
+      serviceCategory,       // service_category
+      yearsOfExperience,     // years_of_experience
+      JSON.stringify(coverageArea), // coverage_area as JSON
+      licenseNumber,         // license_number
+      issuingAuthority,      // issuing_authority
+      JSON.stringify(specialties),  // specialties as JSON
+      JSON.stringify(affiliations), // affiliations as JSON
+      insurancePolicy,       // insurance_policy
+      JSON.stringify(references),  // references as JSON
+      description,           // description
+      JSON.stringify(files)  // files as JSON
+    ];
+
+    const result = await pool.query(query, values);
+    const user = result.rows[0];
+
+    // ✅ Professional email template
+    const emailSubject = "We've Received Your Registration Request!";
+
+    const emailText = `
+    <html>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 40px 0;">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <tr>
+                  <td align="center" style="padding: 20px 0;">
+                    <img src="https://realist.galico.io/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <h2 style="color: #333333; margin-bottom: 10px;">Thank You for Registering!</h2>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      Hello ${fullName},
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      We have received your contractor registration request on <strong>Realist</strong>. Our team is reviewing your application to ensure everything is in order.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      You will receive a confirmation email once your account is approved and activated.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; line-height: 1.5;">
+                      If you have any questions, feel free to reach out to us.
+                    </p>
+                    <a href="https://realist.galico.io/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                      Contact Support
+                    </a>
+                    <p style="color: #333333; font-size: 14px; margin-top: 30px;">
+                      Best regards,<br>The Realist Team
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background-color: #f0f0f0; border-radius: 0 0 8px 8px;">
+                    <p style="color: #888888; font-size: 12px; margin: 0;">
+                      © ${new Date().getFullYear()} Realist by Galico. All rights reserved.
+                    </p>
+                    <p style="color: #888888; font-size: 12px; margin: 5px 0 0;">
+                      <a href="https://realist.galico.io" style="color: #007bff; text-decoration: none;">Visit our website</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `;
+
+    await sendEmail(email, emailSubject, emailText);
+
+    res.status(201).json({ message: 'Contractor registered successfully', user });
+
+  } catch (error) {
+    console.error('Error registering contractor:', error);
+    res.status(500).json({ message: 'Failed to register contractor', error: error.message });
+  }
+};
+
 
 // Update user details
 export const updateUser = async (req, res) => {

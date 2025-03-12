@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.0.2] - 2025-03-12
+### New Features
+- Added contractor registration modal on homepage, with role-based data saving in the database.
+- Sent professional confirmation email to contractors informing them that their profile is under review.
+- Introduced multi-step Formik form (Stepper) for contractor and real estate agent registration with dynamic fields and file uploads.
+- Integrated FilePond for file uploads supporting multiple formats and size validation.
+- Implemented full Formik validation schema to ensure accurate and complete data submission for both agents and contractors.
+- Added invite-based registration flow for contractors with automatic invite validation.
+- Added dynamic fields in contractor signup based on invite data fetched from the backend.
+
+### Fixes & Improvements
+- Added additional columns in Users table including license_number, issuing_authority, specialties, and affiliations to match new registration requirements.
+- Updated Invite system:
+- Added automatic UUID generation for invites within the database.
+- Refined invite validation logic and status handling in backend.
+- Improved API responses for invite creation and registration flows.
+- Enhanced invite registration flow:
+- Modal only shows if invite is valid.
+- Proper error message displayed if invite is invalid or expired.
+- Consistent backend improvements:
+- Stored arrays and complex data as JSONB fields in PostgreSQL (e.g., coverage_area, references, specialties, affiliations, files).
+- Ensured snake_case column naming in SQL queries to avoid mismatches.
+- Improved error handling and structured responses for frontend to handle smoothly.
+- UI/UX Improvements:
+- Clean multi-step registration process for both agents and contractors.
+- Clear user feedback and form validation errors.
+- Branded email templates aligned with Realist's theme and color scheme.
+
+
 ## [1.0.1] - 2025-03-11
 ### New Features
 - Updated overall UI color scheme.

@@ -7,6 +7,7 @@ import About from './components/About';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
 import Videos from './components/Videos';
+import Invite from './components/Invite';
 import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/invite/:id" element={<Invite />} />
             {/* Protect all admin routes */}
           <Route
             path="/admin/*"

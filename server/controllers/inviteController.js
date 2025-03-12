@@ -10,7 +10,7 @@ export const createInvite = async (req, res) => {
   }
 
   try {
-    // Check if the email exists in the "User" table (already registered)
+    // ✅ Check if the user already exists
     const userCheckQuery = `SELECT * FROM "Users" WHERE email = $1;`;
     const userCheckResult = await pool.query(userCheckQuery, [email]);
 
@@ -18,7 +18,7 @@ export const createInvite = async (req, res) => {
       return res.status(409).json({ message: "User already joined." });
     }
 
-    // Check if an invite already exists for this email
+    // ✅ Check if invite already exists for this email
     const inviteCheckQuery = `SELECT * FROM "Invites" WHERE email = $1;`;
     const inviteCheckResult = await pool.query(inviteCheckQuery, [email]);
 
@@ -26,40 +26,59 @@ export const createInvite = async (req, res) => {
       return res.status(409).json({ message: "An invite for this email already exists." });
     }
 
-    // Generate an invite link
-    const inviteLink = `https://realist.galico.io/invite/${uuidv4()}`;
-
-    const query = `
-      INSERT INTO "Invites" (email, invite_link, role, "created_at", "updated_at", "expires_at")
-      VALUES ($1, $2, $3, NOW(), NOW(), NOW() + INTERVAL '3 days') RETURNING *;
+    // ✅ Insert invite (uuid generated automatically by DB)
+    const insertInviteQuery = `
+      INSERT INTO "Invites" (email, role, "created_at", "updated_at", "expires_at")
+      VALUES ($1, $2, NOW(), NOW(), NOW() + INTERVAL '3 days')
+      RETURNING uuid;
     `;
-    const values = [email, inviteLink, role];
+    const insertValues = [email, role];
+    const result = await pool.query(insertInviteQuery, insertValues);
+    const { uuid } = result.rows[0]; // ✅ Extract generated UUID
 
-    const result = await pool.query(query, values);
-    const invite = result.rows[0];
+    // ✅ Build invite link dynamically
+    const inviteLink = `https://realist.galico.io/invite/${uuid}`;
 
-    // Send invite email
+    // ✅ Optional: Store invite link back in table for reference
+    // const updateInviteLinkQuery = `UPDATE "Invites" SET invite_link = $1 WHERE uuid = $2;`;
+    // await pool.query(updateInviteLinkQuery, [inviteLink, uuid]);
+
+    // ✅ Send invite email
     const emailSubject = "You're Invited! Complete Your Registration";
+
     const emailText = `
       <html>
-        <body style="font-family: Arial, sans-serif;">
-          <h2>Welcome!</h2>
-          <p>You have been invited. Click the link below to complete your registration:</p>
-          <p><a href="${inviteLink}" style="color: blue; text-decoration: underline;">Complete Registration</a></p>
-          <p>If you have any questions, please reach out.</p>
-          <p>Best regards,<br>Team</p>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+            <tr>
+              <td align="center">
+                <h2 style="color: #333;">Welcome to Realist!</h2>
+                <p style="font-size: 16px; color: #555;">
+                  You have been invited to join our platform. Please click the button below to complete your registration.
+                </p>
+                <a href="${inviteLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 20px 0;">
+                  Complete Registration
+                </a>
+                <p style="font-size: 14px; color: #777;">
+                  If the button doesn't work, copy and paste the link below into your browser:
+                </p>
+                <p style="font-size: 14px; color: #007bff;">${inviteLink}</p>
+                <p style="margin-top: 30px; color: #555;">Best regards,<br>Realist Team</p>
+              </td>
+            </tr>
+          </table>
         </body>
       </html>
     `;
+
     await sendEmail(email, emailSubject, emailText);
 
-    res.status(201).json({ message: "Invite created and sent successfully.", invite });
+    res.status(201).json({ message: "Invite created and sent successfully.", invite: { email, role, uuid, inviteLink } });
   } catch (error) {
     console.error("Error creating invite:", error);
     res.status(500).json({ message: "Failed to create invite." });
   }
 };
-
 
 export const updateInvite = async (req, res) => {
   const { id } = req.params;
@@ -99,50 +118,71 @@ export const updateInvite = async (req, res) => {
 
 // Resend an invite email
 export const resendInvite = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // This should be the UUID of the invite
 
   try {
-    const query = `SELECT * FROM "Invites" WHERE id = $1;`;
-    const result = await pool.query(query, [id]);
+    // ✅ Fetch invite by UUID
+    const fetchInviteQuery = `SELECT * FROM "Invites" WHERE id = $1;`;
+    const fetchResult = await pool.query(fetchInviteQuery, [id]);
 
-    if (result.rowCount === 0) {
+    if (fetchResult.rowCount === 0) {
       return res.status(404).json({ message: "Invite not found." });
     }
 
-    const { email, invite_link } = result.rows[0];
+    let { email, invite_link, expires_at } = fetchResult.rows[0];
 
-    if(!validate_expiry_date(result.rows[0].expires_at)){
-      // create new invite
-      const inviteLink = `https://realist.galico.io/invite/${uuidv4()}`;
-      const query = `
-        UPDATE "Invites" SET invite_link = $1, "updated_at" = NOW(), "expires_at" = NOW() + INTERVAL '3 days' WHERE email = $2 RETURNING *;
+    // ✅ If expired, generate new invite link and update DB
+    if (!validate_expiry_date(expires_at)) {
+      // ✅ Extend expiration by 3 more days without changing UUID or invite_link
+      const updateInviteQuery = `
+        UPDATE "Invites"
+        SET "updated_at" = NOW(), "expires_at" = NOW() + INTERVAL '3 days'
+        WHERE id = $1
+        RETURNING *;
       `;
-      const values = [inviteLink, email];
-      const result = await pool.query(query, values);
-
-      // return res.status(400).json({ message: "Invite expired" });
+      const updateValues = [id]; // Use UUID as identifier
+      const updateResult = await pool.query(updateInviteQuery, updateValues);
+    
+      // Update invite_link in case you want to make sure you have the fresh one (though it's the same)
+      invite_link = updateResult.rows[0].invite_link;
     }
+    
+
+    // ✅ Send reminder email with invite link
     const emailSubject = "Reminder: Your Invitation is Waiting!";
     const emailText = `
       <html>
-        <body style="font-family: Arial, sans-serif;">
-          <h2>Greetings,</h2>
-          <p>We noticed you haven't completed your registration yet. Click below to accept your invite:</p>
-          <p><a href="${invite_link}" style="color: blue; text-decoration: underline;">Complete Registration</a></p>
-          <p>Best regards,<br>Team</p>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+            <tr>
+              <td align="center">
+                <h2 style="color: #333;">Hello!</h2>
+                <p style="font-size: 16px; color: #555;">
+                  We noticed you haven't completed your registration yet. Please click the button below to accept your invitation.
+                </p>
+                <a href="${invite_link}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 20px 0;">
+                  Complete Registration
+                </a>
+                <p style="font-size: 14px; color: #777;">
+                  If the button doesn't work, copy and paste this link into your browser:
+                </p>
+                <p style="font-size: 14px; color: #007bff;">${invite_link}</p>
+                <p style="margin-top: 30px; color: #555;">Best regards,<br>Realist Team</p>
+              </td>
+            </tr>
+          </table>
         </body>
       </html>
     `;
 
     await sendEmail(email, emailSubject, emailText);
 
-    res.status(200).json({ message: "Invite resent successfully." });
+    res.status(200).json({ message: "Invite resent successfully.", invite_link });
   } catch (error) {
     console.error("Error resending invite:", error);
     res.status(500).json({ message: "Failed to resend invite." });
   }
 };
-
 // Get all invites
 export const getInvites = async (req, res) => {
   try {
@@ -156,8 +196,31 @@ export const getInvites = async (req, res) => {
   }
 };
 
+export const getInvitesById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const query = `SELECT * FROM "Invites" WHERE uuid = $1 and status=1;`;
+    const result = await pool.query(query, [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Invitation not found.' });
+    }
+
+    const invite = result.rows[0];
+
+    // Check expiration
+    if (!validate_expiry_date(invite.expires_at)) {
+      return res.status(410).json({ message: 'Invitation has expired.' }); // 410 Gone status for expired resource
+    }
+    res.status(200).json({ invite });
+  } catch (error) {
+    console.error('Error fetching invite:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+// Expiry date validation function
 function validate_expiry_date(date) {
   const expiry_date = new Date(date);
   const current_date = new Date();
-  return expiry_date > current_date;
+  return expiry_date > current_date; // True if not expired
 }

@@ -1,9 +1,10 @@
 import React, { useRef, useState,useEffect } from 'react';
+import { useParams,useNavigate  } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
-import alertify from 'alertifyjs';
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
+import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
@@ -61,22 +62,23 @@ const validationSchema = Yup.object({
 
   description: Yup.string().required('Description is required'),
   captchaValue: Yup.string().required('Captcha is required'),
-  affiliations: Yup.array()
-  .min(1, 'Select at least one affiliation or certification')
-  .required('Affiliations & Certifications are required'),
-  specialties: Yup.array()
-    .min(1, 'Select at least one specialty')
-    .required('Specialties are required'),
-  issuingAuthority: Yup.string().required('Issuing Authority is required'),
 });
 
-const RegisterModal = ({ isOpen, closeModal }) => {
-  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
-  const recaptchaRef = useRef();
-  const [activeStep, setActiveStep] = useState(0);
-  const filePondRef = useRef();
-  const handleNext = async (validateForm, values, setTouched) => {
+const Invite = () => {
+    const navigate = useNavigate();
+    const [isOpen, setisOpen] = useState('');
+    // const [isModalOpen, setIsModalOpen] = useState(true);
+    const { id } = useParams(); // Invite ID from URL
+    const [inviteValid, setInviteValid] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [inviteData, setInviteData] = useState(null); // to store invite if you want to prefill data later
+    const [Error, setError] = useState(''); // ✅ Correct way to track error
+    const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+    const [location, setLocation] = useState({ latitude: null, longitude: null });
+    const recaptchaRef = useRef();
+    const [activeStep, setActiveStep] = useState(0);
+    const filePondRef = useRef();
+    const handleNext = async (validateForm, values, setTouched) => {
     const errors = await validateForm();
     const currentStepFields = stepFields[activeStep];
     const stepErrors = Object.keys(errors).filter((key) => currentStepFields.includes(key));
@@ -91,10 +93,14 @@ const RegisterModal = ({ isOpen, closeModal }) => {
     }
   };
 
+  const closeModal = () => {
+    setisOpen(false);
+  };
+
   const handleSubmit = async (values, { resetForm }) => {
     console.log("submission received:", values);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/registerRea`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/registerContractor`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,26 +110,29 @@ const RegisterModal = ({ isOpen, closeModal }) => {
           dateTime: selectedDateTime,
           latitude: location.latitude,
           longitude: location.longitude,
+          invite_id:id
         }),
       });
   
-      if (response.ok) {
+      if (response.ok)
+        {
+          resetForm(); // reset Formik
+          setActiveStep(0); // reset stepper
+          recaptchaRef.current.reset(); // reset captcha
+          filePondRef.current.removeFiles(); // ✅ reset FilePond files
+          closeModal?.();
+          alertify.alert(
+            "Thank You for Registering!",
+            `
+            <p>We have received your contractor registration request on <strong>Realist</strong>. Our team is currently reviewing your application to ensure everything is in order.</p>
+            <p>You will receive a confirmation email once your account has been approved and activated.</p>
+            <p>In the meantime, if you have any questions, feel free to reach out to us.</p>
+            `, function () {
+            alertify.message("OK");
+            navigate("/"); // Navigate to the home page after clicking OK
+          });
         // alertify.success('User created successfully!');
-        resetForm(); // reset Formik
-        setActiveStep(0); // reset stepper
-        recaptchaRef.current.reset(); // reset captcha
-        filePondRef.current.removeFiles(); // ✅ reset FilePond files
-        closeModal(); // optional: close modal
-        alertify.alert(
-          "Thank You for Registering!",
-          `
-          <p>We have received your registration request on <strong>Realist</strong>. Our team is currently reviewing your application to ensure everything is in order.</p>
-          <p>You will receive a confirmation email once your account has been approved and activated.</p>
-          <p>In the meantime, if you have any questions, feel free to reach out to us.</p>
-          `, function () {
-          alertify.message("OK");
-          // navigate("/"); // Navigate to the home page after clicking OK
-        });
+        
       } else {
         alertify.error('Failed to create user');
       }
@@ -166,17 +175,55 @@ const RegisterModal = ({ isOpen, closeModal }) => {
     }
   };
 
-  useEffect(() => {
-    fetchLocation();
-  }, []);
+//   useEffect(() => {
+//     fetchLocation();
+//   }, []);
 
+useEffect(() => {
+    const checkInvite = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/invites/${id}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          
+          setInviteValid(true);
+          setInviteData(data.invite);
+          setisOpen(true);
+          // console.log(inviteData.email)
+        } else {
+          alertify.error(data.message || 'Invitation invalid or expired.');
+          setInviteValid(false);
+          setisOpen(false);
+          setError(data.message)
+        }
+      } catch (error) {
+        setError(error)
+        console.error('Error fetching invite:', error);
+        alertify.error('Failed to validate invitation. Please try again later.');
+        setInviteValid(false);
+        setError("Something went wrong please contact admin")
+        setisOpen(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkInvite();
+  }, [id]);
+
+  if (Error) {
+    return <p className="text-center text-red-500 mt-8 font-bold">{Error}</p>; // ✅ Now will render if error exists
+  }
+  
+//   console.log(isOpen)
   return (
     isOpen && (
       <div className="modal-overlay">
         <div className="modal-content">
           <button className="close-modal" onClick={closeModal}>&times;</button>
-          <h2 className="modal-title">Register</h2>
-          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Real Estate Agent</p>
+          <h2 className="modal-title">Registration Form </h2>
+          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Contractor</p>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>
@@ -186,7 +233,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
               initialValues={{
                 fullName: '',
                 companyName: '',
-                email: '',
+                email: inviteData?.email || '',
                 phone: '',
                 website: '',
                 address: '',
@@ -196,16 +243,14 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                 serviceCategory: '',
                 yearsOfExperience: '',
                 coverageArea: [],
-                insurancePolicy: '',
                 licenseNumber: '',
-                issuingAuthority: '',
-                specialties: [],
-                affiliations: [],
+                insurancePolicy: '',
                 references: [{ name: '', phone: '' }],
                 description: '',
                 captchaValue: '',
                 files: [],
               }}
+              enableReinitialize={true}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
               
@@ -222,7 +267,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                 )}
                 {activeStep === 1 && (
                   <>
-                    <Field name="email" placeholder="Email" className="form-control" />
+                    <Field name="email" placeholder="Email" className="form-control" readOnly/>
                     <ErrorMessage name="email" component="div" className="text-red-600" />
                     <Field name="phone" placeholder="Phone" className="form-control mt-2" />
                     <ErrorMessage name="phone" component="div" className="text-red-600" />
@@ -329,52 +374,6 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                       <Field name="insurancePolicy" placeholder="Insurance Policy" className="form-control mt-2" />
                       <ErrorMessage name="insurancePolicy" component="div" className="text-red-600" />
                     </div>
-                    {/* License Issuing Authority */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Issuing Authority</label>
-                  <Field
-                    name="issuingAuthority"
-                    placeholder="Issuing Authority"
-                    className="form-control mt-2"
-                  />
-                  <ErrorMessage name="issuingAuthority" component="div" className="text-red-600" />
-
-                  {/* Specialties - Multi Select */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Specialties</label>
-                  <Field
-                    as="select"
-                    name="specialties"
-                    multiple
-                    className="form-control mt-2"
-                    onChange={(event) => {
-                      const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
-                      setFieldValue('specialties', selectedOptions);
-                    }}
-                  >
-                    <option value="Residential">Residential</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Industrial">Industrial</option>
-                    <option value="Land">Land</option>
-                    <option value="Luxury">Luxury</option>
-                  </Field>
-                  <ErrorMessage name="specialties" component="div" className="text-red-600" />
-
-                  {/* Affiliations - Multi Select */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Affiliations & Certifications</label>
-                  <Field
-                    as="select"
-                    name="affiliations"
-                    multiple
-                    className="form-control mt-2"
-                    onChange={(event) => {
-                      const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
-                      setFieldValue('affiliations', selectedOptions);
-                    }}
-                  >
-                    <option value="NAR">National Association of Realtors (NAR)</option>
-                    <option value="CREA">Canadian Real Estate Association (CREA)</option>
-                    <option value="LEED">LEED Certification</option>
-                    <option value="Luxury Certified">Luxury Certified</option>
-                  </Field>
                   </>
                 )}
                   {activeStep === 3 && (
@@ -434,7 +433,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                           </div>
                         )}
                       </FieldArray>
-                        
+
                       <label className="block text-sm font-medium text-gray-700 mt-4">Description</label>
                       <Field
                         name="description"
@@ -505,4 +504,4 @@ const RegisterModal = ({ isOpen, closeModal }) => {
   );
 };
 
-export default RegisterModal;
+export default Invite;

@@ -7,6 +7,8 @@ import {
   getUserById,
   deleteUser,
   loginUser,
+  RegisterContractor,
+  registerRea,
 //   changeUserStatus,
 //   resetPassword,
 } from "../controllers/userController.js";
@@ -20,6 +22,8 @@ router.post("/login", loginUser); // Authenticate user and return token
 router.get("/", getAllUsers); // Retrieve all users
 router.get("/:id", getUserById); // Retrieve a specific user by ID
 router.post("/", createUserA); // Create a new user
+router.post("/registerContractor", RegisterContractor); // Create a new user
+router.post("/registerRea", registerRea); // Create a new user
 router.post("/admin", createUserB); // Create a new user Admin
 router.put("/update/:id", updateUser); // Update user details directly
 router.delete("/:id", deleteUser); // Delete a user by ID
