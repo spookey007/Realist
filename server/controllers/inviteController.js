@@ -3,7 +3,7 @@ import { sendEmail } from '../helpers/emailHelper.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export const createInvite = async (req, res) => {
-  const { email, role } = req.body;
+  const { email, role, created_by } = req.body;
 
   if (!email) {
     return res.status(400).json({ message: "Email is required." });
@@ -28,11 +28,11 @@ export const createInvite = async (req, res) => {
 
     // ✅ Insert invite (uuid generated automatically by DB)
     const insertInviteQuery = `
-      INSERT INTO "Invites" (email, role, "created_at", "updated_at", "expires_at")
-      VALUES ($1, $2, NOW(), NOW(), NOW() + INTERVAL '3 days')
+      INSERT INTO "Invites" (email, role, "created_by", "created_at", "updated_at", "expires_at")
+      VALUES ($1, $2, $3, NOW(), NOW(), NOW() + INTERVAL '3 days')
       RETURNING uuid;
     `;
-    const insertValues = [email, role];
+    const insertValues = [email, role, created_by];
     const result = await pool.query(insertInviteQuery, insertValues);
     const { uuid } = result.rows[0]; // ✅ Extract generated UUID
 
@@ -185,16 +185,37 @@ export const resendInvite = async (req, res) => {
 };
 // Get all invites
 export const getInvites = async (req, res) => {
-  try {
-    const query = `SELECT inv.*, rol.name as role_name FROM "Invites" as inv LEFT JOIN "Roles" as rol on rol.id = inv.role  ORDER BY "created_at" DESC;`;
-    const result = await pool.query(query);
+  const { user_id } = req.query; // Get user_id from query if present
 
+  try {
+    // Base query
+    let query = `
+      SELECT inv.*, rol.name as role_name 
+      FROM "Invites" as inv 
+      LEFT JOIN "Roles" as rol ON rol.id = inv.role
+    `;
+
+    // Conditionally add WHERE clause if user_id is provided
+    const values = [];
+    if (user_id) {
+      query += ` WHERE inv.created_by = $1`;
+      values.push(user_id);
+    }
+
+    // Order by created_at descending
+    query += ` ORDER BY inv."created_at" DESC`;
+
+    // Execute query
+    const result = await pool.query(query, values);
+
+    // Return result
     res.status(200).json({ invites: result.rows });
   } catch (error) {
     console.error("Error fetching invites:", error);
     res.status(500).json({ message: "Failed to retrieve invites." });
   }
 };
+
 
 export const getInvitesById = async (req, res) => {
   const { id } = req.params;

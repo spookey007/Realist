@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 import {
   Drawer,
   List,
@@ -9,21 +10,17 @@ import {
   ListItemIcon,
   ListItemText,
   Collapse,
-  Toolbar,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import {
-  HomeIcon,
-  UsersIcon,
-  CogIcon,
-  ChartBarIcon,
-  FolderIcon,
-} from "@heroicons/react/24/outline";
+import { HomeIcon, UsersIcon, CogIcon, ChartBarIcon, FolderIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "@mui/material/styles";
 import logo from "../../assets/images/slate-R-logo.svg"; // Fixed import
 
 const drawerWidth = 280;
-const drawerWidth1 = 10;
+const drawerCollapsedWidth = 1;
+const drawerCollapsedWidth1 = 70;
 
 const iconMap = {
   Dashboard: HomeIcon,
@@ -33,29 +30,54 @@ const iconMap = {
   Menu: FolderIcon,
 };
 
-const Sidebar = ({ open, toggleSidebar, startLoading }) => {
+const Sidebar = ({ startLoading }) => {
+  const { user } = useAuth();
+  
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Detect mobile screen
+
   const [menuItems, setMenuItems] = useState([]);
   const [openSubMenus, setOpenSubMenus] = useState({});
+  const [openSidebar, setOpenSidebar] = useState(!isMobile); // Initially open for desktop, closed for mobile
+
+  // Toggle Sidebar state
+  const toggleSidebar = () => setOpenSidebar((prev) => !prev);
 
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/getMenusSidebar`);
-        setMenuItems(structureMenu(response.data));
-      } catch (error) {
-        console.error("Error fetching menu:", error);
-      }
-    };
+    setOpenSidebar(!isMobile); // Adjust sidebar on screen resize
+  }, [isMobile]);
 
-    fetchMenu();
-  }, []);
+  const fetchMenuFromAPI = async (role_id) => {
+    // console.log('api')
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/getMenusSidebar`, {
+        params: { role_id },
+      });
+      const structured = structureMenu(response.data);
+      setMenuItems(structured);
+      localStorage.setItem(`menu`, JSON.stringify(structured)); // Cache menu for role
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role) {
+      const cachedMenu = localStorage.getItem(`menu`);
+      if (cachedMenu) {
+        setMenuItems(JSON.parse(cachedMenu));
+      } else {
+        fetchMenuFromAPI(user.role);
+      }
+    }
+  }, [user?.role]); // Fetch when user role is available
 
   const structureMenu = (menuList) => {
     const menuMap = {};
-    menuList.forEach(menu => menuMap[menu.id] = { ...menu, subMenu: [] });
+    menuList.forEach((menu) => (menuMap[menu.id] = { ...menu, subMenu: [] }));
     const rootMenus = [];
-    menuList.forEach(menu => {
+    menuList.forEach((menu) => {
       if (menu.parent_menu_id) {
         menuMap[menu.parent_menu_id]?.subMenu.push(menuMap[menu.id]);
       } else {
@@ -66,41 +88,40 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
   };
 
   const toggleSubMenu = (menuId) => {
-    setOpenSubMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
+    setOpenSubMenus((prev) => ({ ...prev, [menuId]: !prev[menuId] }));
   };
 
   return (
     <motion.div
-      initial={{ width: open ? 10 : drawerWidth1 }}
-      animate={{ width: open ? drawerWidth1 : 10 }}
+      initial={{ width: openSidebar ? drawerWidth : drawerCollapsedWidth }}
+      animate={{ width: openSidebar ? drawerWidth : drawerCollapsedWidth }}
       transition={{ duration: 0.3 }}
       className="h-screen flex flex-col"
     >
       <Drawer
         variant="permanent"
         sx={{
-          width: open ? drawerWidth : 70,
+          width: openSidebar ? drawerWidth : drawerCollapsedWidth1,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: open ? drawerWidth : 70,
+            width: openSidebar ? drawerWidth : drawerCollapsedWidth1,
             transition: "width 0.3s ease-in-out",
             backgroundColor: "#ffffff",
             color: "#1E293B",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            overflow:"clip",
           },
         }}
       >
         {/* Logo */}
-        <div className="flex p-4">
+        <div className="flex justify-center p-4">
           <img src={logo} alt="Logo" className="h-8 w-8" />
         </div>
 
         {/* Menu Items */}
         <List className="flex-grow">
-          {menuItems.map(menu => (
+          {menuItems.map((menu) => (
             <React.Fragment key={menu.id}>
               <ListItem
                 button
@@ -118,14 +139,15 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
                 <ListItemIcon sx={{ color: location.pathname === menu.href ? "rgb(55 48 163 / var(--tw-text-opacity))" : "#64748B" }}>
                   {iconMap[menu.icon] ? React.createElement(iconMap[menu.icon], { className: "h-6 w-6" }) : null}
                 </ListItemIcon>
-                {open && <ListItemText primary={menu.name} />}
+                {openSidebar && <ListItemText primary={menu.name} />}
                 {menu.subMenu.length > 0 && (openSubMenus[menu.id] ? <ExpandLess /> : <ExpandMore />)}
               </ListItem>
 
+              {/* Submenu */}
               {menu.subMenu.length > 0 && (
                 <Collapse in={openSubMenus[menu.id]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {menu.subMenu.map(sub => (
+                    {menu.subMenu.map((sub) => (
                       <ListItem
                         button
                         key={sub.id}
@@ -133,7 +155,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
                         to={sub.href}
                         onClick={startLoading}
                         sx={{
-                          pl: open ? 4 : 2,
+                          pl: openSidebar ? 4 : 2,
                           color: location.pathname === sub.href ? "rgb(55 48 163 / var(--tw-text-opacity))" : "#1E293B",
                           backgroundColor: location.pathname === sub.href ? "rgb(224 231 255/var(--tw-bg-opacity))" : "transparent",
                           "&:hover": { backgroundColor: "#E5E7EB", color: "#1E293B" },
@@ -144,7 +166,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
                         <ListItemIcon sx={{ color: location.pathname === sub.href ? "rgb(55 48 163 / var(--tw-text-opacity))" : "#64748B" }}>
                           {iconMap[sub.icon] ? React.createElement(iconMap[sub.icon], { className: "h-5 w-5" }) : null}
                         </ListItemIcon>
-                        {open && <ListItemText primary={sub.name} />}
+                        {openSidebar && <ListItemText primary={sub.name} />}
                       </ListItem>
                     ))}
                   </List>
@@ -154,7 +176,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
           ))}
         </List>
 
-        {/* Bottom Toggle Button with Divider */}
+        {/* Bottom Toggle Button */}
         <div className="p-3">
           <Divider />
           <div className="flex justify-center p-3 cursor-pointer" onClick={toggleSidebar}>
@@ -166,7 +188,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
                 viewBox="0 0 24 24"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={`transition-transform ${open ? "rotate-180" : ""}`}
+                className={`transition-transform ${openSidebar ? "rotate-180" : ""}`}
                 height="1em"
                 width="1em"
                 xmlns="http://www.w3.org/2000/svg"
@@ -175,7 +197,7 @@ const Sidebar = ({ open, toggleSidebar, startLoading }) => {
                 <polyline points="6 17 11 12 6 7"></polyline>
               </svg>
             </div>
-            <span className="text-xs font-medium  p-3">{open ? "Hide" : ""}</span>
+            {openSidebar && <span className="text-xs font-medium p-3">Hide</span>}
           </div>
         </div>
       </Drawer>

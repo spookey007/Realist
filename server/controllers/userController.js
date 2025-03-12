@@ -96,7 +96,8 @@ export const RegisterContractor = async (req, res) => {
     invite_id
   } = req.body;
   const role = 3;
-  const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
+  const password = "Test1214@"
+  // const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
   const status = 0;
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
@@ -239,7 +240,8 @@ export const registerRea = async (req, res) => {
   } = req.body;
 
   const role = 2;
-  const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
+  const password = "Test1214@"
+  // const password = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 8 bytes
   const status = 0;
 
   if (!email || !password) {
@@ -496,7 +498,7 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email,role: user.role },
     });
   } catch (error) {
     console.error('Error logging in:', error);

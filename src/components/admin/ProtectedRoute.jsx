@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 const ProtectedRoute = ({ children }) => {
   const authToken = localStorage.getItem("authToken");
 
-  console.log("ProtectedRoute: authToken =", authToken); // Debugging log
+  // console.log("ProtectedRoute: authToken =", authToken); // Debugging log
 
   if (!authToken) {
     console.log("Redirecting to login");

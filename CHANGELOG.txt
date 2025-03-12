@@ -1,5 +1,28 @@
 # Changelog
 
+
+# Changelog
+
+## [1.0.3] - 2025-03-13
+
+### New Features
+- Added role-based sidebar menu fetching using `role_id` from user context.
+- Implemented AuthContext for centralized user authentication state management.
+- Sidebar now stores menu data in localStorage for faster loading and fewer API calls.
+- Added logout functionality through AuthContext to properly clear user data and tokens.
+- Dynamic sidebar now respects user roles and permissions, loaded on login.
+- Implemented mobile-responsive sidebar behavior: collapses on mobile and expands on desktop.
+
+### Fixes & Improvements
+- Fixed issue where sidebar wouldn't display updated user data immediately after login (now reactive via context).
+- Sidebar fetches menus only once and uses cached data unless not available.
+- Resolved content shifting issue caused by dynamic sidebar width.
+- Improved responsiveness of sidebar toggle button and interactions.
+- Code refactoring for cleaner and more modular sidebar and header components.
+- Enhanced logout dialog to use context, ensuring consistent app state on logout.
+
+
+
 ## [1.0.2] - 2025-03-12
 ### New Features
 - Added contractor registration modal on homepage, with role-based data saving in the database.

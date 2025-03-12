@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
+
 import {
   AppBar,
   Toolbar,
@@ -15,17 +17,19 @@ import {
   DialogTitle,
   DialogActions,
   Button,
+  useMediaQuery,
 } from "@mui/material";
 import { Bars3Icon, BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "@mui/material/styles";
 
-let userData = JSON.parse(localStorage.getItem("user")) || { name: "Guest", notifications: 0 };
-console.log(userData)
 const Header = ({ toggleSidebar }) => {
+  const { logout,user } = useAuth();
+  
   const navigate = useNavigate();
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Detect screen width for responsive design
   // Open dropdown menu
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -44,10 +48,9 @@ const Header = ({ toggleSidebar }) => {
 
   // Logout user
   const handleConfirmLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    setOpenLogoutDialog(false);
-    navigate("/"); // Redirect to home/login page
+    logout(); // Call context logout to clear user and token
+    setOpenLogoutDialog(false); // Close dialog
+    navigate("/"); // Redirect to login or home
   };
 
   return (
@@ -66,42 +69,51 @@ const Header = ({ toggleSidebar }) => {
           <IconButton color="inherit" edge="start" onClick={toggleSidebar} className="md:hidden" sx={{ mr: 2 }}>
             <Bars3Icon className="h-6 w-6 text-white" />
           </IconButton>
+          
+          {/* Center Section: Search (Hidden on very small screens) */}
+          {!isMobile && (
+            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1 w-full max-w-md">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
+              <InputBase
+                placeholder="Search..."
+                className="text-black w-full pl-2"
+                sx={{
+                  color: "black",
+                  "&::placeholder": { color: "black" },
+                }}
+              />
+            </div>
+          )}
+          {/* Right Section: Notifications + User Avatar */}
+          <div className="flex items-center gap-4">
+            {/* Search Icon for Mobile */}
+            {isMobile && (
+              <IconButton color="inherit">
+                <MagnifyingGlassIcon className="h-6 w-6 text-black" />
+              </IconButton>
+            )}
 
-          {/* Search Bar */}
-          <Box className="flex items-center bg-gray-100 rounded-lg px-3 py-1 w-full max-w-md">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
-            <InputBase
-              placeholder="Search..."
-              className="text-black w-full pl-2"
-              sx={{
-                color: "black",
-                "&::placeholder": { color: "black" },
-              }}
-            />
-          </Box>
-
-          {/* Right Side User Info & Notifications */}
-          <Box className="flex items-center space-x-4">
+            {/* Notification Bell */}
             <IconButton color="inherit">
-              <Badge badgeContent={userData.notifications} color="error">
+              <Badge badgeContent={user.notifications} color="error">
                 <BellIcon className="h-6 w-6 text-black" />
               </Badge>
             </IconButton>
 
-            {/* User Avatar with Dropdown */}
+            {/* User Avatar */}
             <Avatar
               sx={{ bgcolor: "primary.main", cursor: "pointer" }}
               onClick={handleAvatarClick}
             >
-              {userData.name.charAt(0)}
+              {user.name.charAt(0).toUpperCase()}
             </Avatar>
 
             {/* Dropdown Menu */}
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              <MenuItem disabled>{userData.name}</MenuItem>
+              <MenuItem disabled>{user.name}</MenuItem>
               <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>
-          </Box>
+          </div>
         </Toolbar>
       </AppBar>
 
@@ -109,8 +121,12 @@ const Header = ({ toggleSidebar }) => {
       <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
         <DialogTitle>Are you sure you want to logout?</DialogTitle>
         <DialogActions>
-          <Button onClick={() => setOpenLogoutDialog(false)} color="primary">Cancel</Button>
-          <Button onClick={handleConfirmLogout} color="error">Logout</Button>
+          <Button onClick={() => setOpenLogoutDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmLogout} color="error">
+            Logout
+          </Button>
         </DialogActions>
       </Dialog>
     </>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from '../../context/AuthContext';
 import {
   Button,
   Dialog,
@@ -17,6 +18,7 @@ import alertify from "alertifyjs";
 import "alertifyjs/build/css/alertify.css";
 
 const Invites = () => {
+  const { user } = useAuth();
   const initialData = { email: "", role: "" };
   const [data, setData] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -31,25 +33,47 @@ const Invites = () => {
 
   const fetchInvites = async () => {
     try {
+      const user = JSON.parse(localStorage.getItem('user')); // or useAuth() if using context
+  
+      // Setup params conditionally
+      const params = user.role !== 1 ? { user_id: user.id } : {};
+  
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/invites/getInvites`
+        `${import.meta.env.VITE_API_URL}/api/invites/getInvites`,
+        { params }
       );
+  
       setData(response.data.invites || []);
     } catch (error) {
       console.error("Error fetching invites:", error);
     }
   };
+  
 
   const fetchRoles = async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/roles/getRoles`
       );
-      setRoles(response.data.roles || []);
+  
+      let fetchedRoles = response.data.roles || [];
+  
+      // Assuming you have access to user.role in this scope
+      const user = JSON.parse(localStorage.getItem('user'));
+  
+      // Apply filtering based on user's role
+      if (user.role === 2 || user.role === 3) {
+        fetchedRoles = fetchedRoles.filter(role => role.id === 3);
+      }
+      else if (user.role === 1){
+        fetchedRoles = fetchedRoles.filter(role => role.id === 2);
+      }
+      setRoles(fetchedRoles);
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
   };
+  
 
   const openModal = (item = null) => {
     setFormData(item ? { ...item } : initialData);
@@ -84,35 +108,60 @@ const Invites = () => {
 
   const handleSave = async () => {
     try {
+      if (!formData.email) {
+        alertify.error("Please type an email.");
+        return;
+      }
       if (!formData.role) {
         alertify.error("Please select a role.");
         return;
       }
-
+  
+      let response;
+  
       if (editItem) {
         const updateData = {
           email: formData.email,
           role: formData.role,
         };
-        await axios.put(
+        response = await axios.put(
           `${import.meta.env.VITE_API_URL}/api/invites/updateInvite/${editItem.id}`,
           updateData
         );
-        alertify.success("Updated successfully!");
       } else {
-        await axios.post(
+        const payload = {
+          ...formData,
+          created_by: user.id // Add user.id as created_by
+        };
+      
+        response = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/invites/createInvite`,
-          formData
+          payload
         );
-        alertify.success("Invite sent successfully!");
       }
-
+  
+      // ✅ Display success message from API response
+      if (response.data && response.data.message) {
+        alertify.success(response.data.message);
+      } else {
+        alertify.success("Operation completed successfully.");
+      }
+  
+      // Refresh invites and close modal
       fetchInvites();
       setIsModalOpen(false);
+  
     } catch (error) {
-      alertify.error("Error saving data.");
+      console.error(error);
+      // ✅ Display error message from API response if available
+      if (error.response && error.response.data && error.response.data.message) {
+        alertify.error(error.response.data.message);
+      } else {
+        alertify.error("Something went wrong. Please try again.");
+      }
     }
   };
+  
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">

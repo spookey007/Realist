@@ -9,7 +9,7 @@ import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import '../assets/css/modal.css';
 import backgroundImg from '../assets/images/contact_form/contact_form.jpeg';
-
+import { useAuth } from '../context/AuthContext'; // Import context
 const now = new Date();
 const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
@@ -19,6 +19,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
   const [selectedDateTime, setSelectedDateTime] = useState(startOfToday);
   const [location, setLocation] = useState({ latitude: '', longitude: '' });
   const recaptchaRef = useRef();
+  const { login } = useAuth(); // Use context login function
 
   const initialValues = {
     name: '',
@@ -65,17 +66,11 @@ const LoginModal = ({ isOpen, closeModal }) => {
       if (response.ok) {
         alertify.success('User login successful!');
   
-        // Store token and user info
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-  
+        login(data.user, data.token); // ✅ Call context login to set user globally
         resetForm();
         recaptchaRef.current.reset();
         closeModal();
-  
-        // Redirect to dashboard
-        // window.location.href = '/admin/dashboard';
-        navigate("/admin/dashboard")
+        navigate('/admin/dashboard'); // Redirect
       } else {
         alertify.error('Invalid email or password. Please try again.');
       }

@@ -176,7 +176,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
         <div className="modal-content">
           <button className="close-modal" onClick={closeModal}>&times;</button>
           <h2 className="modal-title">Register</h2>
-          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Real Estate Agent</p>
+          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Contractor</p>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>

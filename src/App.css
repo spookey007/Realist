@@ -1,17 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #root {
-  max-width: 1280px;
+  max-width: 100%;
+  max-width: 1536px; /* Works on 4K screens */
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
   background: white;
 }
 
+/* Make Logo Responsive */
 .logo {
-  height: 6em;
+  height: 4rem; /* Mobile */
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
+@media (min-width: 768px) {
+  .logo {
+    height: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .logo {
+    height: 6rem;
+  }
+}
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
@@ -34,11 +53,28 @@
   }
 }
 
+/* Improve Card Padding */
 .card {
-  padding: 2em;
+  padding: 1rem; /* Default for mobile */
 }
 
+@media (min-width: 768px) {
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    padding: 2rem;
+  }
+}
+
+/* Improve Readability */
 .read-the-docs {
-  color: #888;
+  color: rgba(100, 100, 100, 0.9);
 }
 
+body {
+  font-size: clamp(14px, 1.2vw, 20px);
+}

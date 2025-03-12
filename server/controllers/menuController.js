@@ -37,14 +37,36 @@ export const getAllMenus = async (req, res) => {
 };
 
 export const getMenusSidebar = async (req, res) => {
+  const { role_id } = req.query;
+
   try {
-    const result = await pool.query('SELECT * FROM "Menus"  WHERE status=1 ORDER BY id ASC');
+    let query;
+    let values;
+
+    if (role_id) {
+      // Join Menus with RoleMenuRights and filter based on role
+      query = `
+        SELECT m.*, r.privs
+        FROM "Menus" m
+        INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+        WHERE m.status = 1 AND r.role_id = $1
+        ORDER BY m.id ASC;
+      `;
+      values = [role_id];
+    } else {
+      // Fallback if no role_id is provided (optional)
+      query = `SELECT * FROM "Menus" WHERE status = 1 ORDER BY id ASC;`;
+      values = [];
+    }
+
+    const result = await pool.query(query, values);
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching menus:", error);
     res.status(500).json({ message: "Failed to fetch menus" });
   }
 };
+
 
 // Get a single menu by ID
 export const getMenuById = async (req, res) => {
