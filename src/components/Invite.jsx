@@ -113,7 +113,8 @@ const Invite = () => {
           invite_id:id
         }),
       });
-  
+      const responseData = await response.json();
+      // console.log(responseData)
       if (response.ok)
         {
           resetForm(); // reset Formik
@@ -134,7 +135,7 @@ const Invite = () => {
         // alertify.success('User created successfully!');
         
       } else {
-        alertify.error('Failed to create user');
+        alertify.error(responseData.message);
       }
     } catch (error) {
       console.error(error);

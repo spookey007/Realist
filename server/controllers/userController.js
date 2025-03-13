@@ -27,7 +27,9 @@ export const createUserA = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-
+  if (await emailExists(email)) {
+    return res.status(400).json({ message: 'Email already exists' });
+  }
   let name = generateNameFromEmail(email);
   const hashedPassword = await hashPassword(password);
 
@@ -54,7 +56,9 @@ export const createUserB = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-
+  if (await emailExists(email)) {
+    return res.status(400).json({ message: 'Email already exists' });
+  }
   const hashedPassword = await hashPassword(password);
 
   try {
@@ -102,7 +106,11 @@ export const RegisterContractor = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-
+  
+  if (await emailExists(email)) {
+    console.log(emailExists(email))
+    return res.status(400).json({ message: 'Email already exists' });
+  }
   try {
     const hashedPassword = await hashPassword(password);
 
@@ -230,9 +238,9 @@ export const registerRea = async (req, res) => {
     yearsOfExperience,
     coverageArea,
     licenseNumber,
-    issuingAuthority, // ✅ New field
-    specialties,      // ✅ New field
-    affiliations,     // ✅ New field
+    issuingAuthority,
+    specialties,
+    affiliations,
     insurancePolicy,
     references,
     description,
@@ -247,7 +255,9 @@ export const registerRea = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-
+  if (await emailExists(email)) {
+    return res.status(400).json({ message: 'Email already exists' });
+  }
   try {
     const hashedPassword = await hashPassword(password);
 
@@ -371,6 +381,11 @@ export const updateUser = async (req, res) => {
   }
 
   try {
+    // Check if email exists for another user
+    if (updatedData.email && (await emailExistsForAnotherUser(updatedData.email, id))) {
+      return res.status(400).json({ message: 'Email already exists for another user' });
+    }
+
     const fields = Object.keys(updatedData).map((key, idx) => `"${key}" = $${idx + 2}`);
     const query = `
       UPDATE "Users"
@@ -397,11 +412,40 @@ export const getAllUsers = async (req, res) => {
   try {
     const query = `
       SELECT
-        "Users"."id", "Users"."name", "Users"."email", "Users"."status", "Users"."role", 
-        "Users"."createdAt", "Users"."updatedAt",
-        "Roles"."name" AS "role_name" 
+        "Users"."id",
+        "Users"."name",
+        "Users"."email",
+        "Users"."status",
+        "Users"."role",
+        "Users"."phone",
+        "Users"."address",
+        "Users"."city",
+        "Users"."state",
+        "Users"."country",
+        "Users"."postal_code",
+        "Users"."lat",
+        "Users"."lon",
+        "Users"."last_login",
+        "Users"."profile_picture_url",
+        "Users"."createdAt",
+        "Users"."updatedAt",
+        "Users"."company_name",
+        "Users"."website",
+        "Users"."service_category",
+        "Users"."years_of_experience",
+        "Users"."coverage_area",
+        "Users"."license_number",
+        "Users"."insurance_policy",
+        "Users"."references",
+        "Users"."description",
+        "Users"."files",
+        "Users"."licenseNumber",
+        "Users"."issuingAuthority",
+        "Users"."specialties",
+        "Users"."affiliations",
+        "Roles"."name" AS "role_name"
       FROM "Users"
-      LEFT JOIN "Roles" ON "Users"."role" = "Roles"."id";  -- ✅ Correct table references
+      LEFT JOIN "Roles" ON "Users"."role" = "Roles"."id";
     `;
     
     const result = await pool.query(query);
@@ -503,5 +547,27 @@ export const loginUser = async (req, res) => {
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Failed to authenticate user' });
+  }
+};
+
+const emailExists = async (email) => {
+  try {
+    const query = 'SELECT 1 FROM "Users" WHERE "email" = $1 LIMIT 1;';
+    const result = await pool.query(query, [email]);
+    return result.rowCount > 0;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
+};
+
+const emailExistsForAnotherUser = async (email, userId) => {
+  try {
+    const query = 'SELECT 1 FROM "Users" WHERE "email" = $1 AND "id" <> $2 LIMIT 1;';
+    const result = await pool.query(query, [email, userId]);
+    return result.rowCount > 0;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
   }
 };

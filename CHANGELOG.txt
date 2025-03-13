@@ -1,17 +1,34 @@
 # Changelog
 
+## [1.0.4] - 2025-03-14
 
-# Changelog
+### New Features
+- Added "View" Button: A new button was added to allow users to open a modal in view-only mode without approval/rejection options.
+- Implemented View Modal: Clicking the "View" button opens the ReviewModal in "view" mode, displaying all user details without action buttons.
+- Expanded Review Modal: The modal was updated to display all user fields, including company details, references, and specialties.
+
+### Fixes & Improvements
+- Fixed Password Validation on Edit: Adjusted Yup validation to exclude password checks when editing a user to prevent unnecessary validation errors.
+- Fixed Modal Opening Issue: Ensured openViewModal correctly differentiates between "review" and "view" modes to open the respective modal.
+- Fixed Missing Approval/Rejection Handlers: Implemented handleApprove and handleReject with proper try-catch error handling to prevent crashes.
+- Improved Axios Requests: Added try-catch blocks to approval and rejection functions for better error handling and user feedback.
+- Fixed Modal Close Behavior: Ensured closeViewModal() is properly called after approving/rejecting users.
+- Refactored Action Column Logic: Integrated "View" and "Review" buttons within the Actions column, ensuring correct modal handling based on user status.
+- Corrected API Responses on Registration: Ensured API responses return meaningful success/error messages during user registration.
+- Added Checks for Existing Email: Implemented validation to check for duplicate emails during both user registration and update to prevent conflicts.
 
 ## [1.0.3] - 2025-03-13
 
 ### New Features
-- Added role-based sidebar menu fetching using `role_id` from user context.
+- Added role-based sidebar menu fetching using role_id from user context.
 - Implemented AuthContext for centralized user authentication state management.
 - Sidebar now stores menu data in localStorage for faster loading and fewer API calls.
 - Added logout functionality through AuthContext to properly clear user data and tokens.
 - Dynamic sidebar now respects user roles and permissions, loaded on login.
 - Implemented mobile-responsive sidebar behavior: collapses on mobile and expands on desktop.
+- Added role-based filtering of roles: if user role is 2 or 3, show only role_id 3; else show all roles.
+- Passed user.id when creating invites for proper tracking.
+- Added created_by column to invites and role_menu_rights via Sequelize migrations.
 
 ### Fixes & Improvements
 - Fixed issue where sidebar wouldn't display updated user data immediately after login (now reactive via context).
@@ -20,7 +37,8 @@
 - Improved responsiveness of sidebar toggle button and interactions.
 - Code refactoring for cleaner and more modular sidebar and header components.
 - Enhanced logout dialog to use context, ensuring consistent app state on logout.
-
+- Filtered invites API based on user roles: if role != 1, only fetch invites created by that user.
+- Standardized alertify success and error messages based on API responses for better user feedback.
 
 
 ## [1.0.2] - 2025-03-12

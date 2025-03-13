@@ -106,7 +106,8 @@ const RegisterModal = ({ isOpen, closeModal }) => {
           longitude: location.longitude,
         }),
       });
-  
+      const responseData = await response.json();
+      // console.log(responseData)
       if (response.ok) {
         // alertify.success('User created successfully!');
         resetForm(); // reset Formik
@@ -125,7 +126,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
           // navigate("/"); // Navigate to the home page after clicking OK
         });
       } else {
-        alertify.error('Failed to create user');
+        alertify.error(responseData.message);
       }
     } catch (error) {
       console.error(error);
@@ -176,7 +177,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
         <div className="modal-content">
           <button className="close-modal" onClick={closeModal}>&times;</button>
           <h2 className="modal-title">Register</h2>
-          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Contractor</p>
+          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Real Estate Agent</p>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>

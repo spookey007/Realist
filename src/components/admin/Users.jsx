@@ -17,6 +17,8 @@ import alertify from "alertifyjs";
 import "alertifyjs/build/css/alertify.css";
 import "preline";
 import * as Yup from "yup";
+import ReviewModal from "./ReviewModal.jsx";  // ✅ Fix: Use default import
+
 
 const Users = ({ apiUrl, rolesApi }) => {
   const initialData = { name: "", role: "", status: 1 };
@@ -27,6 +29,38 @@ const Users = ({ apiUrl, rolesApi }) => {
   const [formData, setFormData] = useState(initialData);
   const [editItem, setEditItem] = useState(null);
   const [password, setPassword] = useState({ newPassword: "", confirmPassword: "" });
+
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [viewMode, setViewMode] = useState("view");  // ✅ Track mode here
+  
+  
+  const openViewModal = (mode, user) => {
+    setSelectedUser(user);
+    setViewMode(mode);   // ✅ Set mode dynamically
+    setViewModalOpen(true);
+  };
+  
+  const closeViewModal = () => {
+    setViewModalOpen(false);
+  };
+  
+  
+  const openModal = (item = null) => {
+    setFormData(item ? { ...item } : initialData);
+    setEditItem(item);
+    setIsModalOpen(true);
+  };
+
+  const openReviewModal = (user) => {
+    setSelectedUser(user);
+    setReviewModalOpen(true);
+  };
+  
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -59,13 +93,7 @@ const Users = ({ apiUrl, rolesApi }) => {
   };
 
 
-  const openModal = (item = null) => {
-    setFormData(item ? { ...item } : initialData);
-    setEditItem(item);
-    setIsModalOpen(true);
-  };
-   
-  
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -73,22 +101,67 @@ const Users = ({ apiUrl, rolesApi }) => {
 
 
 
+  
+  const handleApprove = async (userId) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/update/${userId}`, { status: 1 });
+  
+      if (response.status === 200) {
+        fetchData();
+        alertify.success("User Approved!");
+        closeViewModal();
+      } else {
+        alertify.error("Failed to approve user.");
+      }
+    } catch (error) {
+      console.error("Error approving user:", error);
+      alertify.error("An error occurred while approving the user.");
+    }
+  };
+  
+  const handleReject = async (userId) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/update/${userId}`, { status: 2 });
+  
+      if (response.status === 200) {
+        fetchData();
+        alertify.error("User Rejected!");
+        closeViewModal();
+      } else {
+        alertify.error("Failed to reject user.");
+      }
+    } catch (error) {
+      console.error("Error rejecting user:", error);
+      alertify.error("An error occurred while rejecting the user.");
+    }
+  };
+  
+
 const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email format")
     .required("Email is required"),
 
   password: Yup.string()
-    .min(8, "Password must be at least 8 characters")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[0-9]/, "Password must contain at least one number")
-    .matches(/[@$!%*?&]/, "Password must contain at least one special character")
-    .required("Password is required"),
+    .when([], {
+      is: () => !editItem, // Only validate if it's a new user
+      then: (schema) =>
+        schema
+          .min(8, "Password must be at least 8 characters")
+          .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+          .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+          .matches(/[0-9]/, "Password must contain at least one number")
+          .matches(/[@$!%*?&]/, "Password must contain at least one special character")
+          .required("Password is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Passwords must match")
-    .required("Confirm Password is required"),
+    .when("password", {
+      is: (password) => !!password, // Only validate if password is provided
+      then: (schema) => schema.oneOf([Yup.ref("password")], "Passwords must match"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 
   // captchaValue: Yup.string().required("Please complete the reCAPTCHA"),
 });
@@ -96,8 +169,7 @@ const validationSchema = Yup.object({
 
   const handleSave = async () => {
     try {
-      await validationSchema.validate(formData, { abortEarly: false });
-  
+
       if (editItem) {
         const updatedUser = {
           name: formData.name.trim(),
@@ -205,18 +277,32 @@ const validationSchema = Yup.object({
         accessorKey: "actions",
         cell: (info) => {
           const rowItem = info.row.original;
+          const status = rowItem.status;
+          
           return (
             <div className="flex space-x-2">
-              <Button variant="contained" color="primary" size="small" onClick={() => openModal(rowItem)}>
-                Edit
-              </Button>
-              <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenPasswordModal(rowItem)}>
-                Reset Password
-              </Button>
+              {status === 1 && (
+                <>
+                  <Button variant="contained" color="primary" size="small" onClick={() => openModal(rowItem)}>
+                    Edit
+                  </Button>
+                  <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenPasswordModal(rowItem)}>
+                    Reset Password
+                  </Button>
+                  <Button variant="contained" color="info" size="small" onClick={() => openViewModal('view',rowItem)}>
+                    View
+                  </Button>
+                </>
+              )}
+              {status === 0 || status === 2 ? (
+                <Button variant="contained" color="warning" size="small" onClick={() => openViewModal('review',rowItem)}>
+                  Review
+                </Button>
+              ) : null}
             </div>
           );
         },
-      },
+      },    
     ],
     []
   );
@@ -258,6 +344,7 @@ const validationSchema = Yup.object({
           ))}
         </tbody>
       </table>
+      
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -317,6 +404,18 @@ const validationSchema = Yup.object({
         </button>
         </DialogActions>
       </Dialog>
+
+      {/* {Review Modal} */}
+      {viewModalOpen && selectedUser && (
+        <ReviewModal 
+          open={viewModalOpen} 
+          onClose={closeViewModal} 
+          user={selectedUser} 
+          mode={viewMode}
+          handleApprove={handleApprove}
+          handleReject={handleReject} 
+        />
+      )}
     </div>
   );
 };
