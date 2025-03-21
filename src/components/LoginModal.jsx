@@ -112,9 +112,9 @@ const LoginModal = ({ isOpen, closeModal }) => {
     }
   };
 
-  useEffect(() => {
-    fetchLocation();
-  }, []);
+  // useEffect(() => {
+  //   fetchLocation();
+  // }, []);
 
   return (
     isOpen && (

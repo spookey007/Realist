@@ -1,20 +1,16 @@
-import React, { useState } from "react";
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { isMobile, isTablet } from "react-device-detect";
+import { openModal, closeModal } from "../../redux/modalSlice";
+import MobileModal from "../modals/ListingsModal/MobileModal";
+import DesktopModal from "../modals/ListingsModal/DesktopModal";
+import { getDeviceType } from "../utils/deviceDetector";
+import WebListings from "../ui/WebListings";
+import MobileListings from "../ui/MobileListings";
 import { motion } from "framer-motion";
+import axios from "axios";
 
+// Helper function to generate random listing data
 const generateRandomListing = () => {
   const randomPrice = `$${(Math.random() * 900000 + 100000).toFixed(0)}`;
   const randomBeds = Math.floor(Math.random() * 3) + 1;
@@ -31,136 +27,137 @@ const generateRandomListing = () => {
   };
 };
 
-const listingsData = Array.from({ length: 5 }, generateRandomListing);
+// const listingsData = Array.from({ length: 5 }, generateRandomListing);
+const isMobileDevice = getDeviceType() === "mobile";
 
 const Listings = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [propertyType, setPropertyType] = useState("");
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
-  const [formData, setFormData] = useState({
-    city: "",
-    state: "",
-    price: "",
-    beds: "",
-    baths: "",
-  });
+  const dispatch = useDispatch();
+  const { isOpen, modalType } = useSelector((state) => state.modal);
+  const [listingsData, setListingsData] = useState([]);
+
+  const handleOpenModal = () => {
+    const deviceType = isMobile || isTablet ? "mobile" : "desktop";
+    dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
+  };
+
+   // Fetch properties from API
+   const fetchProperties = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/properties/`
+      );
+      console.log("Fetched Properties:", response.data);
+      setListingsData(response.data);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const handleSubmit = async (values) => {
+    try {
+      console.log("Form Data:", values);
+
+      // Retrieve the logged-in user from localStorage
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.id) {
+        alert("User is not logged in.");
+        return;
+      }
+      const owner_id = user.id;
+
+      // Extract required fields from form values
+      const { address, propertyType, price, ...otherDetails } = values;
+
+      // Prepare the payload with required fields and extra details stored in the JSON 'details' column
+      const payload = {
+        owner_id,
+        address,
+        property_type: propertyType,
+        price,
+        details: otherDetails, // All additional fields go into details
+      };
+
+      // Send a POST request to create a new property
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/properties/`,
+        payload
+      );
+
+      if (response.data && response.data.message) {
+        alertify.success(response.data.message);
+      } else {
+        alertify.success("Property created successfully!");
+      }
+      
+      fetchProperties();
+      // Close the modal after successful submission
+      dispatch(closeModal());
+    } catch (error) {
+      console.error("Error submitting property:", error);
+      alertify.error("Error submitting property. Please try again later.");
+    }
+  };
 
   return (
-    <div className="p-8 flex flex-col gap-10">
-      {/* Button to Open Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <button
-          onClick={() => setModalOpen(true)}
-          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
-        >
-          Add New Listing
-        </button>
-      </motion.div>
-
-      {/* Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+    <div className="pt-5 flex flex-col gap-5">
+      {/* Button for Desktop */}
+      {!isMobileDevice && (
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
-          <Box className="bg-white bg-opacity-90 backdrop-blur-xl rounded-3xl shadow-xl p-8 max-w-3xl mx-auto mt-20 border border-gray-300">
-            <Typography variant="h6" className="font-bold text-center">
-              Add Listing
-            </Typography>
-
-            <FormControl fullWidth className="mt-4">
-              <InputLabel>Property Type</InputLabel>
-              <Select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
-                <MenuItem value="sale">For Sale</MenuItem>
-                <MenuItem value="rent">For Rent</MenuItem>
-                <MenuItem value="construction">New/Under Construction</MenuItem>
-                <MenuItem value="land">Land/Lot</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Grid container spacing={2} className="mt-4">
-              <Grid item xs={6}>
-                <TextField label="City" fullWidth name="city" onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField label="State" fullWidth name="state" onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2} className="mt-4">
-              <Grid item xs={6}>
-                <TextField label="Price" fullWidth name="price" onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField label="Beds" fullWidth name="beds" onChange={(e) => setFormData({ ...formData, beds: e.target.value })} />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField label="Baths" fullWidth name="baths" onChange={(e) => setFormData({ ...formData, baths: e.target.value })} />
-              </Grid>
-            </Grid>
-
-            <Typography variant="subtitle1" className="mt-4 font-semibold">
-              Amenities
-            </Typography>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {["55+", "Investor Special", "Pool", "Waterfront", "HOA"].map((amenity) => (
-                <FormControlLabel
-                  key={amenity}
-                  control={<Checkbox value={amenity} onChange={(e) => setSelectedAmenities([...selectedAmenities, e.target.value])} />}
-                  label={amenity}
-                />
-              ))}
-            </div>
-
-            <TextField label="Buyer's Agent Compensation" fullWidth className="mt-4" />
-
-            <div className="flex justify-between mt-6">
-            <button onClick={() => setModalOpen(false)} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-            Cancel
-            </button>
-            <button onClick={() => setModalOpen(false)} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-              Submit Listing
-            </button>
-            </div>
-          </Box>
+          <button
+            onClick={handleOpenModal}
+            className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+          >
+            Add New Listing
+          </button>
         </motion.div>
-      </Modal>
+      )}
+
+      {/* Full-Width Sticky Button for Mobile */}
+      {isMobileDevice && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="fixed left-0 mt-5 px-2 mb-10 top-12 w-full z-50"
+        >
+          <button
+            onClick={handleOpenModal}
+            className="group w-full relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-purple-500 text-white px-6 font-medium transition-all [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
+          >
+            Add New Listing
+          </button>
+        </motion.div>
+      )}
+
+      {/* Render Modal Based on Device Type */}
+      {modalType === "mobile" ? (
+        <MobileModal
+          onSubmit={handleSubmit}
+          isOpen={isOpen}
+          onClose={() => dispatch(closeModal())}
+        />
+      ) : (
+        <DesktopModal
+          onSubmit={handleSubmit}
+          isOpen={isOpen}
+          onClose={() => dispatch(closeModal())}
+        />
+      )}
 
       {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listingsData.map((listing, index) => (
-          <motion.div
-            key={index}
-            className="p-6 rounded-2xl shadow-lg bg-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <Typography variant="h6" className="font-bold text-xl">
-              {listing.price}
-            </Typography>
-            <Typography className="text-sm text-gray-500 mt-1">
-              {listing.address}
-            </Typography>
-            <div className="mt-2 flex items-center text-sm text-gray-600">
-              <span>{listing.beds} bd</span>
-              <span className="mx-2">|</span>
-              <span>{listing.baths}</span>
-              <span className="mx-2">|</span>
-              <span>{listing.sqft}</span>
-            </div>
-            <div className="mt-2 flex items-center text-blue-500 text-sm">
-              <span className="mr-2">💡</span>
-              <span>{listing.liveIn}</span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {isMobileDevice ? (
+        <MobileListings listings={listingsData} />
+      ) : (
+        <WebListings listings={listingsData} />
+      )}
     </div>
   );
 };

@@ -165,9 +165,12 @@ const Invites = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <Button variant="contained" color="primary" onClick={() => openModal()}>
-        Invite
-      </Button>
+      <button
+          onClick={() => openModal()}
+          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+        >
+          Add Invite
+      </button>
 
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
@@ -196,22 +199,18 @@ const Invites = () => {
               <td className="p-2 flex space-x-2">
                 {item.status === 1 && (
                   <>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    onClick={() => ResendInvite(item)}
-                  >
-                    Resend
-                  </Button>
-                  <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => openModal(item)}
-                  >
-                    Edit
-                  </Button>
+                    <button
+                      onClick={() => ResendInvite(item)}
+                      className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-green-500 bg-transparent px-3 font-medium text-green-600 transition-all duration-100 [box-shadow:5px_5px_rgb(34_197_94)] hover:bg-green-100 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(34_197_94)]"
+                    >
+                      Resend
+                    </button>
+                    <button
+                      onClick={() => openModal(item)}
+                      className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-blue-500 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] hover:bg-blue-100 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+                    >
+                      Edit
+                    </button>
                   </>
                 )}
               </td>
@@ -249,10 +248,22 @@ const Invites = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-gray-300 bg-transparent px-4 font-medium text-gray-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] hover:bg-gray-200 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border ${
+              editItem
+                ? "border-yellow-500 text-yellow-600 [box-shadow:5px_5px_rgb(234_179_8)] hover:bg-yellow-100"
+                : "border-green-500 text-green-600 [box-shadow:5px_5px_rgb(34_197_94)] hover:bg-green-100"
+            } px-4 font-medium transition-all duration-100 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(34_197_94)]`}
+          >
             {editItem ? "Update" : "Send Invite"}
-          </Button>
+          </button>
         </DialogActions>
       </Dialog>
     </div>

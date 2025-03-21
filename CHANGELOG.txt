@@ -1,5 +1,22 @@
 # Changelog
 
+
+## [1.0.6] - 2025-03-19
+
+### New Features
+
+### Fixes & Improvements
+
+
+
+## [1.0.5] - 2025-03-18
+
+### Fixes & Improvements
+- Fixed Dialog Backdrop Animation: Moved backdropFilter to the style prop to ensure the blur effect works correctly.
+- Improved AnimatePresence Handling: Wrapped Dialog inside {isModalOpen && (...)} to prevent animation glitches and unnecessary renders.
+- Optimized Background Styling: Removed redundant `backgroundColor:
+
+
 ## [1.0.4] - 2025-03-14
 
 ### New Features

@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Provider } from 'react-redux'; // Import Redux Provider
+import store from './redux/store'; // Import Redux store
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -12,8 +14,14 @@ import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import NotFound from './components/NotFound'; // Example 404 page
+import ModalProvider from './components/ModalProvider'; // Import ModalProvider
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import alertify from "alertifyjs";
+import "alertifyjs/build/css/alertify.css";
+import { ThemeProvider } from "./context/ThemeContext";
+
+window.alertify = alertify;
 
 const App = () => {
   const location = useLocation();
@@ -38,7 +46,7 @@ const App = () => {
           <Route path="/videos" element={<Videos />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/invite/:id" element={<Invite />} />
-            {/* Protect all admin routes */}
+          {/* Protect all admin routes */}
           <Route
             path="/admin/*"
             element={
@@ -47,21 +55,27 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       
       {/* Conditionally render Footer */}
       {!isNoFooterHeader && <Footer />}
+
+      {/* Modal Provider for Global Modals */}
+      <ModalProvider />
     </div>
   );
 };
 
 const AppWrapper = () => (
-  <Router>
-    <App />
-  </Router>
+  <Provider store={store}> {/* Wrap the entire app with Redux Provider */}
+    <ThemeProvider> {/* Wrap the entire app with ThemeProvider */}
+      <Router>
+        <App />
+      </Router>
+    </ThemeProvider>
+  </Provider>
 );
 
 export default AppWrapper;

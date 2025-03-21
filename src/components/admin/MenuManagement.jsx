@@ -20,46 +20,51 @@ import * as Yup from "yup";
 
 
 import {
-  HomeIcon,
-  UserIcon,
-  CogIcon,
-  ChartBarIcon,
-  InboxIcon,
-  BellIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  HeartIcon,
-  ShoppingCartIcon,
-  UsersIcon,
-  ArrowRightOnRectangleIcon,
-} from "@heroicons/react/24/outline";
-
-import { Dashboard, CalendarToday, Person, Contacts, Assessment, ExitToApp, Menu, ExpandLess, ExpandMore, Group, Settings } from "@mui/icons-material";
+  HiHome,
+  HiUser,
+  HiCog,
+  HiChartBar,
+  HiInbox,
+  HiBell,
+  HiDocumentText,
+  HiFolder,
+  HiHeart,
+  HiShoppingCart,
+  HiUsers,
+  HiArrowRightOnRectangle,
+  HiCalendar,
+  HiBars3,
+  HiChevronUp,
+  HiChevronDown,
+  HiUserPlus,
+  HiSquaresPlus,
+  HiOutlineEquals,
+  HiRectangleStack,
+  HiDocumentCheck
+} from "react-icons/hi2";
 
 const availableIcons = [
-  { label: "Home", value: "HomeIcon", component: HomeIcon },
-  { label: "User", value: "UserIcon", component: UserIcon },
-  { label: "Settings", value: "CogIcon", component: CogIcon },
-  { label: "Reports", value: "ChartBarIcon", component: ChartBarIcon },
-  { label: "Inbox", value: "InboxIcon", component: InboxIcon },
-  { label: "Notifications", value: "BellIcon", component: BellIcon },
-  { label: "Documents", value: "DocumentTextIcon", component: DocumentTextIcon },
-  { label: "Folders", value: "FolderIcon", component: FolderIcon },
-  { label: "Favorites", value: "HeartIcon", component: HeartIcon },
-  { label: "Cart", value: "ShoppingCartIcon", component: ShoppingCartIcon },
-  { label: "Users", value: "UsersIcon", component: UsersIcon },
-  { label: "Logout", value: "ArrowRightOnRectangleIcon", component: ArrowRightOnRectangleIcon },
-  { label: "Dashboard", value: "Dashboard", component: Dashboard },
-  { label: "Calendar", value: "CalendarToday", component: CalendarToday },
-  { label: "Person", value: "Person", component: Person },
-  { label: "Contacts", value: "Contacts", component: Contacts },
-  { label: "Assessment", value: "Assessment", component: Assessment },
-  { label: "Exit", value: "ExitToApp", component: ExitToApp },
-  { label: "Menu", value: "Menu", component: Menu },
-  { label: "Expand Less", value: "ExpandLess", component: ExpandLess },
-  { label: "Expand More", value: "ExpandMore", component: ExpandMore },
-  { label: "Group", value: "Group", component: Group },
-  { label: "Settings", value: "Settings", component: Settings }
+  { label: "Home", value: "HiHome", component: HiHome },
+  { label: "User", value: "HiUser", component: HiUser },
+  { label: "Invite", value: "HiUserPlus", component: HiUserPlus },
+  { label: "Permission", value: "HiSquaresPlus", component: HiSquaresPlus },
+  { label: "MenuManagemnt", value: "HiOutlineEquals", component: HiOutlineEquals },
+  { label: "Listing", value: "HiRectangleStack", component: HiRectangleStack },
+  { label: "Services", value: "HiDocumentCheck", component: HiDocumentCheck },
+  { label: "Settings", value: "HiCog", component: HiCog },
+  { label: "Reports", value: "HiChartBar", component: HiChartBar },
+  { label: "Inbox", value: "HiInbox", component: HiInbox },
+  { label: "Notifications", value: "HiBell", component: HiBell },
+  { label: "Documents", value: "HiDocumentText", component: HiDocumentText },
+  { label: "Folders", value: "HiFolder", component: HiFolder },
+  { label: "Favorites", value: "HiHeart", component: HiHeart },
+  { label: "Cart", value: "HiShoppingCart", component: HiShoppingCart },
+  { label: "Users", value: "HiUsers", component: HiUsers },
+  { label: "Logout", value: "HiArrowRightOnRectangle", component: HiArrowRightOnRectangle },
+  { label: "Calendar", value: "HiCalendar", component: HiCalendar },
+  { label: "Menu", value: "HiBars3", component: HiBars3 },
+  { label: "Expand Less", value: "HiChevronUp", component: HiChevronUp },
+  { label: "Expand More", value: "HiChevronDown", component: HiChevronDown },
 ];
 
 const dummyMenus = [
@@ -218,7 +223,9 @@ const MenuManagement = () => {
         header: "Actions",
         cell: ({ row }) => (
           <>
-            <Button variant="contained" size="small" onClick={() => openModal(row.original)}>Edit</Button>
+            <button onClick={() => openModal(row.original)} className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]">
+                Edit
+            </button>
             {/* <Button variant="contained" color="error" size="small" onClick={() => deleteMenu(row.original.id)}>Delete</Button> */}
           </>
         ),
@@ -271,9 +278,12 @@ const MenuManagement = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <Button variant="contained" color="primary" onClick={() => setIsModalOpen(true)}>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+      >
         Add Menu
-      </Button>
+      </button>
 
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
@@ -414,11 +424,27 @@ const MenuManagement = () => {
             </TextField>
 
             <DialogActions>
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit" variant="contained" color="primary">
-                {editItem ? "Update" : "Save"}
-              </Button>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-gray-300 bg-transparent px-4 font-medium text-gray-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] hover:bg-gray-200 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-4 font-medium transition-all duration-100 active:translate-x-[3px] active:translate-y-[3px] ${
+                  editItem
+                    ? "border-yellow-500 text-yellow-600 [box-shadow:5px_5px_rgb(234_179_8)] hover:bg-yellow-100 active:[box-shadow:0px_0px_rgb(234_179_8)]"
+                    : "border-green-500 text-green-600 [box-shadow:5px_5px_rgb(34_197_94)] hover:bg-green-100 active:[box-shadow:0px_0px_rgb(34_197_94)]"
+                }`}
+              >
+                {editItem ? "Update" : "Send Invite"}
+              </button>
             </DialogActions>
+
+
           </form>
         </DialogContent>
       </Dialog>

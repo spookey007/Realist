@@ -57,9 +57,13 @@ const Roles = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <Button variant="contained" color="primary" onClick={() => openModal()}>
+      <button
+        onClick={() => openModal()}
+        className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+      >
         Add Roles
-      </Button>
+      </button>
+      
 
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
@@ -97,9 +101,12 @@ const Roles = () => {
                 />
               </td>
               <td className="p-2 flex space-x-2">
-                <Button variant="contained" color="primary" size="small" onClick={() => openModal(item)}>
-                  Edit
-                </Button>
+              <button
+                onClick={() => openModal(item)}
+                className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+              >
+                Edit
+              </button>
               </td>
             </tr>
           ))}
@@ -119,10 +126,18 @@ const Roles = () => {
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
-            {editItem ? "Update" : "Save"}
-          </Button>
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-4 font-medium text-gray-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-4 font-medium text-green-600 transition-all duration-100 [box-shadow:5px_5px_rgb(34_197_94)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(34_197_94)]"
+        >
+          {editItem ? "Update" : "Save"}
+        </button>
         </DialogActions>
       </Dialog>
     </div>

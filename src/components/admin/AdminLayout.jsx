@@ -1,49 +1,56 @@
-import React, { useState } from "react";
+import React from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
 import LoadingSpinner from "./LoadingSpinner";
+import { getDeviceType } from "../utils/deviceDetector";
 
-const drawerWidth = 280;
-const drawerCollapsedWidth = 1;
-const drawerCollapsedWidth1 = 70;
+const isMobileDevice = getDeviceType() === "mobile";
 
-const AdminLayout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
-
-  const startLoading = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000); // simulate loading
-  };
-
-  const currentSidebarWidth = sidebarOpen ? drawerCollapsedWidth1 : drawerCollapsedWidth1;
-
+const AdminLayout = ({ children, sidebarOpen, toggleSidebar, startLoading, isLoading, currentSidebarWidth }) => {
   return (
-    <div className="flex h-screen bg-gray-100 relative">
-      {isLoading && <LoadingSpinner />}
+    <div className="relative flex h-screen">
+      {/* Overlay for mobile (Only shows when sidebar is open) */}
+      {isMobileDevice && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity duration-300"
+          onClick={toggleSidebar}
+        />
+      )}
 
       {/* Sidebar */}
-      <Sidebar
-        openSidebar={sidebarOpen}
-        toggleSidebar={toggleSidebar}
-        startLoading={startLoading}
-      />
+      <div
+        className={`${
+          isMobileDevice ? "fixed inset-y-0 left-0 w-[70%] max-w-[300px] z-30" : "relative"
+        } transition-all duration-300`}
+        style={{
+          width: isMobileDevice ? (sidebarOpen ? "70%" : "0") : `${currentSidebarWidth}px`,
+        }}
+      >
+        <Sidebar
+          openSidebar={sidebarOpen}
+          toggleSidebar={toggleSidebar}
+          startLoading={startLoading}
+        />
+      </div>
 
       {/* Main Content */}
       <div
-        className="flex flex-col flex-1 transition-all duration-300"
+        className={`relative flex flex-col flex-1 transition-all duration-300 ${
+          isMobileDevice ? "w-full" : ""
+        }`}
         style={{
-          marginLeft: currentSidebarWidth,
-          width: `calc(100% - ${currentSidebarWidth}px)`,
+          marginLeft: isMobileDevice ? "0" : `${currentSidebarWidth}px`,
+          width: isMobileDevice ? "100%" : `calc(100% - ${currentSidebarWidth}px)`,
         }}
       >
         <Header toggleSidebar={toggleSidebar} />
         <main className="flex-1 p-6 overflow-y-auto mt-[64px]">{children}</main>
         <Footer />
       </div>
+
+      {/* Loading Spinner */}
+      {isLoading && <LoadingSpinner />}
     </div>
   );
 };

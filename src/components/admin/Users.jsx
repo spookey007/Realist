@@ -283,24 +283,40 @@ const validationSchema = Yup.object({
             <div className="flex space-x-2">
               {status === 1 && (
                 <>
-                  <Button variant="contained" color="primary" size="small" onClick={() => openModal(rowItem)}>
+                  <button
+                    onClick={() => openModal(rowItem)}
+                    className="group relative inline-flexh-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+                  >
                     Edit
-                  </Button>
-                  <Button variant="contained" color="secondary" size="small" onClick={() => handleOpenPasswordModal(rowItem)}>
+                  </button>
+          
+                  <button
+                    onClick={() => handleOpenPasswordModal(rowItem)}
+                    className="group relative inline-flexh-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-red-600 transition-all duration-100 [box-shadow:5px_5px_rgb(239_68_68)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(239_68_68)]"
+                  >
                     Reset Password
-                  </Button>
-                  <Button variant="contained" color="info" size="small" onClick={() => openViewModal('view',rowItem)}>
+                  </button>
+          
+                  <button
+                    onClick={() => openViewModal('view', rowItem)}
+                    className="group relative inline-flexh-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-cyan-600 transition-all duration-100 [box-shadow:5px_5px_rgb(6_182_212)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(6_182_212)]"
+                  >
                     View
-                  </Button>
+                  </button>
                 </>
               )}
-              {status === 0 || status === 2 ? (
-                <Button variant="contained" color="warning" size="small" onClick={() => openViewModal('review',rowItem)}>
+              
+              {(status === 0 || status === 2) && (
+                <button
+                  onClick={() => openViewModal('review', rowItem)}
+                  className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-yellow-600 transition-all duration-100 [box-shadow:5px_5px_rgb(234_179_8)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(234_179_8)]"
+                >
                   Review
-                </Button>
-              ) : null}
+                </button>
+              )}
             </div>
           );
+          
         },
       },    
     ],
@@ -347,6 +363,7 @@ const validationSchema = Yup.object({
       
 
       {/* Add/Edit Modal */}
+      
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <DialogTitle>{editItem ? `Update (ID: ${editItem.id})` : "Add New"}</DialogTitle>
         <DialogContent>
