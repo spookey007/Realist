@@ -43,7 +43,7 @@ const Hero = () => {
             <img
               src={heroImage}
               alt="Realist"
-              className="w-full h-full object-cover md:object-contain lg:object-cover rounded-lg shadow-lg"
+              className="w-full h-full object-cover md:object-contain lg:object-cover rounded-lg"
             />
             {/* Overlay content */}
             <div className="absolute inset-0 flex flex-col items-start justify-center bg-white-800 bg-opacity-60 p-4 md:p-8 lg:p-12 rounded-lg">

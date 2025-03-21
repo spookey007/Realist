@@ -40,7 +40,7 @@ import {
 } from "react-icons/hi2";
 
 import { useTheme } from "@mui/material/styles";
-import logo from "../../assets/images/slate-R-logo.svg"; // Fixed import
+import logo from "../../assets/images/slate-R-logo.png"; // Fixed import
 
 const drawerWidth = 280;
 const drawerCollapsedWidth1 = 70;
@@ -174,7 +174,7 @@ const Sidebar = ({ startLoading }) => {
       >
         {/* Logo */}
         <div className="flex justify-center p-4">
-          <img src={logo} alt="Logo" className="h-8 w-8" />
+          <img src={logo} alt="Logo" className="h-14 w-14" />
         </div>
 
         {/* Menu Items */}

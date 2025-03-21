@@ -1,126 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
-import logo from '../assets/images/slate-R-logo.svg';
+import logo from '../assets/images/slate-R-logo.png';
 import '@fortawesome/fontawesome-free/css/all.css';
 import '../assets/css/header.css';
-import LoginModal from './LoginModal'; // Import Modal
+import LoginModal from './LoginModal';
+import { useAuth } from '../context/AuthContext';
+
 const Header = () => {
+  
+    
   const navigate = useNavigate();
-  const authToken = localStorage.getItem("authToken");
 
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  
-  // New function to close the menu
-  const closeMenu = () => setIsMenuOpen(false);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [bgColor, setBgColor] = useState("bg-blue-500");
+  const { logout,user } = useAuth();
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
   const openLModal = () => setIsModalOpen(true);
   const closeLModal = () => setIsModalOpen(false);
 
-  // Show logout confirmation dialog
   const handleLogoutClick = () => {
     setOpenLogoutDialog(true);
+    closeMenu();
   };
 
-    // Confirm logout & remove session
-    const handleConfirmLogout = () => {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      setOpenLogoutDialog(false);
-      navigate("/"); // Redirect to home/login
-    };
+  const handleConfirmLogout = () => {
+    logout(); // Call context logout to clear user and token
+    setOpenLogoutDialog(false); // Close dialog
+    navigate("/"); // Redirect to login or home
+  };
+
+  useEffect(() => {
+    const colors = ["bg-blue-500", "bg-purple-500", "bg-pink-500", "bg-red-500", "bg-green-500", "bg-indigo-500"];
+    let index = 0;
+    const interval = setInterval(() => {
+      setBgColor(colors[index]);
+      index = (index + 1) % colors.length;
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="w-full shadow-md bg-white">
-      {/* <div className="bg-white-800 px-4 py-2 flex justify-center md:justify-end items-center text-white invisible">
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6">
-          <div className="flex items-center space-x-2">
-            <i className="fas fa-envelope text-yellow-400"></i>
-            <a href="mailto:YOUR EMAIL" className="text-sm md:text-base font-bold text-white hover:text-yellow-400">
-            YOUR EMAIL
-            </a>
-          </div>
-          <div className="flex items-center space-x-2">
-            <i className="fas fa-map-marker-alt text-yellow-400"></i>
-            <a href="YOUR ADDRESS URL" target="_blank" rel="noopener noreferrer" className="text-sm md:text-base font-bold text-white hover:text-yellow-400">
-            YOUR ADDRESS
-            </a>
-          </div>
-          <div className="flex items-center space-x-2">
-            <i className="fas fa-phone-alt text-yellow-400"></i>
-            <a href="tel:+YOUR PHONE NUMBER" className="text-sm md:text-base font-bold text-white hover:text-yellow-400">
-              YOUR PHONE NUMBER
-            </a>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Main Section with Logo and Nav */}
-      <div className="bg-white-800 p-4 flex justify-between items-center relative">
-        {/* Logo */}
+      <div className={`p-4 flex justify-between items-center relative transition-all duration-500 ${bgColor}`}>
         <div className="w-2/5 md:w-1/5 lg:w-1/6">
-          <img src={logo} alt="Realist" className="w-full h-auto max-w-[100px]" />
+          <Link to="/" onClick={closeMenu}>
+            <img src={logo} alt="Realist" className="w-full h-auto max-w-[100px]" />
+          </Link>
         </div>
 
-        {/* Hamburger Menu (for mobile) */}
         <div className="md:hidden">
-          <button
-            onClick={toggleMenu}
-            className="focus:outline-none p-2 rounded-md bg-black text-white hover:bg-gray-700 transition duration-300"
-          >
+          <button onClick={toggleMenu} className="focus:outline-none p-2 rounded-md bg-black text-white hover:bg-gray-700 transition duration-300">
             <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl`}></i>
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <nav
-          className={`md:flex md:space-x-6 items-center absolute md:relative w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none z-10 transition-all duration-300 ease-in-out ${
-            isMenuOpen ? 'block' : 'hidden'
-          }`}
-          style={{ top: 'calc(100% + 0rem)', left: 0 }} // Adjust the position to align below the logo
-        >
-          <Link
-            to="/about"
-            onClick={closeMenu}
-            className="relative block py-4 px-6 md:py-2 md:px-4 text-black text-lg transition duration-300 
-                      no-underline hover:no-underline
-                      after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full 
-                      after:origin-bottom-right after:scale-x-0 after:bg-neutral-800 
-                      after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] 
-                      hover:after:origin-bottom-left hover:after:scale-x-100"
-          >
-            About Us
-          </Link>
-          <>
-          {authToken ? (
-            // Show Logout button if user is logged in
-            <button onClick={handleLogoutClick} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-              Logout
-            </button>
+        <nav className="hidden md:flex md:space-x-6 items-center">
+          <Link to="/" onClick={closeMenu} className="py-2 px-4 text-white text-lg hover:text-gray-200 transition duration-300">Home</Link>
+          <Link to="/about" onClick={closeMenu} className="py-2 px-4 text-white text-lg hover:text-gray-200 transition duration-300">About Us</Link>
+          {user ? (
+            <button onClick={handleLogoutClick} className="py-2 px-4 text-white text-lg border border-white rounded-md hover:bg-white hover:text-blue-500 transition duration-300">Logout</button>
           ) : (
-            // Show Sign In button if user is NOT logged in
-            <button onClick={openLModal} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-gray-900 px-6 font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-              Sign In
-            </button>
+            <button onClick={openLModal} className="py-2 px-4 bg-white text-blue-500 text-lg rounded-md hover:bg-gray-100 transition duration-300">Sign In</button>
           )}
-
-          {/* Logout Confirmation Dialog */}
-          <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
-            <DialogTitle>Are you sure you want to logout?</DialogTitle>
-            <DialogActions>
-              <Button onClick={() => setOpenLogoutDialog(false)} color="primary">Cancel</Button>
-              <Button onClick={handleConfirmLogout} color="error">Logout</Button>
-            </DialogActions>
-          </Dialog>
-        </>
         </nav>
       </div>
+
+      <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-white shadow-md transform ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'} transition-transform duration-500 z-50`}> 
+        <button onClick={toggleMenu} className="absolute top-4 right-4 p-2 bg-black text-white rounded-full text-2xl">
+          <i className="fas fa-times"></i>
+        </button>
+        <ul className="mt-16 text-center space-y-6">
+          <li><Link to="/" onClick={closeMenu} className="text-2xl text-gray-800 hover:text-blue-500">Home</Link></li>
+          <li><Link to="/about" onClick={closeMenu} className="text-2xl text-gray-800 hover:text-blue-500">About Us</Link></li>
+          <li>
+            {user ? (
+              <button onClick={handleLogoutClick} className="text-2xl text-gray-800 hover:text-red-500">Logout</button>
+            ) : (
+              <button onClick={() => { openLModal(); closeMenu(); }} className="text-2xl text-gray-800 hover:text-green-500">Sign In</button>
+            )}
+          </li>
+        </ul>
+      </div>
+
+      <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
+        <DialogTitle className="font-bold">Are you sure you want to logout?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setOpenLogoutDialog(false)} color="primary">Cancel</Button>
+          <Button onClick={handleConfirmLogout} color="error">Logout</Button>
+        </DialogActions>
+      </Dialog>
+
       <LoginModal isOpen={isModalOpen} closeModal={closeLModal} />
     </header>
   );
