@@ -8,6 +8,7 @@ import Users from "../Users";
 import Roles from "../Roles";
 import Invites from "../Invites";
 import MenuManagement from "../MenuManagement";
+import Services from "../Services";
 import Listings from "../Listings";
 
 const AdminRoutes = () => {
@@ -23,6 +24,7 @@ const AdminRoutes = () => {
           <Route path="invite" element={<Invites />} />
           <Route path="menu" element={<MenuManagement />} />
           <Route path="listings" element={<Listings />} />
+          <Route path="services" element={<Services />} />
         </Routes>
       </AdminLayout>
     </ProtectedRoute>

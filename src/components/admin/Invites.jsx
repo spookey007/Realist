@@ -14,8 +14,7 @@ import {
   Chip,
 } from "@mui/material";
 import axios from "axios";
-import alertify from "alertifyjs";
-import "alertifyjs/build/css/alertify.css";
+import { useDevice } from "../../context/DeviceContext";
 
 const Invites = () => {
   const { user } = useAuth();
@@ -25,7 +24,7 @@ const Invites = () => {
   const [editItem, setEditItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState(initialData);
-
+  const { isMobile } = useDevice();
   useEffect(() => {
     fetchInvites();
     fetchRoles();
@@ -163,15 +162,55 @@ const Invites = () => {
   };
   
 
-  return (
-    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <button
-          onClick={() => openModal()}
-          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
-        >
-          Add Invite
-      </button>
 
+  const MobileTable = ({ data, ResendInvite, openModal }) => (
+    <div className="md:hidden mt-4 space-y-4">
+      {data.map((item) => (
+        <div key={item.id} className="p-4 border rounded-lg shadow-sm bg-white">
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Email:</span>
+            <span>{item.email}</span>
+          </div>
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Role:</span>
+            <span>{item.role_name}</span>
+          </div>
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Status:</span>
+            <Chip
+              label={item.status === 1 ? "Invited" : "Joined"}
+              sx={{
+                backgroundColor: item.status === 1 ? "#4CAF50" : "#FFC107",
+                color: "white",
+                fontWeight: "bold",
+              }}
+            />
+          </div>
+          {item.status === 1 && (
+            <div className="mt-3 text-right space-x-2">
+              <button
+                onClick={() => ResendInvite(item)}
+                className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-green-500 bg-transparent px-3 font-medium text-green-600 transition-all duration-100 [box-shadow:5px_5px_rgb(34_197_94)] hover:bg-green-100 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(34_197_94)]"
+              >
+                Resend
+              </button>
+              <button
+                onClick={() => openModal(item)}
+                className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-blue-500 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] hover:bg-blue-100 active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  
+
+  const DesktopTable = ({ data, ResendInvite, openModal }) => (
+    <div className="hidden md:block">
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
           <tr className="border-b bg-gray-200">
@@ -218,6 +257,23 @@ const Invites = () => {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+  
+  return (
+    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
+      <button
+          onClick={() => openModal()}
+          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+        >
+          Add Invite
+      </button>
+
+    {isMobile ? (
+      <MobileTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
+      ) : (
+        <DesktopTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
+      )}
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>

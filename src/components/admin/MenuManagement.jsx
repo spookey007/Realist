@@ -12,12 +12,10 @@ import {
   Chip,
 } from "@mui/material";
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
-import alertify from "alertifyjs";
-import "alertifyjs/build/css/alertify.css";
 import "preline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
+import { useDevice } from "../../context/DeviceContext";
 
 import {
   HiHome,
@@ -42,6 +40,7 @@ import {
   HiRectangleStack,
   HiDocumentCheck
 } from "react-icons/hi2";
+
 
 const availableIcons = [
   { label: "Home", value: "HiHome", component: HiHome },
@@ -79,7 +78,7 @@ const MenuManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: "", href: "", status: 1, parent_menu_id: null, position: 1 });
   const [editItem, setEditItem] = useState(null);
-
+  const { isMobile } = useDevice();
   useEffect(() => {
     fetchData();
   }, []);
@@ -276,6 +275,58 @@ const MenuManagement = () => {
     },
   });
 
+
+  const MobileTable = ({ table }) => {
+    return (
+      <div className="md:hidden space-y-4 mt-4">
+        {table.getRowModel().rows.map((row) => (
+          <div key={row.id} className="p-4 border rounded-lg shadow-sm bg-white">
+            {row.getVisibleCells().map((cell) => (
+              <div key={cell.id} className="flex justify-between py-1 text-sm">
+                <span className="font-semibold text-gray-500">
+                  {flexRender(cell.column.columnDef.header, cell.getContext())}:
+                </span>
+                <span>{flexRender(cell.column.columnDef.cell, cell.getContext())}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const DesktopTable = ({ table }) => {
+    return (
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full mt-4 border-collapse border border-gray-300">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b bg-gray-200">
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} className="p-2 text-left">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-b">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="p-2">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+  
+  
   return (
     <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
       <button
@@ -285,28 +336,11 @@ const MenuManagement = () => {
         Add Menu
       </button>
 
-      <table className="w-full mt-4 border-collapse border border-gray-300">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b bg-gray-200">
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} className="p-2 text-left">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {isMobile ? (
+        <MobileTable table={table} />
+      ) : (
+        <DesktopTable table={table} />
+      )}
 
       {/* Add/Edit Modal */}
       <Dialog

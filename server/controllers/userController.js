@@ -169,7 +169,7 @@ export const RegisterContractor = async (req, res) => {
               <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                 <tr>
                   <td align="center" style="padding: 20px 0;">
-                    <img src="https://realist.galico.io/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
+                    <img src="https://realistapp.com/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
                   </td>
                 </tr>
                 <tr>
@@ -187,7 +187,7 @@ export const RegisterContractor = async (req, res) => {
                     <p style="color: #555555; font-size: 16px; line-height: 1.5;">
                       In the meantime, if you have any questions, feel free to reach out to us.
                     </p>
-                    <a href="https://realist.galico.io/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                    <a href="https://realistapp.com/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
                       Contact Support
                     </a>
                     <p style="color: #333333; font-size: 14px; margin-top: 30px;">
@@ -201,7 +201,7 @@ export const RegisterContractor = async (req, res) => {
                       © ${new Date().getFullYear()} Realist by Galico. All rights reserved.
                     </p>
                     <p style="color: #888888; font-size: 12px; margin: 5px 0 0;">
-                      <a href="https://realist.galico.io" style="color: #007bff; text-decoration: none;">Visit our website</a>
+                      <a href="https://realistapp.com" style="color: #007bff; text-decoration: none;">Visit our website</a>
                     </p>
                   </td>
                 </tr>
@@ -312,7 +312,7 @@ export const registerRea = async (req, res) => {
               <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                 <tr>
                   <td align="center" style="padding: 20px 0;">
-                    <img src="https://realist.galico.io/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
+                    <img src="https://realistapp.com/assets/slate-R-logo-f5_dY64Q.svg" alt="Realist" width="180" style="display: block;">
                   </td>
                 </tr>
                 <tr>
@@ -330,7 +330,7 @@ export const registerRea = async (req, res) => {
                     <p style="color: #555555; font-size: 16px; line-height: 1.5;">
                       If you have any questions, feel free to reach out to us.
                     </p>
-                    <a href="https://realist.galico.io/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                    <a href="https://realistapp.com/" target="_blank" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">
                       Contact Support
                     </a>
                     <p style="color: #333333; font-size: 14px; margin-top: 30px;">
@@ -344,7 +344,7 @@ export const registerRea = async (req, res) => {
                       © ${new Date().getFullYear()} Realist by Galico. All rights reserved.
                     </p>
                     <p style="color: #888888; font-size: 12px; margin: 5px 0 0;">
-                      <a href="https://realist.galico.io" style="color: #007bff; text-decoration: none;">Visit our website</a>
+                      <a href="https://realistapp.com" style="color: #007bff; text-decoration: none;">Visit our website</a>
                     </p>
                   </td>
                 </tr>

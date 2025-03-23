@@ -13,12 +13,10 @@ import {
 } from "@mui/material";
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
 import axios from "axios";
-import alertify from "alertifyjs";
-import "alertifyjs/build/css/alertify.css";
 import "preline";
 import * as Yup from "yup";
 import ReviewModal from "./ReviewModal.jsx";  // ✅ Fix: Use default import
-
+import { useDevice } from "../../context/DeviceContext";
 
 const Users = ({ apiUrl, rolesApi }) => {
   const initialData = { name: "", role: "", status: 1 };
@@ -36,6 +34,8 @@ const Users = ({ apiUrl, rolesApi }) => {
   const [viewMode, setViewMode] = useState("view");  // ✅ Track mode here
   
   
+  const { isMobile } = useDevice();
+
   const openViewModal = (mode, user) => {
     setSelectedUser(user);
     setViewMode(mode);   // ✅ Set mode dynamically
@@ -329,15 +329,35 @@ const validationSchema = Yup.object({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  return (
-    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <button
-          onClick={() => openModal()}
-          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
-        >
-          Add User
-      </button>
 
+  const MobileTable = ({ table }) => (
+    <div className="md:hidden mt-4 space-y-4">
+      {table.getRowModel().rows.map((row) => (
+        <div
+          key={row.id}
+          className="p-4 border rounded-lg shadow-sm bg-white"
+        >
+          {row.getVisibleCells().map((cell) => (
+            <div
+              key={cell.id}
+              className="flex justify-between py-1 text-sm"
+            >
+              <span className="font-medium text-gray-500">
+                {cell.column.columnDef.header}
+              </span>
+              <span className="text-gray-800">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+  
+  const DesktopTable = ({ table }) => (
+    <div className="hidden md:block">
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -354,12 +374,32 @@ const validationSchema = Yup.object({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="border-b">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                <td key={cell.id} className="p-2">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+  
+  return (
+    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
+      <button
+          onClick={() => openModal()}
+          className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+        >
+          Add User
+      </button>
+
+      {isMobile ? (
+      <MobileTable table={table} />
+    ) : (
+      <DesktopTable table={table} />
+    )}
+
       
 
       {/* Add/Edit Modal */}

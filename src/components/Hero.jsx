@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import heroImage from '../assets/images/front_info.png';
+import React, { useState, useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import heroImage from '../assets/images/front_info_03.png';
 import '../assets/css/hero.css';
 import Testimonials from './Testimonials';
 import Talk from './Talk';
@@ -8,43 +11,139 @@ import RegisterModal from './RegisterModal'; // Import Modal
 const Hero = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const threeRef = useRef(null);
+    const modelPath = '/assets/anims/scene.gltf'; // Ensure the file is inside public/assets/anims/
+  
+    useEffect(() => {
+      if (!threeRef.current) return;
+    
+      // ✅ Clear any previous canvas
+      while (threeRef.current.firstChild) {
+        threeRef.current.removeChild(threeRef.current.firstChild);
+      }
+    
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      camera.position.set(3, 2, 3); // above the model
+      camera.lookAt(3, 6, 3);
+    
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setClearColor(0x000000, 0); // Fully transparent background
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.setSize(300, 300);
+      renderer.setClearColor(0x000000, 0); // transparent background
+      threeRef.current.appendChild(renderer.domElement);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      directionalLight.position.set(5, 10, 7.5);
+      scene.add(directionalLight);
+  
+      // renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      // renderer.outputEncoding = THREE.sRGBEncoding;
+      
+      // Light
+      const light = new THREE.AmbientLight(0xffffff, 1);
+      scene.add(light);
+  
+      // Controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableZoom = false;
+      controls.enableRotate = false;
+      controls.enablePan = false;
+  
+      // controls.enableDamping = false;
+      // controls.dampingFactor = 0.05;
+      // controls.enableZoom = true;
+      // controls.minDistance = 2;
+      // controls.maxDistance = 20;
+      // controls.target.set(0, 0, 0); // orbit focus
+      // controls.update();
+  
+      // Load model
+      const loader = new GLTFLoader();
+      let model = null;
+  
+      loader.load(
+        modelPath,
+        (gltf) => {
+          model = gltf.scene;
+          model.scale.set(0.5, 0.5, 0.5);
+          model.position.set(0, -0.5, 0);
+          scene.add(model);
+        },
+        undefined,
+        (error) => console.error("❌ Error loading GLTF model:", error)
+      );
+  
+      // Animation loop
+      let animationId;
+      const animate = () => {
+        animationId = requestAnimationFrame(animate);
+        if (model) model.rotation.y += 0.0015;
+        controls.update();
+        renderer.render(scene, camera);
+      };
+      animate();
+  
+      // Cleanup
+      return () => {
+        cancelAnimationFrame(animationId);
+        controls.dispose();
+        renderer.dispose();
+        if (threeRef.current) {
+          while (threeRef.current.firstChild) {
+            threeRef.current.removeChild(threeRef.current.firstChild);
+          }
+        }
+      };
+    }, []);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   return (
     <>
-      <div className="flex flex-col-reverse md:flex-row bg-white-800">
-        {/* Video Section */}
-        <div className="relative w-full md:w-1/2 flex items-center justify-center p-4 md:p-8">
-          <div className="rounded-lg overflow-hidden min-h-[300px] md:min-h-[400px] flex items-center justify-center bg-white-800 bg-opacity-60 p-6 md:p-8 lg:p-10 text-white max-w-2xl mx-auto">
-            <section className="w-full">
-              {/* Content */}
-              <div className="rounded-b-md">
-                <h3 className="text-xl text-black md:text-2xl font-semibold mb-4">Streamline Your Real Estate Workflow with Realist</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1 text-sm md:text-base text-black">
-                  <li>Realist combines advanced AI, detailed property data, and curated contractor networks to simplify your workflow and maximize client satisfaction.</li>
-                </ul>
-              </div>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10 bg-white max-w-screen-xl mx-auto">
 
-              {/* Slogan and Info */}
-              <div className="mt-6 text-center max-w-lg mx-auto">
-              <button onClick={openModal} className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6 font-medium text-white-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-                Register
-              </button>
+        {/* Video Section */}
+        <div className="w-full md:w-1/2 flex justify-center">
+          <div className="rounded-lg overflow-hidden w-full max-w-xl flex flex-col items-center justify-center bg-white p-6 md:p-8 lg:p-10 text-black">
+            <section className="w-full">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-center md:text-left">
+                Streamline Your Real Estate Workflow with Realist
+              </h3>
+              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
+                <li>
+                  Realist combines advanced AI, detailed property data, and curated contractor networks to simplify your workflow and maximize client satisfaction.
+                </li>
+              </ul>
+              <div className="mt-6 text-center">
+                <button
+                  onClick={openModal}
+                  className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6 font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                >
+                  Register
+                </button>
               </div>
             </section>
           </div>
         </div>
 
+
         {/* Text and Image Section */}
         <div className="relative w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
           <div className="relative w-full h-full">
             {/* Ensure the image covers the full area */}
-            <img
+            {/* <img
               src={heroImage}
               alt="Realist"
               className="w-full h-full object-cover md:object-contain lg:object-cover rounded-lg"
-            />
+            /> */}
+            <div
+              ref={threeRef}
+              className="rounded-lg overflow-hidden min-h-[300px] flex items-center justify-center bg-white"
+            ></div>
             {/* Overlay content */}
             <div className="absolute inset-0 flex flex-col items-start justify-center bg-white-800 bg-opacity-60 p-4 md:p-8 lg:p-12 rounded-lg">
               {/* <h1 className="retro-text font-extrabold mb-2 md:mb-4 text-2xl md:text-4xl lg:text-5xl"> */}

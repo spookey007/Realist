@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { isMobile, isTablet } from "react-device-detect";
 import { openModal, closeModal } from "../../redux/modalSlice";
 import MobileModal from "../modals/ListingsModal/MobileModal";
 import DesktopModal from "../modals/ListingsModal/DesktopModal";
-import { getDeviceType } from "../utils/deviceDetector";
-import WebListings from "../ui/WebListings";
-import MobileListings from "../ui/MobileListings";
+import WebListings from "../ui/Listings/WebListings";
+import MobileListings from "../ui/Listings/MobileListings";
 import { motion } from "framer-motion";
 import axios from "axios";
-
+import { useDevice } from "../../context/DeviceContext";
 // Helper function to generate random listing data
 const generateRandomListing = () => {
   const randomPrice = `$${(Math.random() * 900000 + 100000).toFixed(0)}`;
@@ -28,13 +26,12 @@ const generateRandomListing = () => {
 };
 
 // const listingsData = Array.from({ length: 5 }, generateRandomListing);
-const isMobileDevice = getDeviceType() === "mobile";
 
 const Listings = () => {
   const dispatch = useDispatch();
   const { isOpen, modalType } = useSelector((state) => state.modal);
   const [listingsData, setListingsData] = useState([]);
-
+  const { isMobile,isTablet } = useDevice();
   const handleOpenModal = () => {
     const deviceType = isMobile || isTablet ? "mobile" : "desktop";
     dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
@@ -105,7 +102,7 @@ const Listings = () => {
   return (
     <div className="pt-5 flex flex-col gap-5">
       {/* Button for Desktop */}
-      {!isMobileDevice && (
+      {!isMobile && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -121,7 +118,7 @@ const Listings = () => {
       )}
 
       {/* Full-Width Sticky Button for Mobile */}
-      {isMobileDevice && (
+      {isMobile && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -153,7 +150,7 @@ const Listings = () => {
       )}
 
       {/* Listings Grid */}
-      {isMobileDevice ? (
+      {isMobile ? (
         <MobileListings listings={listingsData} />
       ) : (
         <WebListings listings={listingsData} />

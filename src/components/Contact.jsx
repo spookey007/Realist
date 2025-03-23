@@ -4,8 +4,6 @@ import React, { useRef, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
-import alertify from 'alertifyjs'; // Make sure to import alertify.js
-import 'alertifyjs/build/css/alertify.css'; // Import alertify.js CSS for styling
 import backgroundImg from '../assets/images/services/background.jpeg'; // Adjust this path to your background image
 import contact_form_img from '../assets/images/contact_form/contact_form.jpeg';
 

@@ -62,6 +62,7 @@ const Header = ({ toggleSidebar }) => {
           backgroundColor: "#ffffff",
           color: "white",
           boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
+          'z-index':"40",
         }}
       >
         <Toolbar className="flex justify-between items-center">

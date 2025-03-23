@@ -8,7 +8,6 @@ import Services from './components/Services';
 import About from './components/About';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
-import Videos from './components/Videos';
 import Invite from './components/Invite';
 import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
@@ -20,22 +19,23 @@ import 'slick-carousel/slick/slick-theme.css';
 import alertify from "alertifyjs";
 import "alertifyjs/build/css/alertify.css";
 import { ThemeProvider } from "./context/ThemeContext";
+import { AnimatePresence } from "framer-motion"; // Import AnimatePresence
+import { DeviceProvider } from "./context/DeviceContext";
 
 window.alertify = alertify;
 
 const App = () => {
-  const location = useLocation();
+  const location = useLocation(); // Now safe to use
 
-  // Define routes where the footer and header should not be displayed
   const noFooterHeaderRoutes = ['/login'];
-
-  // Check if the current location path matches any of the noFooterHeaderRoutes
   const isNoFooterHeader = noFooterHeaderRoutes.includes(location.pathname) || location.pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Conditionally render Header */}
-      {!isNoFooterHeader && <Header />}
+      {/* Wrap Header with AnimatePresence */}
+      <AnimatePresence>
+        {!isNoFooterHeader && <Header key="header" />}
+      </AnimatePresence>
       
       <main className="flex-grow">
         <Routes>
@@ -43,37 +43,27 @@ const App = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/videos" element={<Videos />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/invite/:id" element={<Invite />} />
-          {/* Protect all admin routes */}
-          <Route
-            path="/admin/*"
-            element={
-              <ProtectedRoute>
-                <AdminRoutes />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/admin/*" element={<ProtectedRoute><AdminRoutes /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       
-      {/* Conditionally render Footer */}
       {!isNoFooterHeader && <Footer />}
-
-      {/* Modal Provider for Global Modals */}
       <ModalProvider />
     </div>
   );
 };
 
 const AppWrapper = () => (
-  <Provider store={store}> {/* Wrap the entire app with Redux Provider */}
-    <ThemeProvider> {/* Wrap the entire app with ThemeProvider */}
-      <Router>
-        <App />
-      </Router>
+  <Provider store={store}>
+    <ThemeProvider>
+      <DeviceProvider>
+        <Router>
+          <App />
+        </Router>
+      </DeviceProvider>
     </ThemeProvider>
   </Provider>
 );

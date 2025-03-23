@@ -41,6 +41,7 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 import logo from "../../assets/images/slate-R-logo.png"; // Fixed import
+import { useDevice } from "../../context/DeviceContext";
 
 const drawerWidth = 280;
 const drawerCollapsedWidth1 = 70;
@@ -50,8 +51,7 @@ const Sidebar = ({ startLoading }) => {
   const [iconMap, setIconMap] = useState({});
   const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Detect mobile screen
-
+  const { isMobile } = useDevice();
   const [menuItems, setMenuItems] = useState([]);
   const [openSubMenus, setOpenSubMenus] = useState({});
   const [openSidebar, setOpenSidebar] = useState(!isMobile); // Initially open for desktop, closed for mobile
@@ -169,6 +169,7 @@ const Sidebar = ({ startLoading }) => {
             justifyContent: "space-between",
             overflow: "hidden", // Ensures no scrolling inside the drawer
             whiteSpace: "nowrap", // Prevents text from causing overflow
+            'z-index':"41",
           },
         }}
       >

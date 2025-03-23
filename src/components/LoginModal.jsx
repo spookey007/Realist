@@ -5,8 +5,6 @@ import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
-import alertify from 'alertifyjs';
-import 'alertifyjs/build/css/alertify.css';
 import '../assets/css/modal.css';
 import backgroundImg from '../assets/images/contact_form/contact_form.jpeg';
 import { useAuth } from '../context/AuthContext'; // Import context

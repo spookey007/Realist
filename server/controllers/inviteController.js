@@ -37,7 +37,7 @@ export const createInvite = async (req, res) => {
     const { uuid } = result.rows[0]; // ✅ Extract generated UUID
 
     // ✅ Build invite link dynamically
-    const inviteLink = `https://realist.galico.io/invite/${uuid}`;
+    const inviteLink = `https://realistapp.com/invite/${uuid}`;
 
     // ✅ Optional: Store invite link back in table for reference
     // const updateInviteLinkQuery = `UPDATE "Invites" SET invite_link = $1 WHERE uuid = $2;`;

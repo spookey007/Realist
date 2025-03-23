@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem, Chip } from "@mui/material";
 import axios from "axios";
-import alertify from "alertifyjs";
-import "alertifyjs/build/css/alertify.css";
+import { useDevice } from "../../context/DeviceContext";
 
 const Roles = () => {
   const initialData = { name: "", description: "", status: 1 };
@@ -11,6 +10,9 @@ const Roles = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState(initialData);
 
+
+  const { isMobile } = useDevice();
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -41,30 +43,86 @@ const Roles = () => {
       let response;
       if (editItem) {
         response = await axios.put(`${import.meta.env.VITE_API_URL}/api/roles/${editItem.id}`, formData);
-        setData((prev) => prev.map((item) => (item.id === editItem.id ? response.data : item)));
+        const updatedItem = response.data;
+        setData((prev) =>
+          prev.map((item) => (item.id === editItem.id ? { ...item, ...updatedItem } : item))
+        );
         alertify.success("Updated successfully!");
       } else {
         response = await axios.post(`${import.meta.env.VITE_API_URL}/api/roles/createRoles`, formData);
-        setData((prev) => [...prev, response.data]);
+        const newItem = response.data?.role;
+        if (!newItem || !newItem.id) {
+          alertify.error("Something went wrong. Role not added.");
+          return;
+        }
+        setData((prev) => [...prev, newItem]);
         alertify.success("Added successfully!");
       }
+  
       setIsModalOpen(false);
+      setFormData(initialData);
+      setEditItem(null);
     } catch (error) {
+      console.error("Error saving:", error);
       alertify.error("Error saving data.");
     }
   };
   
+  
 
-  return (
-    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
-      <button
-        onClick={() => openModal()}
-        className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
-      >
-        Add Roles
-      </button>
-      
+  const MobileTable = ({ data, openModal }) => (
+    <div className="md:hidden mt-4 space-y-4">
+      {data.map((item) => (
+        <div
+          key={item.id}
+          className="p-4 border rounded-lg shadow-sm bg-white"
+        >
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Name:</span>
+            <span>{item.name}</span>
+          </div>
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Description:</span>
+            <span>{item.description}</span>
+          </div>
+          <div className="flex justify-between py-1 text-sm">
+            <span className="font-semibold text-gray-500">Status:</span>
+            <Chip
+              label={
+                item.status === 0
+                  ? "Pending"
+                  : item.status === 1
+                  ? "Activated"
+                  : "Deactivated"
+              }
+              sx={{
+                backgroundColor:
+                  item.status === 1
+                    ? "#4CAF50"
+                    : item.status === 2
+                    ? "#F44336"
+                    : "#FFC107",
+                color: "white",
+                fontWeight: "bold",
+              }}
+            />
+          </div>
+          <div className="mt-3 text-right">
+            <button
+              onClick={() => openModal(item)}
+              className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
+  
+  const DesktopTable = ({ data, openModal }) => (
+    <div className="hidden md:block">
       <table className="w-full mt-4 border-collapse border border-gray-300">
         <thead>
           <tr className="border-b bg-gray-200">
@@ -101,17 +159,37 @@ const Roles = () => {
                 />
               </td>
               <td className="p-2 flex space-x-2">
-              <button
-                onClick={() => openModal(item)}
-                className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
-              >
-                Edit
-              </button>
+                <button
+                  onClick={() => openModal(item)}
+                  className="group relative inline-flex h-8 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-3 font-medium text-blue-600 transition-all duration-100 [box-shadow:5px_5px_rgb(59_130_246)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(59_130_246)]"
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+  
+  
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow w-full max-w-[100%] mx-auto overflow-x-auto">
+      <button
+        onClick={() => openModal()}
+        className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]" 
+      >
+        Add Roles
+      </button>
+      
+
+      {isMobile ? (
+        <MobileTable data={data} openModal={openModal} />
+      ) : (
+        <DesktopTable data={data} openModal={openModal} />
+      )}
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>

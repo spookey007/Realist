@@ -4,8 +4,6 @@ import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
-import alertify from 'alertifyjs';
-import 'alertifyjs/build/css/alertify.css';
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 
