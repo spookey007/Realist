@@ -269,10 +269,10 @@ const Invites = () => {
           Add Invite
       </button>
 
-    {isMobile ? (
-      <MobileTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
-      ) : (
-        <DesktopTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
+      {isMobile ? (
+        <MobileTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
+        ) : (
+          <DesktopTable data={data} ResendInvite={ResendInvite} openModal={openModal} />
       )}
 
       {/* Add/Edit Modal */}

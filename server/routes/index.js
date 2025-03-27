@@ -7,6 +7,9 @@ import RolesRoutes from './RolesRoutes.js';
 import InviteRoutes from './InviteRoutes.js';
 import MenuRoutes from './MenuRoutes.js';
 import propertiesRoutes from './propertiesRoutes.js';
+import servicesRoutes from './servicesRoutes.js';
+import serviceTypeRoutes from './serviceTypes.js';
+
 const router = express.Router();
 
 // Use the imported routes
@@ -18,5 +21,7 @@ router.use('/user-permissions', userPermissionsRoutes);
 router.use('/invites', InviteRoutes);
 router.use('/menu', MenuRoutes);
 router.use('/properties', propertiesRoutes);
+router.use('/services', servicesRoutes);
+router.use('/servicestypes', serviceTypeRoutes);
 
 export default router;
