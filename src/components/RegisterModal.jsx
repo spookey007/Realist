@@ -421,7 +421,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                             ))}
                             <button
                               type="button"
-                              className="bg-blue-500 text-white px-2 py-1 rounded"
+                              className="bg-cyan-800 text-white px-2 py-1 rounded"
                               onClick={() => push({ name: '', phone: '' })}
                             >
                               + Add Reference
@@ -484,12 +484,13 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                     Back
                   </Button>
                   {activeStep === steps.length - 1 ? (
-                    <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>Submit</Button>
+                    <Button type="submit" variant="contained" color="secondary" disabled={isSubmitting}>Submit</Button>
                   ) : (
                     <Button
                       onClick={() => handleNext(validateForm, values, setTouched)}
                       variant="contained"
                       color="primary"
+                      
                     >
                       Next
                     </Button>
