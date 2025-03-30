@@ -68,7 +68,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
         resetForm();
         recaptchaRef.current.reset();
         closeModal();
-        navigate('/admin/dashboard'); // Redirect
+        navigate('/dashboard'); // Redirect
       } else {
         alertify.error('Invalid email or password. Please try again.');
       }

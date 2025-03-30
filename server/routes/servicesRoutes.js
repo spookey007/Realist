@@ -10,18 +10,18 @@ import {
 const router = express.Router();
 
 // GET /services - Retrieve all services
-router.get('/services', getAllServices);
+router.get('/', getAllServices);
 
 // GET /services/:serviceId - Retrieve a specific service by ID
-router.get('/services/:serviceId', getServiceById);
+router.get('/:serviceId', getServiceById);
 
 // POST /services - Create a new service
-router.post('/services', createService);
+router.post('/', createService);
 
 // PUT /services/:serviceId - Update a service by ID
-router.put('/services/:serviceId', updateService);
+router.put('/:serviceId', updateService);
 
 // DELETE /services/:serviceId - Delete a service by ID
-router.delete('/services/:serviceId', deleteService);
+router.delete('/:serviceId', deleteService);
 
 export default router;

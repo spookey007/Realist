@@ -11,7 +11,19 @@ const DesktopHeader = ({ user, openLModal, handleLogoutClick, closeMenu }) => {
             </Link>
 
             <nav className="hidden  md:flex md:space-x-6 items-center">
-            <Link
+            
+
+            {user ? (
+                <Link
+                to="/dashboard"
+                onClick={closeMenu}
+                role="link"
+                className="relative no-underline hover:no-underline text-white hover:text-white text-lg py-2 px-4 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:w-full after:origin-bottom after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65,0.05,0.36,1)] hover:after:scale-x-100"
+                >
+                Dashboard
+            </Link>
+              ) : (
+                <Link
                 to="/"
                 onClick={closeMenu}
                 role="link"
@@ -19,6 +31,7 @@ const DesktopHeader = ({ user, openLModal, handleLogoutClick, closeMenu }) => {
                 >
                 Home
             </Link>
+              )}
 
             <Link
                 to="/about"

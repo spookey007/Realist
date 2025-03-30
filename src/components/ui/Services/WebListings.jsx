@@ -10,7 +10,7 @@ const WebListings = ({ listings }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {listings.map((listing) => (
           <motion.div
-            key={listing.id}
+            key={listing.service_id || listing.id}
             className="p-6 rounded-2xl shadow-lg bg-white cursor-pointer relative"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -18,24 +18,17 @@ const WebListings = ({ listings }) => {
             onClick={() => setSelectedListing(listing)}
           >
             <Typography variant="h6" className="font-bold text-xl">
-              ${listing.price}
+              {listing.service_name}
             </Typography>
             <Typography className="text-sm text-gray-500 mt-1">
-              {listing.address}
+              Type: {listing.service_type_name}
             </Typography>
-            <div className="mt-2 flex items-center text-sm text-gray-600">
-              <span>{listing.details.beds} bd</span>
-              <span className="mx-2">|</span>
-              <span>{listing.details.baths} ba</span>
-              <span className="mx-2">|</span>
-              <span>
-                {listing.sqft || listing.details?.estSqFt} sqft
-              </span>
-            </div>
-            <div className="mt-2 flex items-center text-blue-500 text-sm">
-              <span className="mr-2">💡</span>
-              <span>{listing.liveIn}</span>
-            </div>
+            <Typography className="text-sm text-gray-600 mt-2">
+              {listing.description}
+            </Typography>
+            <Typography className="text-xs text-gray-400 mt-1">
+              Created: {new Date(listing.created_at).toLocaleString()}
+            </Typography>
           </motion.div>
         ))}
       </div>
@@ -55,28 +48,86 @@ const WebListings = ({ listings }) => {
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6"
-              onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
+              className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 overflow-y-auto max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-lg font-bold mb-2">
-                ${selectedListing.price}
+              <div className="text-2xl font-bold mb-4">
+                {selectedListing.service_name}
               </div>
-              <div className="text-gray-600 mb-2">{selectedListing.address}</div>
 
-              <div className="text-sm text-gray-700 space-y-1">
-                <div><strong>City:</strong> {selectedListing.details.city}</div>
-                <div><strong>State:</strong> {selectedListing.details.state}</div>
-                <div><strong>Zip Code:</strong> {selectedListing.details.zipCode}</div>
-                <div><strong>Year Built:</strong> {selectedListing.details.yearBuilt}</div>
-                <div><strong>Est. Sq Ft:</strong> {selectedListing.details.estSqFt}</div>
-                <div><strong>Lot Size:</strong> {selectedListing.details.estLotSize}</div>
-                <div><strong>Acreage:</strong> {selectedListing.details.acreage}</div>
-                <div><strong>Amenities:</strong> {
-                  Array.isArray(selectedListing.details.amenities)
-                    ? selectedListing.details.amenities.join(", ")
-                    : selectedListing.details.amenities
-                }</div>
-                <div><strong>Buyer Agent Comp:</strong> {selectedListing.details.buyerAgentComp}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+                {/* Left: Service Info */}
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Service Details</h3>
+                  <p><strong>Service ID:</strong> {selectedListing.service_id}</p>
+                  <p><strong>Description:</strong> {selectedListing.description}</p>
+                  <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
+                  <p><strong>Created at:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
+                </div>
+
+                {/* Right: User Info */}
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Provider Info</h3>
+                  <p><strong>Name:</strong> {selectedListing.name}</p>
+                  <p><strong>Email:</strong> {selectedListing.email}</p>
+                  <p><strong>Role:</strong> {selectedListing.role}</p>
+                  <p><strong>Phone:</strong> {selectedListing.phone}</p>
+                  {selectedListing.address?.trim() && (
+                    <p><strong>Address:</strong> {selectedListing.address}</p>
+                  )}
+                  {selectedListing.city && <p><strong>City:</strong> {selectedListing.city}</p>}
+                  {selectedListing.state && <p><strong>State:</strong> {selectedListing.state}</p>}
+                  {selectedListing.country && <p><strong>Country:</strong> {selectedListing.country}</p>}
+                  {selectedListing.postal_code && (
+                    <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>
+                  )}
+                  {selectedListing.company_name && (
+                    <p><strong>Company:</strong> {selectedListing.company_name}</p>
+                  )}
+                  {selectedListing.website && (
+                    <p>
+                      <strong>Website:</strong>{" "}
+                      <a
+                        href={selectedListing.website}
+                        className="text-blue-600 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {selectedListing.website}
+                      </a>
+                    </p>
+                  )}
+                </div>
+
+                {/* Full Width Section */}
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-2">Professional Details</h3>
+                    <p><strong>Service Category:</strong> {selectedListing.service_category}</p>
+                    <p><strong>Years of Experience:</strong> {selectedListing.years_of_experience}</p>
+                    <p><strong>Issuing Authority:</strong> {selectedListing.issuingAuthority}</p>
+                  </div>
+                  <div>
+                    {Array.isArray(selectedListing.coverage_area) && (
+                      <p>
+                        <strong>Coverage Area:</strong>{" "}
+                        {selectedListing.coverage_area.join(", ")}
+                      </p>
+                    )}
+                    {Array.isArray(selectedListing.specialties) && (
+                      <p>
+                        <strong>Specialties:</strong>{" "}
+                        {selectedListing.specialties.join(", ")}
+                      </p>
+                    )}
+                    {Array.isArray(selectedListing.affiliations) && (
+                      <p>
+                        <strong>Affiliations:</strong>{" "}
+                        {selectedListing.affiliations.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <button

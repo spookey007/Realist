@@ -3,14 +3,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { openModal, closeModal } from "../../redux/modalSlice";
 import MobileModal from "../modals/ServicesModal/MobileModal";
 import DesktopModal from "../modals/ServicesModal/DesktopModal";
-import WebListings from "../ui/Listings/WebListings";
-import MobileListings from "../ui/Listings/MobileListings";
+import WebListings from "../ui/Services/WebListings";
+import MobileListings from "../ui/Services/MobileListings";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useDevice } from "../../context/DeviceContext";
+import { useAuth } from '../../context/AuthContext';
 
 
 const Services = () => {
+  const { user } = useAuth();
   const dispatch = useDispatch();
   const { isOpen, modalType } = useSelector((state) => state.modal);
   const [listingsData, setListingsData] = useState([]);
@@ -19,19 +21,22 @@ const Services = () => {
     const deviceType = isMobile || isTablet ? "mobile" : "desktop";
     dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
   };
-
+  const allowed_role = 3;
    // Fetch properties from API
    const fetchServices = async () => {
     try {
+      const params = user?.role === allowed_role ? { userId: user.id } : {};
+  
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/services/`
+        `${import.meta.env.VITE_API_URL}/api/services/`,
+        { params }
       );
-      console.log("Fetched services:", response.data);
       setListingsData(response.data);
     } catch (error) {
       console.error("Error fetching services:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchServices();
@@ -39,53 +44,51 @@ const Services = () => {
 
   const handleSubmit = async (values) => {
     try {
-      console.log("Form Data:", values);
+        console.log("Form Data:", values);
 
-      // Retrieve the logged-in user from localStorage
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
-        alert("User is not logged in.");
-        return;
-      }
-      const owner_id = user.id;
+        // Retrieve the logged-in user from localStorage
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.id) {
+            alert("User is not logged in.");
+            return;
+        }
 
-      // Extract required fields from form values
-      const { address, propertyType, price, ...otherDetails } = values;
+        const created_by = user.id; 
 
-      // Prepare the payload with required fields and extra details stored in the JSON 'details' column
-      const payload = {
-        owner_id,
-        address,
-        property_type: propertyType,
-        price,
-        details: otherDetails, // All additional fields go into details
-      };
+        const { address, propertyType, price, ...otherDetails } = values;
 
-      // Send a POST request to create a new services
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/services/`,
-        payload
-      );
+        const payload = {
+            created_by,  
+            service_name: values.service,
+            description: values.description
+        };
+        // console.log(payload)
+        // return false
+        // Send a POST request to create a new service
+        const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/services/`,
+            payload
+        );
 
-      if (response.data && response.data.message) {
-        alertify.success(response.data.message);
-      } else {
-        alertify.success("Service created successfully!");
-      }
-      
-      fetchProperties();
-      // Close the modal after successful submission
-      dispatch(closeModal());
+        if (response.data && response.data.message) {
+            alertify.success(response.data.message);
+        } else {
+            alertify.success("Service created successfully!");
+        }
+
+        fetchServices();
+        dispatch(closeModal()); // Close the modal after successful submission
     } catch (error) {
-      console.error("Error submitting service:", error);
-      alertify.error("Error submitting service. Please try again later.");
+        console.error("Error submitting service:", error);
+        alertify.error("Error submitting service. Please try again later.");
     }
-  };
+};
+
 
   return (
     <div className="pt-5 flex flex-col gap-5">
       {/* Button for Desktop */}
-      {!isMobile && (
+      {!isMobile && user?.role === allowed_role && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -101,7 +104,7 @@ const Services = () => {
       )}
 
       {/* Full-Width Sticky Button for Mobile */}
-      {isMobile && (
+      {isMobile && user?.role === allowed_role && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,7 +115,7 @@ const Services = () => {
             onClick={handleOpenModal}
             className="group w-full relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-purple-500 text-white px-6 font-medium transition-all [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
           >
-            Add New Listing
+            Add New Service
           </button>
         </motion.div>
       )}

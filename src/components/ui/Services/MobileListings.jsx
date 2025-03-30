@@ -15,10 +15,10 @@ const MobileListings = ({ listings }) => {
         return orderBy(listings, ["created_at"], ["desc"]);
       case "oldest":
         return orderBy(listings, ["created_at"], ["asc"]);
-      case "priceHigh":
-        return orderBy(listings, ["price"], ["desc"]);
-      case "priceLow":
-        return orderBy(listings, ["price"], ["asc"]);
+      case "nameAsc":
+        return orderBy(listings, ["service_name"], ["asc"]);
+      case "nameDesc":
+        return orderBy(listings, ["service_name"], ["desc"]);
       default:
         return listings;
     }
@@ -26,15 +26,11 @@ const MobileListings = ({ listings }) => {
 
   const filterListings = (listings) => {
     return listings.filter((listing) =>
-      Object.values({
-        ...listing,
-        ...listing.details,
-      }).some((value) =>
-        value
-          .toString()
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
+      [listing.service_name, listing.description, listing.service_type_name]
+        .filter(Boolean)
+        .some((value) =>
+          value.toLowerCase().includes(searchQuery.toLowerCase())
+        )
     );
   };
 
@@ -75,8 +71,8 @@ const MobileListings = ({ listings }) => {
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
-              <option value="priceHigh">Price: High to Low</option>
-              <option value="priceLow">Price: Low to High</option>
+              <option value="nameAsc">Name: A → Z</option>
+              <option value="nameDesc">Name: Z → A</option>
             </select>
           </div>
 
@@ -84,7 +80,7 @@ const MobileListings = ({ listings }) => {
             <label className="text-xs font-medium text-gray-600">Search</label>
             <input
               type="text"
-              placeholder="City, ZIP, etc..."
+              placeholder="Search services..."
               className="border rounded-md text-sm px-2 py-1 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -103,15 +99,16 @@ const MobileListings = ({ listings }) => {
           >
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-lg font-bold">${listing.price}</div>
-                <div className="text-gray-600">{listing.address}</div>
-                <div className="text-sm text-gray-500">
-                  {listing.details.beds} bd • {listing.details.baths} ba •{" "}
-                  {listing.details.estSqFt} sqft
+                <div className="text-lg font-bold">{listing.service_name}</div>
+                <div className="text-gray-600 text-sm">
+                  {listing.service_type_name}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {listing.description}
                 </div>
               </div>
-              <div className="text-blue-500 text-xs">
-                {listing.liveIn || ""}
+              <div className="text-gray-400 text-xs text-right">
+                {new Date(listing.created_at).toLocaleDateString()}
               </div>
             </div>
           </div>
@@ -129,34 +126,76 @@ const MobileListings = ({ listings }) => {
             onClick={() => setSelectedListing(null)}
           >
             <motion.div
-              initial={{ scale: 0.8 }}
+              initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
+              exit={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
-              onClick={(e) => e.stopPropagation()} // Prevent outside click from closing
+              className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-lg font-bold mb-2">${selectedListing.price}</div>
-              <div className="text-gray-600 mb-2">{selectedListing.address}</div>
-              <div className="text-sm text-gray-700 space-y-1">
-                <div><strong>City:</strong> {selectedListing.details.city}</div>
-                <div><strong>State:</strong> {selectedListing.details.state}</div>
-                <div><strong>Zip Code:</strong> {selectedListing.details.zipCode}</div>
-                <div><strong>Year Built:</strong> {selectedListing.details.yearBuilt}</div>
-                <div><strong>Est. Sq Ft:</strong> {selectedListing.details.estSqFt}</div>
-                <div><strong>Lot Size:</strong> {selectedListing.details.estLotSize}</div>
-                <div><strong>Acreage:</strong> {selectedListing.details.acreage}</div>
-                <div><strong>Amenities:</strong>{" "}
-                  {Array.isArray(selectedListing.details.amenities)
-                    ? selectedListing.details.amenities.join(", ")
-                    : selectedListing.details.amenities}
-                </div>
-                <div><strong>Buyer Agent Comp:</strong> {selectedListing.details.buyerAgentComp}</div>
+              <div className="text-xl font-bold mb-3">
+                {selectedListing.service_name}
+              </div>
+
+              <div className="text-sm text-gray-600 mb-4">
+                <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
+                <p><strong>Created:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
+              </div>
+
+              <div className="text-sm text-gray-700 mb-4">
+                <strong>Description:</strong>
+                <p className="mt-1">{selectedListing.description}</p>
+              </div>
+
+              <hr className="my-4" />
+
+              <div className="text-sm text-gray-800 space-y-2">
+                <p><strong>Name:</strong> {selectedListing.name}</p>
+                <p><strong>Email:</strong> {selectedListing.email}</p>
+                <p><strong>Role:</strong> {selectedListing.role}</p>
+                <p><strong>Phone:</strong> {selectedListing.phone}</p>
+                {selectedListing.address?.trim() && <p><strong>Address:</strong> {selectedListing.address}</p>}
+                {selectedListing.city && <p><strong>City:</strong> {selectedListing.city}</p>}
+                {selectedListing.state && <p><strong>State:</strong> {selectedListing.state}</p>}
+                {selectedListing.country && <p><strong>Country:</strong> {selectedListing.country}</p>}
+                {selectedListing.postal_code && <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>}
+                {selectedListing.company_name && <p><strong>Company:</strong> {selectedListing.company_name}</p>}
+                {selectedListing.website && (
+                  <p>
+                    <strong>Website:</strong>{" "}
+                    <a
+                      href={selectedListing.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      {selectedListing.website}
+                    </a>
+                  </p>
+                )}
+                <p><strong>Service Category:</strong> {selectedListing.service_category}</p>
+                <p><strong>Years of Experience:</strong> {selectedListing.years_of_experience}</p>
+                <p><strong>Issuing Authority:</strong> {selectedListing.issuingAuthority}</p>
+                {Array.isArray(selectedListing.coverage_area) && (
+                  <p>
+                    <strong>Coverage Area:</strong> {selectedListing.coverage_area.join(", ")}
+                  </p>
+                )}
+                {Array.isArray(selectedListing.specialties) && (
+                  <p>
+                    <strong>Specialties:</strong> {selectedListing.specialties.join(", ")}
+                  </p>
+                )}
+                {Array.isArray(selectedListing.affiliations) && (
+                  <p>
+                    <strong>Affiliations:</strong> {selectedListing.affiliations.join(", ")}
+                  </p>
+                )}
               </div>
 
               <button
                 onClick={() => setSelectedListing(null)}
-                className="mt-4 w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
+                className="mt-6 w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
               >
                 Close
               </button>

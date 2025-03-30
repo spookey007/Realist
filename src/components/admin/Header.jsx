@@ -72,7 +72,7 @@ const Header = ({ toggleSidebar }) => {
           </IconButton>
           
           {/* Center Section: Search (Hidden on very small screens) */}
-          {!isMobile && (
+          {/* {!isMobile && (
             <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1 w-full max-w-md">
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
               <InputBase
@@ -84,15 +84,15 @@ const Header = ({ toggleSidebar }) => {
                 }}
               />
             </div>
-          )}
+          )} */}
           {/* Right Section: Notifications + User Avatar */}
           <div className="flex items-center gap-4">
             {/* Search Icon for Mobile */}
-            {isMobile && (
+            {/* {isMobile && (
               <IconButton color="inherit">
                 <MagnifyingGlassIcon className="h-6 w-6 text-black" />
               </IconButton>
-            )}
+            )} */}
 
             {/* Notification Bell */}
             <IconButton color="inherit">

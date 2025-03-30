@@ -8,6 +8,7 @@ import MobileListings from "../ui/Listings/MobileListings";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useDevice } from "../../context/DeviceContext";
+import { useAuth } from '../../context/AuthContext';
 // Helper function to generate random listing data
 const generateRandomListing = () => {
   const randomPrice = `$${(Math.random() * 900000 + 100000).toFixed(0)}`;
@@ -28,6 +29,7 @@ const generateRandomListing = () => {
 // const listingsData = Array.from({ length: 5 }, generateRandomListing);
 
 const Listings = () => {
+  const { user } = useAuth();
   const dispatch = useDispatch();
   const { isOpen, modalType } = useSelector((state) => state.modal);
   const [listingsData, setListingsData] = useState([]);
@@ -37,6 +39,7 @@ const Listings = () => {
     dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
   };
 
+  const allowed_role = 2;
    // Fetch properties from API
    const fetchProperties = async () => {
     try {
@@ -102,7 +105,7 @@ const Listings = () => {
   return (
     <div className="pt-5 flex flex-col gap-5">
       {/* Button for Desktop */}
-      {!isMobile && (
+      {!isMobile && user?.role === allowed_role && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -118,7 +121,7 @@ const Listings = () => {
       )}
 
       {/* Full-Width Sticky Button for Mobile */}
-      {isMobile && (
+      {isMobile && user?.role === allowed_role && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
