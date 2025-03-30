@@ -163,12 +163,12 @@ const Hero = () => {
       {/* <div className="container mx-auto px-6 py-12 bg-black/30 rounded-lg">
    
           <Testimonials />
-        </div> */}
+        </div>
 
         <div className="container mx-auto px-6 py-12 bg-black/30 rounded-lg mt-12">
        
           <Talk />
-        </div>
+        </div> */}
 
     </>
   );
