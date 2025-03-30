@@ -4,13 +4,13 @@ import logo from "../assets/images/slate-R-logo.png";
 
 const DesktopHeader = ({ user, openLModal, handleLogoutClick, closeMenu }) => {
   return (
-        <header className="fixed top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-md bg-white h-16 w-4/5 md:w-2/5 z-50">
-        <div className="px-3 py-1 flex justify-between items-center h-full relative transition-all duration-500 bg-cyan-600 rounded-lg">
+        <header className="fixed top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-[80%] shadow-md  h-16 w-4/5 md:w-2/5 z-50">
+        <div className="px-3 py-8 flex justify-between items-center h-full relative transition-all duration-500 bg-cyan-600 rounded-lg">
             <Link to="/" onClick={closeMenu}>
             <img src={logo} alt="Realist" className="w-full h-auto max-w-[70px]" />
             </Link>
 
-            <nav className="hidden md:flex md:space-x-6 items-center">
+            <nav className="hidden  md:flex md:space-x-6 items-center">
             <Link
                 to="/"
                 onClick={closeMenu}
@@ -34,14 +34,14 @@ const DesktopHeader = ({ user, openLModal, handleLogoutClick, closeMenu }) => {
             {user ? (
                 <button
                 onClick={handleLogoutClick}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6 font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6  font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
                 >
                 Logout
                 </button>
             ) : (
                 <button
                 onClick={openLModal}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6 font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-cyan-600 px-6  font-medium text-white transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
                 >
                 Sign In
                 </button>

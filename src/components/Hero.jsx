@@ -104,11 +104,11 @@ const Hero = () => {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10 bg-white max-w-screen-xl mx-auto">
+      <div className="flex flex-col bg-screen md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10  max-w-screen-xl mx-auto">
 
         {/* Video Section */}
         <div className="w-full md:w-1/2 flex justify-center">
-          <div className="rounded-lg overflow-hidden w-full max-w-xl flex flex-col items-center justify-center bg-white p-6 md:p-8 lg:p-10 text-black">
+          <div className="rounded-lg overflow-hidden w-full max-w-xl flex flex-col items-center justify-center  p-6 md:p-8 lg:p-10 text-black">
             <section className="w-full">
               <h3 className="text-xl md:text-2xl font-semibold mb-4 text-center md:text-left">
                 Streamline Your Real Estate Workflow with Realist
@@ -142,7 +142,7 @@ const Hero = () => {
             /> */}
             <div
               ref={threeRef}
-              className="rounded-lg overflow-hidden min-h-[300px] flex items-center justify-center bg-white"
+              className="rounded-lg overflow-hidden min-h-[300px] flex items-center justify-center"
             ></div>
             {/* Overlay content */}
             <div className="absolute inset-0 flex flex-col items-start justify-center bg-white-800 bg-opacity-60 p-4 md:p-8 lg:p-12 rounded-lg">
@@ -160,15 +160,15 @@ const Hero = () => {
       {/* Include Modal */}
       <RegisterModal isOpen={isModalOpen} closeModal={closeModal} />
 
-      <div className="container mx-auto px-6 py-12 bg-white">
-          {/* <WhyChoose /> */}
+      {/* <div className="container mx-auto px-6 py-12 bg-black/30 rounded-lg">
+   
           <Testimonials />
         </div>
 
-        <div className="container mx-auto px-6 py-12 bg-white">
-          {/* <WhyChoose /> */}
+        <div className="container mx-auto px-6 py-12 bg-black/30 rounded-lg mt-12">
+       
           <Talk />
-        </div>
+        </div> */}
 
     </>
   );

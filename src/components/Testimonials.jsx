@@ -53,8 +53,8 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="bg-gray-100 py-12 md:py-20">
-      <div className="container mx-auto px-4 text-center">
+    <section className=" py-12 min-w-full rounded-lg md:py-20">
+      <div className="container mx-auto px-10 text-center">
         {/* Section Title */}
         <h2 className="text-2xl md:text-4xl font-bold text-black mb-8 md:mb-10">
         Trusted by the world’s most innovative teams
@@ -63,7 +63,7 @@ const Testimonials = () => {
         {/* Slider */}
         <Slider {...settings}>
           {testimonialsData.map((testimonial, index) => (
-            <div key={index} className="px-4">
+            <div key={index} className="px-10">
               <div className="bg-white shadow-lg p-4 md:p-6 rounded-lg">
                 {/* Generate avatar using UI Avatars */}
                 <img

@@ -3,7 +3,7 @@ import React from 'react';
 const Talk = () => {
 
   return (
-    <div className="mx-auto rounded-xl bg-black/20 p-8 max-w-lg lg:max-w-4xl">
+    <div className="mx-auto rounded-xl p-8 max-w-lg lg:max-w-4xl">
       <div className="text-center">
         <h2 className="text-4xl font-semibold tracking-tighter text-pretty text-gray-900 sm:text-5xl">
           Want <span className="text-cyan-600">Realist</span> for your brokerage?

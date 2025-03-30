@@ -1,0 +1,319 @@
+{
+    "categories": [
+      {
+        "categoryName": "Property Preparation",
+        "services": [
+          {
+            "serviceName": "Staging",
+            "providers": [
+              {
+                "id": 1,
+                "name": "ABC Staging Co.",
+                "phone": "555-123-4567",
+                "email": "contact@abcstaging.com",
+                "website": "https://abcstaging.com",
+                "description": "Professional home staging for faster, higher-value property sales."
+              },
+              {
+                "id": 2,
+                "name": "Modern Interiors",
+                "phone": "555-987-6543",
+                "email": "hello@moderninteriors.com",
+                "website": "https://moderninteriors.com",
+                "description": "Specializing in modern decor and home staging solutions."
+              }
+            ]
+          },
+          {
+            "serviceName": "Cleaning services",
+            "providers": [
+              {
+                "id": 3,
+                "name": "Sparkle & Shine Cleaners",
+                "phone": "555-111-2222",
+                "email": "info@sparkleandshine.com",
+                "website": "https://sparkleandshine.com",
+                "description": "Deep cleaning services for residential properties, move-in/move-out cleans."
+              }
+            ]
+          },
+          {
+            "serviceName": "Landscaping",
+            "providers": [
+              {
+                "id": 4,
+                "name": "Green Thumb Landscaping",
+                "phone": "555-333-4444",
+                "email": "support@greenthumb.com",
+                "website": "https://greenthumb.com",
+                "description": "Full-service landscaping, lawn care, and curb appeal enhancements."
+              }
+            ]
+          },
+          {
+            "serviceName": "Photography and videography",
+            "providers": [
+              {
+                "id": 5,
+                "name": "HD Property Imaging",
+                "phone": "555-555-5555",
+                "email": "media@hdpropertyimaging.com",
+                "website": "https://hdpropertyimaging.com",
+                "description": "High-definition photo and video packages for real estate listings."
+              }
+            ]
+          },
+          {
+            "serviceName": "Virtual tours and 3D renderings",
+            "providers": [
+              {
+                "id": 6,
+                "name": "3D Home Views",
+                "phone": "555-666-7777",
+                "email": "support@3dhomeviews.com",
+                "website": "https://3dhomeviews.com",
+                "description": "Interactive 3D tours, drone footage, and immersive VR experiences."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "categoryName": "Inspection and Repairs",
+        "services": [
+          {
+            "serviceName": "Home inspection",
+            "providers": [
+              {
+                "id": 7,
+                "name": "AllClear Inspections",
+                "phone": "555-000-1111",
+                "email": "contact@allclearinspect.com",
+                "website": "https://allclearinspect.com",
+                "description": "Certified inspectors for comprehensive home evaluations."
+              }
+            ]
+          },
+          {
+            "serviceName": "Pest control",
+            "providers": [
+              {
+                "id": 8,
+                "name": "BugOff Solutions",
+                "phone": "555-101-1010",
+                "email": "quotes@bugoff.com",
+                "website": "https://bugoff.com",
+                "description": "Residential and commercial pest extermination and prevention."
+              }
+            ]
+          },
+          {
+            "serviceName": "Roof repair",
+            "providers": [
+              {
+                "id": 9,
+                "name": "Skyline Roofing",
+                "phone": "555-202-2020",
+                "email": "info@skylineroof.com",
+                "website": "https://skylineroof.com",
+                "description": "Expert roof repairs and replacements with free estimates."
+              }
+            ]
+          },
+          {
+            "serviceName": "Plumbing and electrical inspections",
+            "providers": [
+              {
+                "id": 10,
+                "name": "BluePipe Plumbing",
+                "phone": "555-303-3030",
+                "email": "contact@bluepipe.com",
+                "website": "https://bluepipeplumbing.com",
+                "description": "Full-service plumbing inspections and repairs."
+              },
+              {
+                "id": 11,
+                "name": "Zap Electric",
+                "phone": "555-404-4040",
+                "email": "support@zapelectric.com",
+                "website": "https://zapelectric.com",
+                "description": "Certified electrical inspections, upgrades, and rewiring."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "categoryName": "Marketing and Listing Support",
+        "services": [
+          {
+            "serviceName": "Social media advertising",
+            "providers": [
+              {
+                "id": 12,
+                "name": "RealEstate Social Pros",
+                "phone": "555-777-8888",
+                "email": "team@resocialpros.com",
+                "website": "https://resocialpros.com",
+                "description": "Social media campaign management for realtors and brokers."
+              }
+            ]
+          },
+          {
+            "serviceName": "Listing on popular real estate sites",
+            "providers": [
+              {
+                "id": 13,
+                "name": "ListMax Agency",
+                "phone": "555-888-9999",
+                "email": "contact@listmax.com",
+                "website": "https://listmax.com",
+                "description": "Maximize your listing visibility on major real estate platforms."
+              }
+            ]
+          },
+          {
+            "serviceName": "Open house management",
+            "providers": [
+              {
+                "id": 14,
+                "name": "ShowTime Open House",
+                "phone": "555-111-9999",
+                "email": "support@showtimeopenhouse.com",
+                "website": "https://showtimeopenhouse.com",
+                "description": "End-to-end open house services, from scheduling to post-event follow-up."
+              }
+            ]
+          },
+          {
+            "serviceName": "Professional signage",
+            "providers": [
+              {
+                "id": 15,
+                "name": "SignMaster Pros",
+                "phone": "555-222-3333",
+                "email": "sales@signmasterpros.com",
+                "website": "https://signmasterpros.com",
+                "description": "Custom real estate signs, banners, and yard signage."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "categoryName": "Legal and Financial",
+        "services": [
+          {
+            "serviceName": "Real estate attorney",
+            "providers": [
+              {
+                "id": 16,
+                "name": "Smith & Johnson Legal",
+                "phone": "555-123-9876",
+                "email": "contact@sjlegal.com",
+                "website": "https://sjlegal.com",
+                "description": "Specialized in property law and contract review."
+              }
+            ]
+          },
+          {
+            "serviceName": "Mortgage broker",
+            "providers": [
+              {
+                "id": 17,
+                "name": "Prime Mortgage",
+                "phone": "555-321-6789",
+                "email": "quotes@primemortgage.com",
+                "website": "https://primemortgage.com",
+                "description": "Competitive rates and personalized mortgage solutions."
+              }
+            ]
+          },
+          {
+            "serviceName": "Title company",
+            "providers": [
+              {
+                "id": 18,
+                "name": "ClearTitle Services",
+                "phone": "555-741-8529",
+                "email": "info@cleartitle.com",
+                "website": "https://cleartitle.com",
+                "description": "Title searches, insurance, and closing services."
+              }
+            ]
+          },
+          {
+            "serviceName": "Home warranty providers",
+            "providers": [
+              {
+                "id": 19,
+                "name": "WarrantyWise",
+                "phone": "555-963-8527",
+                "email": "support@warrantywise.com",
+                "website": "https://warrantywise.com",
+                "description": "Comprehensive home warranty plans for buyers and sellers."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "categoryName": "Moving and Post-Sale Services",
+        "services": [
+          {
+            "serviceName": "Moving companies",
+            "providers": [
+              {
+                "id": 20,
+                "name": "MoveIt Movers",
+                "phone": "555-555-1010",
+                "email": "hello@moveitmovers.com",
+                "website": "https://moveitmovers.com",
+                "description": "Local and long-distance moving services, packing, and unpacking."
+              }
+            ]
+          },
+          {
+            "serviceName": "Storage solutions",
+            "providers": [
+              {
+                "id": 21,
+                "name": "SecureStore",
+                "phone": "555-222-1010",
+                "email": "info@securestore.com",
+                "website": "https://securestore.com",
+                "description": "Climate-controlled storage units with 24/7 security."
+              }
+            ]
+          },
+          {
+            "serviceName": "Cleaning services for new home",
+            "providers": [
+              {
+                "id": 22,
+                "name": "FreshStart Cleaners",
+                "phone": "555-333-2020",
+                "email": "contact@freshstartclean.com",
+                "website": "https://freshstartclean.com",
+                "description": "Post-move cleaning services for new homeowners."
+              }
+            ]
+          },
+          {
+            "serviceName": "Utility connection services",
+            "providers": [
+              {
+                "id": 23,
+                "name": "ConnectAll Utilities",
+                "phone": "555-444-3030",
+                "email": "support@connectall.com",
+                "website": "https://connectall.com",
+                "description": "We handle electricity, water, and internet setup in one go."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

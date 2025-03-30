@@ -1,0 +1,24 @@
+{
+    "fullName": "John Doe",
+    "companyName": "Doe's Home Improvement",
+    "email": "john.doe@example.com",
+    "phone": "555-123-4567",
+    "website": "http://www.jdhomereno.com",
+    "address": "123 Main St",
+    "city": "Springfield",
+    "state": "IL",
+    "zipCode": "62701",
+    "serviceCategory": "General Contractor",
+    "yearsOfExperience": 12,
+    "coverageArea": "Springfield, Jacksonville, Decatur",
+    "licenseNumber": "GC-12345-IL",
+    "insurancePolicy": "AllState #XYZ-999999",
+    "references": "Jane Smith (555-987-6543), Robert Johnson (555-654-7890)",
+    "description": "We specialize in residential remodeling, roofing, and more. Over a decade of experience in the Springfield area. Quality work guaranteed.",
+    "files": [
+      "business_license.pdf",
+      "insurance_certificate.jpg",
+      "portfolio_kitchen_remodel.jpg"
+    ]
+  }
+  
