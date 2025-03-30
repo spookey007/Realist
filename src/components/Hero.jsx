@@ -104,7 +104,7 @@ const Hero = () => {
 
   return (
     <>
-      <div className="flex  flex-col mx-auto  md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10   h-screen max-w-screen-xl ">
+      <div className="flex  flex-col mx-auto  md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10   md:h-[65rem] max-w-screen-xl ">
 
         {/* Video Section */}
         <div className="w-full md:w-1/2 flex justify-center">
