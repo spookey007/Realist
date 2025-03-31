@@ -104,20 +104,20 @@ const Hero = () => {
 
   return (
     <>
-      <div className="flex flex-col bg-screen md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10  max-w-screen-xl mx-auto">
+      <div className="flex  flex-col mx-auto  md:flex-row items-center justify-between gap-10 px-4 md:px-16 py-10   md:h-[65rem] max-w-screen-xl ">
 
         {/* Video Section */}
         <div className="w-full md:w-1/2 flex justify-center">
-          <div className="rounded-lg overflow-hidden w-full max-w-xl flex flex-col items-center justify-center  p-6 md:p-8 lg:p-10 text-black">
-            <section className="w-full">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-center md:text-left">
+          <div className="rounded-lg  overflow-hidden w-full max-w-xl flex flex-col items-center justify-center  p-6 md:p-8 lg:p-10 text-black">
+            <section className="w-full pt-10">
+              <h3 className="text-xl 0 md:text-2xl font-semibold mb-4 text-center md:text-left">
                 Streamline Your Real Estate Workflow with Realist
               </h3>
-              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                <li>
+              <div className="list-disc space-y-2 text-sm md:text-base">
+            
                   Realist combines advanced AI, detailed property data, and curated contractor networks to simplify your workflow and maximize client satisfaction.
-                </li>
-              </ul>
+               
+              </div>
               <div className="mt-6 text-center">
                 <button
                   onClick={openModal}
@@ -132,27 +132,15 @@ const Hero = () => {
 
 
         {/* Text and Image Section */}
-        <div className="relative w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
-          <div className="relative w-full h-full">
-            {/* Ensure the image covers the full area */}
-            {/* <img
-              src={heroImage}
-              alt="Realist"
-              className="w-full h-full object-cover md:object-contain lg:object-cover rounded-lg"
-            /> */}
+        <div className=" w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
+          <div className="w-full h-full">
+         
             <div
               ref={threeRef}
               className="rounded-lg overflow-hidden min-h-[300px] flex items-center justify-center"
             ></div>
             {/* Overlay content */}
-            <div className="absolute inset-0 flex flex-col items-start justify-center bg-white-800 bg-opacity-60 p-4 md:p-8 lg:p-12 rounded-lg">
-              {/* <h1 className="retro-text font-extrabold mb-2 md:mb-4 text-2xl md:text-4xl lg:text-5xl"> */}
-                {/* ANY TEXT */}
-              {/* </h1> */}
-              {/* <p className="text-sm md:text-lg lg:text-xl text-white mb-4 md:mb-6 lg:mb-8"> */}
-                   {/* ANY TEXT */}
-              {/* </p> */}
-            </div>
+           
           </div>
         </div>
       </div>

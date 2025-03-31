@@ -6,9 +6,8 @@ import ContactForm from './ContactForm';
 
 const Home = () => {
   return (
-    <div>
+    <div >
       <Hero />
-      <ContactForm />
     </div>
   );
 };
