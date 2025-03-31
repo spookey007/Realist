@@ -5,8 +5,8 @@ import { userJoin } from "../helpers/userJoin.js";
 export const getAllServices = async (req, res) => {
   try {
     const userId = req.query.userId || null;
+    const filterStatus = req.query.status; // ← optional status param
 
-    // Only get selected user fields for this route
     const { joinClause, userFields } = userJoin("s.created_by", [
       "name",
       "email",
@@ -33,6 +33,7 @@ export const getAllServices = async (req, res) => {
         s.service_name,
         s.description,
         s.created_at,
+        s.status,
         s.service_type_id,
         st.service_type_name,
         ${userFields.join(",\n        ")}
@@ -41,13 +42,23 @@ export const getAllServices = async (req, res) => {
       ${joinClause}
     `;
 
-    const finalQuery = userId
-      ? `${baseQuery} WHERE s.created_by = $1`
-      : baseQuery;
+    const conditions = [];
+    const values = [];
 
-    const result = userId
-      ? await pool.query(finalQuery, [userId])
-      : await pool.query(finalQuery);
+    if (userId) {
+      conditions.push(`s.created_by = $${conditions.length + 1}`);
+      values.push(userId);
+    }
+
+    if (filterStatus) {
+      conditions.push(`s.status = $${conditions.length + 1}`);
+      values.push(filterStatus);
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const finalQuery = `${baseQuery} ${whereClause}`;
+
+    const result = await pool.query(finalQuery, values);
 
     res.status(200).json(result.rows);
   } catch (error) {
@@ -55,6 +66,7 @@ export const getAllServices = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
   
 // GET /services/:serviceId - Retrieve a specific service by ID
 export const getServiceById = async (req, res) => {
@@ -105,26 +117,28 @@ export const createService = async (req, res) => {
   }
 };
 
-  
-
 // PUT /services/:serviceId - Update a service by ID
 export const updateService = async (req, res) => {
-    const { serviceId } = req.params;
-    const { service_name, description, service_type_id } = req.body;
-    try {
-      const result = await pool.query(
-        'UPDATE "Services" SET service_name = $1, description = $2, service_type_id = $3 WHERE id = $4 RETURNING *',
-        [service_name, description, service_type_id, serviceId]
-      );
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Service not found' });
-      }
-      res.status(200).json(result.rows[0]);
-    } catch (error) {
-      console.error('Error updating service:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+  const { serviceId } = req.params;
+  const { service_name, description, status } = req.body;
+
+  try {
+    const result = await pool.query(
+      'UPDATE "Services" SET service_name = $1, description = $2, status = $3,"updatedAt" = NOW() WHERE id = $4 RETURNING *',
+      [service_name, description, status, serviceId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Service not found' });
     }
-  };
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating service:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
   
 
 // DELETE /services/:serviceId - Delete a service by ID

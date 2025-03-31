@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Typography } from "@mui/material";
+import axios from 'axios';
 
-const WebListings = ({ listings }) => {
+const WebListings = ({ listings,fetchServices,canEdit }) => {
   const [selectedListing, setSelectedListing] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   return (
     <div className="relative">
@@ -15,7 +19,15 @@ const WebListings = ({ listings }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            onClick={() => setSelectedListing(listing)}
+            onClick={() => {
+              setSelectedListing(listing);
+              setFormData({
+                service_name: listing.service_name,
+                description: listing.description,
+                status: listing.status || 1,
+              });
+              setEditMode(false);
+            }}
           >
             <Typography variant="h6" className="font-bold text-xl">
               {listing.service_name}
@@ -28,6 +40,9 @@ const WebListings = ({ listings }) => {
             </Typography>
             <Typography className="text-xs text-gray-400 mt-1">
               Created: {new Date(listing.created_at).toLocaleString()}
+            </Typography>
+            <Typography className="text-xs text-gray-400 mt-1">
+              Created By: {listing.name}
             </Typography>
           </motion.div>
         ))}
@@ -52,17 +67,56 @@ const WebListings = ({ listings }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-2xl font-bold mb-4">
-                {selectedListing.service_name}
+                {editMode ? "Edit Service" : selectedListing.service_name}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
                 {/* Left: Service Info */}
                 <div>
                   <h3 className="font-semibold text-gray-800 mb-2">Service Details</h3>
-                  <p><strong>Service ID:</strong> {selectedListing.service_id}</p>
-                  <p><strong>Description:</strong> {selectedListing.description}</p>
-                  <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
-                  <p><strong>Created at:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
+
+                  {editMode ? (
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+                      <input
+                        className="border border-gray-300 rounded-md p-2 w-full mb-2"
+                        value={formData.service_name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, service_name: e.target.value })
+                        }
+                      />
+
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        className="border border-gray-300 rounded-md p-2 w-full mb-2"
+                        rows={3}
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({ ...formData, description: e.target.value })
+                        }
+                      />
+
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select
+                        className="border border-gray-300 rounded-md p-2 w-full"
+                        value={formData.status}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: parseInt(e.target.value) })
+                        }
+                      >
+                        <option value={1}>Active</option>
+                        <option value={0}>Inactive</option>
+                      </select>
+                    </>
+                  ) : (
+                    <>
+                      <p><strong>Service ID:</strong> {selectedListing.service_id}</p>
+                      <p><strong>Description:</strong> {selectedListing.description}</p>
+                      <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
+                      <p><strong>Created at:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
+                      <p><strong>Status:</strong> {selectedListing.status === 1 ? "Active" : "Inactive"}</p>
+                    </>
+                  )}
                 </div>
 
                 {/* Right: User Info */}
@@ -72,18 +126,12 @@ const WebListings = ({ listings }) => {
                   <p><strong>Email:</strong> {selectedListing.email}</p>
                   <p><strong>Role:</strong> {selectedListing.role}</p>
                   <p><strong>Phone:</strong> {selectedListing.phone}</p>
-                  {selectedListing.address?.trim() && (
-                    <p><strong>Address:</strong> {selectedListing.address}</p>
-                  )}
+                  {selectedListing.address?.trim() && <p><strong>Address:</strong> {selectedListing.address}</p>}
                   {selectedListing.city && <p><strong>City:</strong> {selectedListing.city}</p>}
                   {selectedListing.state && <p><strong>State:</strong> {selectedListing.state}</p>}
                   {selectedListing.country && <p><strong>Country:</strong> {selectedListing.country}</p>}
-                  {selectedListing.postal_code && (
-                    <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>
-                  )}
-                  {selectedListing.company_name && (
-                    <p><strong>Company:</strong> {selectedListing.company_name}</p>
-                  )}
+                  {selectedListing.postal_code && <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>}
+                  {selectedListing.company_name && <p><strong>Company:</strong> {selectedListing.company_name}</p>}
                   {selectedListing.website && (
                     <p>
                       <strong>Website:</strong>{" "}
@@ -109,33 +157,84 @@ const WebListings = ({ listings }) => {
                   </div>
                   <div>
                     {Array.isArray(selectedListing.coverage_area) && (
-                      <p>
-                        <strong>Coverage Area:</strong>{" "}
-                        {selectedListing.coverage_area.join(", ")}
-                      </p>
+                      <p><strong>Coverage Area:</strong> {selectedListing.coverage_area.join(", ")}</p>
                     )}
                     {Array.isArray(selectedListing.specialties) && (
-                      <p>
-                        <strong>Specialties:</strong>{" "}
-                        {selectedListing.specialties.join(", ")}
-                      </p>
+                      <p><strong>Specialties:</strong> {selectedListing.specialties.join(", ")}</p>
                     )}
                     {Array.isArray(selectedListing.affiliations) && (
-                      <p>
-                        <strong>Affiliations:</strong>{" "}
-                        {selectedListing.affiliations.join(", ")}
-                      </p>
+                      <p><strong>Affiliations:</strong> {selectedListing.affiliations.join(", ")}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedListing(null)}
-                className="mt-6 w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
-              >
-                Close
-              </button>
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col md:flex-row gap-3">
+                {editMode ? (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          setIsSaving(true); // ✅ Disable button
+                          const response = await axios.put(
+                            `${import.meta.env.VITE_API_URL}/api/services/${selectedListing.service_id}`,
+                            formData
+                          );
+
+                          if (response.status === 200) {
+                            setSelectedListing((prev) => ({
+                              ...prev,
+                              ...response.data,
+                            }));
+                            await fetchServices();
+                            setEditMode(false);
+                            alertify.success("Service updated successfully");
+                          } else {
+                            alertify.error("Something went wrong");
+                          }
+                        } catch (error) {
+                          console.error("Failed to update service:", error);
+                          alertify.error("Something went wrong");
+                        } finally {
+                          setIsSaving(false); // ✅ Re-enable button
+                        }
+                      }}
+                      disabled={isSaving}
+                      className={`w-full py-2 px-4 rounded-md transition ${
+                        isSaving
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-green-600 text-white hover:bg-green-700"
+                      }`}
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="w-full bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {canEdit && (
+                      <button
+                        onClick={() => setEditMode(true)}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedListing(null)}
+                      className="w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
+                    >
+                      Close
+                    </button>
+                  </>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}

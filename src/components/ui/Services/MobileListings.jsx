@@ -2,12 +2,18 @@ import React, { useState } from "react";
 import { FaFilter } from "react-icons/fa";
 import orderBy from "lodash/orderBy";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import alertify from "alertifyjs";
+import "alertifyjs/build/css/alertify.css";
 
-const MobileListings = ({ listings }) => {
+const MobileListings = ({ listings, fetchServices, canEdit }) => {
   const [sortType, setSortType] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   const sortListings = (listings, type) => {
     switch (type) {
@@ -94,18 +100,22 @@ const MobileListings = ({ listings }) => {
         {sortedFilteredListings.map((listing, index) => (
           <div
             key={listing.id || index}
-            onClick={() => setSelectedListing(listing)}
+            onClick={() => {
+              setSelectedListing(listing);
+              setFormData({
+                service_name: listing.service_name,
+                description: listing.description,
+                status: listing.status ?? 1,
+              });
+              setEditMode(false);
+            }}
             className="border-b py-3 cursor-pointer"
           >
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-lg font-bold">{listing.service_name}</div>
-                <div className="text-gray-600 text-sm">
-                  {listing.service_type_name}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">
-                  {listing.description}
-                </div>
+                <div className="text-gray-600 text-sm">{listing.service_type_name}</div>
+                <div className="text-sm text-gray-500 mt-1">{listing.description}</div>
               </div>
               <div className="text-gray-400 text-xs text-right">
                 {new Date(listing.created_at).toLocaleDateString()}
@@ -115,7 +125,7 @@ const MobileListings = ({ listings }) => {
         ))}
       </div>
 
-      {/* Listing Details Modal */}
+      {/* Modal */}
       <AnimatePresence>
         {selectedListing && (
           <motion.div
@@ -134,71 +144,159 @@ const MobileListings = ({ listings }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-xl font-bold mb-3">
-                {selectedListing.service_name}
+                {editMode ? "Edit Service" : selectedListing.service_name}
               </div>
 
-              <div className="text-sm text-gray-600 mb-4">
-                <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
-                <p><strong>Created:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
-              </div>
+              {editMode ? (
+                <div className="text-sm text-gray-700 space-y-4">
+                  <div>
+                    <label className="block font-medium mb-1">Service Name</label>
+                    <input
+                      className="border w-full rounded-md p-2"
+                      value={formData.service_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, service_name: e.target.value })
+                      }
+                    />
+                  </div>
 
-              <div className="text-sm text-gray-700 mb-4">
-                <strong>Description:</strong>
-                <p className="mt-1">{selectedListing.description}</p>
-              </div>
+                  <div>
+                    <label className="block font-medium mb-1">Description</label>
+                    <textarea
+                      className="border w-full rounded-md p-2"
+                      rows={3}
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
+                    />
+                  </div>
 
-              <hr className="my-4" />
-
-              <div className="text-sm text-gray-800 space-y-2">
-                <p><strong>Name:</strong> {selectedListing.name}</p>
-                <p><strong>Email:</strong> {selectedListing.email}</p>
-                <p><strong>Role:</strong> {selectedListing.role}</p>
-                <p><strong>Phone:</strong> {selectedListing.phone}</p>
-                {selectedListing.address?.trim() && <p><strong>Address:</strong> {selectedListing.address}</p>}
-                {selectedListing.city && <p><strong>City:</strong> {selectedListing.city}</p>}
-                {selectedListing.state && <p><strong>State:</strong> {selectedListing.state}</p>}
-                {selectedListing.country && <p><strong>Country:</strong> {selectedListing.country}</p>}
-                {selectedListing.postal_code && <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>}
-                {selectedListing.company_name && <p><strong>Company:</strong> {selectedListing.company_name}</p>}
-                {selectedListing.website && (
-                  <p>
-                    <strong>Website:</strong>{" "}
-                    <a
-                      href={selectedListing.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
+                  <div>
+                    <label className="block font-medium mb-1">Status</label>
+                    <select
+                      className="border w-full rounded-md p-2"
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: parseInt(e.target.value) })
+                      }
                     >
-                      {selectedListing.website}
-                    </a>
-                  </p>
-                )}
-                <p><strong>Service Category:</strong> {selectedListing.service_category}</p>
-                <p><strong>Years of Experience:</strong> {selectedListing.years_of_experience}</p>
-                <p><strong>Issuing Authority:</strong> {selectedListing.issuingAuthority}</p>
-                {Array.isArray(selectedListing.coverage_area) && (
-                  <p>
-                    <strong>Coverage Area:</strong> {selectedListing.coverage_area.join(", ")}
-                  </p>
-                )}
-                {Array.isArray(selectedListing.specialties) && (
-                  <p>
-                    <strong>Specialties:</strong> {selectedListing.specialties.join(", ")}
-                  </p>
-                )}
-                {Array.isArray(selectedListing.affiliations) && (
-                  <p>
-                    <strong>Affiliations:</strong> {selectedListing.affiliations.join(", ")}
-                  </p>
+                      <option value={1}>Active</option>
+                      <option value={0}>Inactive</option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-800 space-y-2">
+                  <p><strong>Status:</strong> {selectedListing.status === 1 ? "Active" : "Inactive"}</p>
+                  <p><strong>Type:</strong> {selectedListing.service_type_name}</p>
+                  <p><strong>Created:</strong> {new Date(selectedListing.created_at).toLocaleString()}</p>
+                  <p><strong>Description:</strong> {selectedListing.description}</p>
+                  <hr className="my-3" />
+                  <p><strong>Name:</strong> {selectedListing.name}</p>
+                  <p><strong>Email:</strong> {selectedListing.email}</p>
+                  <p><strong>Role:</strong> {selectedListing.role}</p>
+                  <p><strong>Phone:</strong> {selectedListing.phone}</p>
+                  {selectedListing.address?.trim() && <p><strong>Address:</strong> {selectedListing.address}</p>}
+                  {selectedListing.city && <p><strong>City:</strong> {selectedListing.city}</p>}
+                  {selectedListing.state && <p><strong>State:</strong> {selectedListing.state}</p>}
+                  {selectedListing.country && <p><strong>Country:</strong> {selectedListing.country}</p>}
+                  {selectedListing.postal_code && <p><strong>Postal Code:</strong> {selectedListing.postal_code}</p>}
+                  {selectedListing.company_name && <p><strong>Company:</strong> {selectedListing.company_name}</p>}
+                  {selectedListing.website && (
+                    <p>
+                      <strong>Website:</strong>{" "}
+                      <a
+                        href={selectedListing.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        {selectedListing.website}
+                      </a>
+                    </p>
+                  )}
+                  <p><strong>Service Category:</strong> {selectedListing.service_category}</p>
+                  <p><strong>Years of Experience:</strong> {selectedListing.years_of_experience}</p>
+                  <p><strong>Issuing Authority:</strong> {selectedListing.issuingAuthority}</p>
+                  {Array.isArray(selectedListing.coverage_area) && (
+                    <p><strong>Coverage Area:</strong> {selectedListing.coverage_area.join(", ")}</p>
+                  )}
+                  {Array.isArray(selectedListing.specialties) && (
+                    <p><strong>Specialties:</strong> {selectedListing.specialties.join(", ")}</p>
+                  )}
+                  {Array.isArray(selectedListing.affiliations) && (
+                    <p><strong>Affiliations:</strong> {selectedListing.affiliations.join(", ")}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col gap-2">
+                {editMode ? (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          setIsSaving(true);
+                          const response = await axios.put(
+                            `${import.meta.env.VITE_API_URL}/api/services/${selectedListing.service_id}`,
+                            formData
+                          );
+
+                          if (response.status === 200) {
+                            setSelectedListing((prev) => ({
+                              ...prev,
+                              ...response.data,
+                            }));
+                            await fetchServices();
+                            setEditMode(false);
+                            alertify.success("Service updated successfully");
+                          } else {
+                            alertify.error("Something went wrong");
+                          }
+                        } catch (error) {
+                          console.error("Failed to update service:", error);
+                          alertify.error("Something went wrong");
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving}
+                      className={`w-full py-2 px-4 rounded-md transition ${
+                        isSaving
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-green-600 text-white hover:bg-green-700"
+                      }`}
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="w-full bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {canEdit && (
+                      <button
+                        onClick={() => setEditMode(true)}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedListing(null)}
+                      className="w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
+                    >
+                      Close
+                    </button>
+                  </>
                 )}
               </div>
-
-              <button
-                onClick={() => setSelectedListing(null)}
-                className="mt-6 w-full bg-cyan-600 text-white py-2 px-4 rounded-md hover:bg-cyan-700 transition"
-              >
-                Close
-              </button>
             </motion.div>
           </motion.div>
         )}

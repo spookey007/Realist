@@ -21,21 +21,36 @@ const Services = () => {
     const deviceType = isMobile || isTablet ? "mobile" : "desktop";
     dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
   };
-  const allowed_role = 3;
+  const add_allow_role = 3;
+  const edit_allow_roles = [1, 3];
+  const canEdit = edit_allow_roles.includes(user?.role);
+  
    // Fetch properties from API
    const fetchServices = async () => {
     try {
-      const params = user?.role === allowed_role ? { userId: user.id } : {};
+      const params = {};
+  
+      // If user has restricted role, only get active services
+      if (![1, 3].includes(user?.role)) {
+        params.status = 1;
+      }
+  
+      // Only send userId for allowed role (example: role 2)
+      if (user?.role === add_allow_role) {
+        params.userId = user.id;
+      }
   
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/services/`,
         { params }
       );
+  
       setListingsData(response.data);
     } catch (error) {
       console.error("Error fetching services:", error);
     }
   };
+  
   
 
   useEffect(() => {
@@ -88,7 +103,7 @@ const Services = () => {
   return (
     <div className="pt-5 flex flex-col gap-5">
       {/* Button for Desktop */}
-      {!isMobile && user?.role === allowed_role && (
+      {!isMobile && user?.role === add_allow_role && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -104,7 +119,7 @@ const Services = () => {
       )}
 
       {/* Full-Width Sticky Button for Mobile */}
-      {isMobile && user?.role === allowed_role && (
+      {isMobile && user?.role === add_allow_role && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -137,9 +152,9 @@ const Services = () => {
 
       {/* Listings Grid */}
       {isMobile ? (
-        <MobileListings listings={listingsData} />
+        <MobileListings listings={listingsData} fetchServices={fetchServices} canEdit={canEdit}/>
       ) : (
-        <WebListings listings={listingsData} />
+        <WebListings listings={listingsData} fetchServices={fetchServices} canEdit={canEdit} />
       )}
     </div>
   );
