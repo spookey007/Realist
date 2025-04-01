@@ -486,14 +486,16 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                   {activeStep === steps.length - 1 ? (
                     <Button type="submit" variant="contained" color="secondary" disabled={isSubmitting}>Submit</Button>
                   ) : (
+                   
+                   
                     <Button
                       onClick={() => handleNext(validateForm, values, setTouched)}
                       variant="contained"
-                      color="primary"
-                      
-                    >
+                      color="primary">
                       Next
                     </Button>
+
+                    
                   )}
                 </div>
               </Form>

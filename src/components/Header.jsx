@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useDevice } from "../context/DeviceContext";
 import LoginModal from "./LoginModal";
 import MobileHeader from "./MobileHeader";
-// import DesktopHeader from "./DesktopHeader";
+import DesktopHeader from "./DesktopHeader";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -45,13 +45,13 @@ const Header = () => {
           closeMenu={closeMenu}
         />
       ) : (
-        <></>
-        // <DesktopHeader
-        //   user={user}
-        //   openLModal={openLModal}
-        //   handleLogoutClick={handleLogoutClick}
-        //   closeMenu={closeMenu}
-        // />
+    
+        <DesktopHeader
+          user={user}
+          openLModal={openLModal}
+          handleLogoutClick={handleLogoutClick}
+          closeMenu={closeMenu}
+        />
       )}
 
       <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
