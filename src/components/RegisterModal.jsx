@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
 import { FilePond, registerPlugin } from 'react-filepond';
+import { motion, AnimatePresence } from "framer-motion";
 import 'filepond/dist/filepond.min.css';
 
 // Plugins
@@ -170,12 +171,25 @@ const RegisterModal = ({ isOpen, closeModal }) => {
   // }, []);
 
   return (
-    isOpen && (
-      <div className="modal-overlay">
-        <div className="modal-content">
+<AnimatePresence>
+  {isOpen && (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} // smoother easeOutExpo
+      className="bg-white/10 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center bg-black/50" // darker backdrop
+    >
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 30 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="bg-gray-500/20  rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[100vh] overflow-y-auto modal-content"
+    >
           <button className="close-modal" onClick={closeModal}>&times;</button>
           <h2 className="modal-title">Register</h2>
-          <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Real Estate Agent</p>
+          <p className="text-center text-sm text-black-800 my-2 font-semibold">For Real Estate Agent</p>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>
@@ -213,21 +227,21 @@ const RegisterModal = ({ isOpen, closeModal }) => {
               <Form>
                 {activeStep === 0 && (
                   <>
-                    <Field name="fullName" placeholder="Full Name" className="form-control" />
+                    <Field name="fullName" placeholder="Full Name" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40" />
                     <ErrorMessage name="fullName" component="div" className="text-red-600" />
-                    <Field name="companyName" placeholder="Company Name" className="form-control mt-2" />
+                    <Field name="companyName" placeholder="Company Name" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                     <ErrorMessage name="companyName" component="div" className="text-red-600" />
                   </>
                 )}
                 {activeStep === 1 && (
                   <>
-                    <Field name="email" placeholder="Email" className="form-control" />
+                    <Field name="email" placeholder="Email" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40" />
                     <ErrorMessage name="email" component="div" className="text-red-600" />
-                    <Field name="phone" placeholder="Phone" className="form-control mt-2" />
+                    <Field name="phone" placeholder="Phone" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                     <ErrorMessage name="phone" component="div" className="text-red-600" />
-                    <Field name="website" placeholder="Website" className="form-control mt-2" />
+                    <Field name="website" placeholder="Website" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                     <ErrorMessage name="website" component="div" className="text-red-600" />
-                    <Field name="address" placeholder="Address" className="form-control mt-2" />
+                    <Field name="address" placeholder="Address" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                     <ErrorMessage name="address" component="div" className="text-red-600" />
                   </>
                 )}
@@ -235,7 +249,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                   <>
                     {/* City - Select Field */}
                     <div>
-                      <Field as="select" name="city" className="form-control mt-2">
+                      <Field as="select" name="city" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2">
                         <option value="">Select City</option>
                         <option value="Springfield">Springfield</option>
                         <option value="Jacksonville">Jacksonville</option>
@@ -249,7 +263,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
 
                     {/* State - Select Field */}
                     <div>
-                      <Field as="select" name="state" className="form-control mt-2">
+                      <Field as="select" name="state" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2">
                         <option value="">Select State</option>
                         <option value="California">California</option>
                         <option value="Texas">Texas</option>
@@ -264,13 +278,13 @@ const RegisterModal = ({ isOpen, closeModal }) => {
 
                     {/* Zip Code - Input Field */}
                     <div>
-                      <Field name="zipCode" placeholder="Zip Code" className="form-control mt-2" />
+                      <Field name="zipCode" placeholder="Zip Code" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                       <ErrorMessage name="zipCode" component="div" className="text-red-600" />
                     </div>
 
                     {/* Service Category - Select Field */}
                     <div>
-                      <Field as="select" name="serviceCategory" className="form-control mt-2">
+                      <Field as="select" name="serviceCategory" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2">
                         <option value="">Select Service Category</option>
                         <option value="General Contractor">General Contractor</option>
                         <option value="Electrical Contractor">Electrical Contractor</option>
@@ -290,7 +304,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                         type="number"
                         min="0"
                         placeholder="Years of Experience"
-                        className="form-control mt-2"
+                        className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                       />
                       <ErrorMessage name="yearsOfExperience" component="div" className="text-red-600" />
                     </div>
@@ -302,7 +316,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                         as="select"
                         name="coverageArea"
                         multiple
-                        className="form-control mt-2"
+                        className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                         onChange={(event) => {
                           const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
                           setFieldValue('coverageArea', selectedOptions);
@@ -319,13 +333,13 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                     </div>
                     {/* License Number - Input Field */}
                     <div>
-                      <Field name="licenseNumber" placeholder="License Number" className="form-control mt-2" />
+                      <Field name="licenseNumber" placeholder="License Number" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                       <ErrorMessage name="licenseNumber" component="div" className="text-red-600" />
                     </div>
 
                     {/* Insurance Policy - Input Field */}
                     <div>
-                      <Field name="insurancePolicy" placeholder="Insurance Policy" className="form-control mt-2" />
+                      <Field name="insurancePolicy" placeholder="Insurance Policy" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                       <ErrorMessage name="insurancePolicy" component="div" className="text-red-600" />
                     </div>
                     {/* License Issuing Authority */}
@@ -333,7 +347,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                   <Field
                     name="issuingAuthority"
                     placeholder="Issuing Authority"
-                    className="form-control mt-2"
+                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                   />
                   <ErrorMessage name="issuingAuthority" component="div" className="text-red-600" />
 
@@ -343,7 +357,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                     as="select"
                     name="specialties"
                     multiple
-                    className="form-control mt-2"
+                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                     onChange={(event) => {
                       const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
                       setFieldValue('specialties', selectedOptions);
@@ -363,7 +377,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                     as="select"
                     name="affiliations"
                     multiple
-                    className="form-control mt-2"
+                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                     onChange={(event) => {
                       const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
                       setFieldValue('affiliations', selectedOptions);
@@ -388,7 +402,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                                   <Field
                                     name={`references[${index}].name`}
                                     placeholder="Name"
-                                    className="form-control"
+                                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40"
                                   />
                                   <ErrorMessage
                                     name={`references[${index}].name`}
@@ -400,7 +414,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                                   <Field
                                     name={`references[${index}].phone`}
                                     placeholder="Phone"
-                                    className="form-control"
+                                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40"
                                   />
                                   <ErrorMessage
                                     name={`references[${index}].phone`}
@@ -439,7 +453,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                         name="description"
                         placeholder="Description"
                         as="textarea"
-                        className="form-control mt-2"
+                        className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
                       />
                       <ErrorMessage name="description" component="div" className="text-red-600" />
 
@@ -460,7 +474,7 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                         className="mt-2"
                       />
 
-                      <small className="text-gray-500">
+                      <small className="text-black-800">
                         You can upload up to 5 files. The total combined size should not exceed 20MB. Accepted formats: JPG, JPEG, PNG, PDF.
                       </small>
                       <ErrorMessage name="files" component="div" className="text-red-600" />
@@ -476,32 +490,53 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                   )}
 
                 <div className="flex justify-between mt-4">
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={() => setActiveStep((prev) => prev - 1)}
-                    variant="outlined"
+                {/* Back Button */}
+                <button
+                  disabled={activeStep === 0}
+                  onClick={() => setActiveStep((prev) => prev - 1)}
+                  className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
+                    ${
+                      activeStep === 0
+                        ? "bg-white/30 text-black cursor-not-allowed border-white/20"
+                        : "bg-white text-cyan-600 border-cyan-600 hover:bg-cyan-50"
+                    }
+                    [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
+                >
+                  Back
+                </button>
+
+                {/* Conditional Submit Button (Final Step) */}
+                {activeStep === steps.length - 1 ? (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
+                      ${
+                        isSubmitting
+                          ? "bg-cyan-600/60 text-white cursor-not-allowed"
+                          : "bg-cyan-600 text-white hover:bg-cyan-700"
+                      }
+                      border-neutral-200
+                      [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
                   >
-                    Back
-                  </Button>
-                  {activeStep === steps.length - 1 ? (
-                    <Button type="submit" variant="contained" color="secondary" disabled={isSubmitting}>Submit</Button>
-                  ) : (
-                    <Button
-                      onClick={() => handleNext(validateForm, values, setTouched)}
-                      variant="contained"
-                      color="primary"
-                      
-                    >
-                      Next
-                    </Button>
-                  )}
+                    Submit
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleNext(validateForm, values, setTouched)}
+                    className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-blue-600 px-6 font-medium text-white transition-all duration-100 hover:bg-blue-700 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                  >
+                    Next
+                  </button>
+                )}
                 </div>
               </Form>
             )}
           </Formik>
-        </div>
-      </div>
-    )
+          </motion.div>
+      </motion.div>
+        )}
+</AnimatePresence>
   );
 };
 

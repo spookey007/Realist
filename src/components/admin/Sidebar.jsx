@@ -98,34 +98,31 @@ const Sidebar = ({ startLoading }) => {
     return newIconMap;
   };
 
-  const fetchMenuFromAPI = async (role_id) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/menu/getMenusSidebar`,
-        { params: { role_id } }
-      );
+  // const fetchMenuFromAPI = async (role_id) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${import.meta.env.VITE_API_URL}/api/menu/getMenusSidebar`,
+  //       { params: { role_id } }
+  //     );
 
-      const structured = structureMenu(response.data);
-      setMenuItems(structured);
-      setIconMap(generateIconMap(response.data));
-      localStorage.setItem("menu", JSON.stringify(structured));
-    } catch (error) {
-      console.error("Error fetching menu:", error);
-    }
-  };
+  //     const structured = structureMenu(response.data);
+  //     setMenuItems(structured);
+  //     setIconMap(generateIconMap(response.data));
+  //     localStorage.setItem("menu", JSON.stringify(structured));
+  //   } catch (error) {
+  //     console.error("Error fetching menu:", error);
+  //   }
+  // };
 
   useEffect(() => {
-    if (user?.role) {
-      const cachedMenu = localStorage.getItem("menu");
-      if (cachedMenu) {
-        const parsedMenu = JSON.parse(cachedMenu);
-        setMenuItems(parsedMenu);
-        setIconMap(generateIconMap(parsedMenu));
-      } else {
-        fetchMenuFromAPI(user.role);
-      }
+    if (user?.menu?.length) {
+      const structured = structureMenu(user.menu);
+      setMenuItems(structured);
+      setIconMap(generateIconMap(user.menu));
+      localStorage.setItem("menu", JSON.stringify(structured)); // Optional if you still want caching
     }
-  }, [user?.role]);
+  }, [user?.menu]);
+  
 
   const structureMenu = (menuList) => {
     const menuMap = {};

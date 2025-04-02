@@ -1,83 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { Provider } from 'react-redux'; // Import Redux Provider
-import store from './redux/store'; // Import Redux store
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Hero from './components/Hero';
 import About from './components/About';
-import Footer from './components/Footer';
 import Contact from './components/Contact';
 import Invite from './components/Invite';
 import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
 import ProtectedRoute from './components/admin/ProtectedRoute';
-import NotFound from './components/NotFound'; // Example 404 page
-import ModalProvider from './components/ModalProvider'; // Import ModalProvider
+import NotFound from './components/NotFound';
+import ModalProvider from './components/ModalProvider';
+
+import { ThemeProvider } from './context/ThemeContext';
+import { DeviceProvider } from './context/DeviceContext';
+import { LoaderProvider, useLoader } from './context/LoaderContext';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import alertify from "alertifyjs";
-import "alertifyjs/build/css/alertify.css";
-import { ThemeProvider } from "./context/ThemeContext";
-import { AnimatePresence } from "framer-motion"; // Import AnimatePresence
-import { DeviceProvider } from "./context/DeviceContext";
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+
+import FullPageLoader from './components/FullPageLoader';
 
 window.alertify = alertify;
 
 const App = () => {
-  const location = useLocation(); // Now safe to use
-
-  const [adminPaths, setAdminPaths] = useState([]);
+  const { isLoading, setIsLoading } = useLoader();
 
   useEffect(() => {
-    // Get admin routes from localStorage
-    const storedMenu = localStorage.getItem("menu");
-    if (storedMenu) {
-      try {
-        const menuData = JSON.parse(storedMenu);
-        const paths = extractPaths(menuData);
-        setAdminPaths(paths);
-      } catch (error) {
-        console.error("Failed to parse menu from localStorage:", error);
-      }
-    }
-  }, []);
+    setIsLoading(true);
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [setIsLoading]);
 
-  // Function to extract all admin route paths from menu data
-  const extractPaths = (menuData) => {
-    let paths = [];
-    menuData.forEach(menuItem => {
-      paths.push(menuItem.href); // Add main menu item path
-      if (menuItem.subMenu && menuItem.subMenu.length > 0) {
-        menuItem.subMenu.forEach(subItem => paths.push(subItem.href)); // Add sub-menu item paths
-      }
-    });
-    return paths;
-  };
-
-  // Check if the current route is an admin route
-  const isAdminRoute = adminPaths.includes(location.pathname);
+  // 🔒 Prevent rendering until loading is complete
+  if (isLoading) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Wrap Header with AnimatePresence */}
-      <AnimatePresence>
-        {!isAdminRoute && <Header key="header" />}
-      </AnimatePresence>
-      
+      <Header />
+
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Hero />} />
-          {/* <Route path="/services" element={<Services />} /> */}
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          {/* <Route path="/login" element={<LoginPage />} /> */}
           <Route path="/invite/:id" element={<Invite />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/*" element={<ProtectedRoute><AdminRoutes /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      
-      {!isAdminRoute && <Footer />}
+
+      <Footer />
       <ModalProvider />
     </div>
   );
@@ -87,9 +68,12 @@ const AppWrapper = () => (
   <Provider store={store}>
     <ThemeProvider>
       <DeviceProvider>
-        <Router>
-          <App />
-        </Router>
+        <LoaderProvider>
+          <Router>
+            <FullPageLoader />
+            <App />
+          </Router>
+        </LoaderProvider>
       </DeviceProvider>
     </ThemeProvider>
   </Provider>

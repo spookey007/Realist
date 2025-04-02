@@ -1,20 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDevice } from "../context/DeviceContext";
 import LoginModal from "./LoginModal";
 import MobileHeader from "./MobileHeader";
 import DesktopHeader from "./DesktopHeader";
+import { isAdminRoute as checkIsAdminRoute } from "./utils/isAdminRoute";
+
 
 const Header = () => {
   const navigate = useNavigate();
-  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+  const location = useLocation();
+  const { logout, user, menu } = useAuth();
+  const { isMobile } = useDevice();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { logout, user } = useAuth();
-
-  const { isMobile } = useDevice();
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => setIsMenuOpen(false);
@@ -32,26 +35,22 @@ const Header = () => {
     navigate("/");
   };
 
+  const isAdmin = checkIsAdminRoute(user?.menu || [], location.pathname);
+
+  if (isAdmin) return null; // ✅ Hides header
+
+  const HeaderComponent = isMobile ? MobileHeader : DesktopHeader;
 
   return (
     <>
-      {isMobile ? (
-        <MobileHeader
-          user={user}
-          openLModal={openLModal}
-          handleLogoutClick={handleLogoutClick}
-          toggleMenu={toggleMenu}
-          isMenuOpen={isMenuOpen}
-          closeMenu={closeMenu}
-        />
-      ) : (
-        <DesktopHeader
-          user={user}
-          openLModal={openLModal}
-          handleLogoutClick={handleLogoutClick}
-          closeMenu={closeMenu}
-        />
-      )}
+      <HeaderComponent
+        user={user}
+        openLModal={openLModal}
+        handleLogoutClick={handleLogoutClick}
+        toggleMenu={toggleMenu}
+        isMenuOpen={isMenuOpen}
+        closeMenu={closeMenu}
+      />
 
       <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
         <DialogTitle className="font-bold">Are you sure you want to logout?</DialogTitle>

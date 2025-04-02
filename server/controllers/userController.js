@@ -509,44 +509,63 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.status(400).json({ message: "Email and password are required" });
   }
 
   try {
-    const query = 'SELECT * FROM "Users" WHERE "email" = $1;';
-    const result = await pool.query(query, [email]);
+    const userQuery = 'SELECT * FROM "Users" WHERE "email" = $1;';
+    const userResult = await pool.query(userQuery, [email]);
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: 'User not found' });
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const user = result.rows[0];
+    const user = userResult.rows[0];
 
     if (!user.encrypted_password) {
-      return res.status(500).json({ message: 'User record is missing a password' });
+      return res.status(500).json({ message: "User record is missing a password" });
     }
 
-    // Compare plain password with hashed password from DB
     const isMatch = await bcrypt.compare(password, user.encrypted_password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT Token
+    // Fetch menu for this user's role
+    const menuQuery = `
+      SELECT 
+        m.*,
+        r.privs
+      FROM "Menus" m
+      INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+      WHERE m.status = 1 AND r.role_id = $1
+      ORDER BY m.position ASC;
+    `;
+    const menuResult = await pool.query(menuQuery, [user.role]);
+
+    const menu = menuResult.rows;
+
+    // Generate JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
     res.status(200).json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
-      user: { id: user.id, name: user.name, email: user.email,role: user.role },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        menu: menu || [],
+      },
     });
   } catch (error) {
-    console.error('Error logging in:', error);
-    res.status(500).json({ message: 'Failed to authenticate user' });
+    console.error("Error logging in:", error);
+    res.status(500).json({ message: "Failed to authenticate user" });
   }
 };
 
