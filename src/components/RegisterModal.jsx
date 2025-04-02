@@ -519,7 +519,6 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                       border-neutral-200
                       [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
                   >
-<<<<<<< HEAD
                     Submit
                   </button>
                 ) : (
@@ -530,24 +529,6 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                     Next
                   </button>
                 )}
-=======
-                    Back
-                  </Button>
-                  {activeStep === steps.length - 1 ? (
-                    <Button type="submit" variant="contained" color="secondary" disabled={isSubmitting}>Submit</Button>
-                  ) : (
-                   
-                   
-                    <Button
-                      onClick={() => handleNext(validateForm, values, setTouched)}
-                      variant="contained"
-                      color="primary">
-                      Next
-                    </Button>
-
-                    
-                  )}
->>>>>>> e29f9c684aa4acaa35ae797f63ad6f1503dc64fe
                 </div>
               </Form>
             )}
