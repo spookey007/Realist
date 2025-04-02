@@ -68,7 +68,7 @@ const Header = ({ toggleSidebar }) => {
         <Toolbar className="flex justify-between items-center">
           {/* Sidebar Toggle Button */}
           <IconButton color="inherit" edge="start" onClick={toggleSidebar} className="md:hidden" sx={{ mr: 2 }}>
-            <Bars3Icon className="h-6 w-6 text-white" />
+          <Bars3Icon className="h-6 w-6 text-white" />
           </IconButton>
           
           {/* Center Section: Search (Hidden on very small screens) */}
