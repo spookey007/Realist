@@ -1,13 +1,13 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
+import { useUser } from "@clerk/clerk-react";
+
 const ProtectedRoute = ({ children }) => {
   const authToken = localStorage.getItem("authToken");
+  const { isSignedIn } = useUser();
 
-  // console.log("ProtectedRoute: authToken =", authToken); // Debugging log
-
-  if (!authToken) {
-    console.log("Redirecting to login");
+  if (!authToken && !isSignedIn) {
     return <Navigate to="/" replace />;
   }
 

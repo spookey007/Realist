@@ -10,6 +10,10 @@ import backgroundImg from '../assets/images/contact_form/contact_form.jpeg';
 import { useAuth } from '../context/AuthContext'; // Import context
 import { useLoader } from "../context/LoaderContext";
 import { motion, AnimatePresence } from "framer-motion";
+// import { useSignIn } from "@clerk/clerk-react";
+import { useUser, useSignIn } from "@clerk/clerk-react";
+
+
 const now = new Date();
 const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
@@ -22,6 +26,27 @@ const LoginModal = ({ isOpen, closeModal }) => {
   const { login } = useAuth();
   const { setIsLoading } = useLoader();
   const [selectedRole, setSelectedRole] = useState("Contractor");
+  // const { signIn } = useSignIn();
+  const { signIn, isLoaded } = useSignIn();
+  const { user, isSignedIn } = useUser();
+  const { setUser } = useAuth();
+
+  
+  const handleGoogleClick = async () => {
+    if (!isLoaded || !signIn) return;
+  
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: `${window.location.origin}/google-callback`,
+        redirectUrlComplete: `${window.location.origin}/google-callback`,
+      });
+      
+    } catch (err) {
+      console.error("Google login failed:", err);
+    }
+  };
+  
 
   const initialValues = {
     name: '',
@@ -194,7 +219,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
 
                 <div className="w-full max-w-xs mx-auto mb-6">
   {/* Label */}
-  <AnimatePresence mode="wait">
+  {/* <AnimatePresence mode="wait">
     <motion.div
       key={selectedRole}
       initial={{ opacity: 0, y: -5 }}
@@ -205,11 +230,12 @@ const LoginModal = ({ isOpen, closeModal }) => {
     >
       Signing in as: <span className="text-cyan-400">{selectedRole}</span>
     </motion.div>
-  </AnimatePresence>
+  </AnimatePresence> */}
 
   {/* Toggle Buttons */}
   <div className="relative bg-white/10 backdrop-blur border border-white/20 rounded-full p-1 flex justify-between">
-    {["Contractor", "Admin", "Real Estate"].map((role, i) => (
+
+    {/* {["Contractor", "Admin", "Real Estate"].map((role, i) => (
       <button
         key={role}
         onClick={() => setSelectedRole(role)}
@@ -217,19 +243,33 @@ const LoginModal = ({ isOpen, closeModal }) => {
       >
         {role}
       </button>
-    ))}
+    ))} */}
 
     {/* Animated Slider */}
-    <motion.div
+    {/* <motion.div
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="absolute top-1 bottom-1 w-1/3 rounded-full bg-cyan-600 z-0"
       style={{
         left: ["Contractor", "Admin", "Real Estate"].indexOf(selectedRole) * 33.3333 + "%",
       }}
-    />
-  </div>
-</div>
+    /> */}
+                <div className="flex flex-col space-y-3 mb-6">
+                      <button
+                        onClick={handleGoogleClick}
+                        className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
+                      >
+                        <img
+                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                          alt="Google"
+                          className="w-5 h-5"
+                        />
+                        <span className="font-medium">Login with Google</span>
+                      </button>
+                    </div>
+
+              </div>
+            </div>
 
 
                                 {/* Submit Button */}

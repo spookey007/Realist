@@ -26,6 +26,9 @@ import 'alertifyjs/build/css/alertify.css';
 
 import FullPageLoader from './components/FullPageLoader';
 
+import ClerkSyncHandler from "./components/ClerkSyncHandler";
+import GoogleCallback from "./components/GoogleCallback";
+
 window.alertify = alertify;
 
 const App = () => {
@@ -39,40 +42,40 @@ const App = () => {
     return () => clearTimeout(timeout);
   }, [setIsLoading]);
 
-  // 🔒 Prevent rendering until loading is complete
   if (isLoading) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
 
+      <Header />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Hero />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/invite/:id" element={<Invite />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/*" element={<ProtectedRoute><AdminRoutes /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="/" element={<Hero />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/invite/:id" element={<Invite />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/google-callback" element={<GoogleCallback />} />
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <AdminRoutes />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
       </main>
-
       <Footer />
       <ModalProvider />
     </div>
   );
 };
-
 const AppWrapper = () => (
   <Provider store={store}>
     <ThemeProvider>
       <DeviceProvider>
         <LoaderProvider>
-          <Router>
-            <FullPageLoader />
-            <App />
-          </Router>
+          <FullPageLoader />
+          <App />
         </LoaderProvider>
       </DeviceProvider>
     </ThemeProvider>

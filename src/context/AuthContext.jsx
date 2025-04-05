@@ -1,8 +1,11 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { useClerk } from "@clerk/clerk-react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const clerk = useClerk();
+
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -24,15 +27,30 @@ export const AuthProvider = ({ children }) => {
     setMenu(userData.menu || []);
   };
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     setUser(null);
     setMenu([]);
+
+    try {
+      await clerk.signOut(); // ✅ Sign out from Clerk
+    } catch (error) {
+      console.error("Clerk signOut failed:", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, menu, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        menu,
+        login,
+        logout,
+        setUser,
+        setMenu,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

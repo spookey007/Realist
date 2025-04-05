@@ -3,9 +3,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { sendEmail } from '../helpers/emailHelper.js';
+import { verifyToken } from "@clerk/backend";
 
 const JWT_SECRET = process.env.JWT_SECRET;
- 
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 const hashPassword = async (password) => {
   const saltRounds = 10;
   return await bcrypt.hash(password, saltRounds);
@@ -543,10 +544,10 @@ export const loginUser = async (req, res) => {
     `;
     const menuResult = await pool.query(menuQuery, [user.role]);
 
-    const menu = menuResult.rows;
+    let menu = menuResult.rows;
 
     // Generate JWT
-    const token = jwt.sign(
+    let token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -588,5 +589,149 @@ const emailExistsForAnotherUser = async (email, userId) => {
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
+  }
+};
+
+// export const clerkAuth = async (req, res) => {
+//   const { email, name } = req.body;
+
+//   if (!email) {
+//     return res.status(400).json({ message: "Email is required" });
+//   }
+
+//   try {
+//     // Step 1: Check if user already exists
+//     const userQuery = 'SELECT * FROM "Users" WHERE "email" = $1;';
+//     const userResult = await pool.query(userQuery, [email]);
+
+//     let user;
+
+//     if (userResult.rowCount > 0) {
+//       // Existing user
+//       user = userResult.rows[0];
+//     } else {
+//       // New user - insert into DB
+//       const defaultRole = 2; // 🔒 e.g. 1 = admin, 2 = user
+
+//       const insertQuery = `
+//         INSERT INTO "Users" ("name", "email", "role")
+//         VALUES ($1, $2, $3)
+//         RETURNING *;
+//       `;
+//       const insertResult = await pool.query(insertQuery, [name, email, defaultRole]);
+//       user = insertResult.rows[0];
+//     }
+
+//     // Step 2: Fetch role-based menu
+//     // const menuQuery = `
+//     //   SELECT m.*, r.privs
+//     //   FROM "Menus" m
+//     //   INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+//     //   WHERE m.status = 1 AND r.role_id = $1
+//     //   ORDER BY m.position ASC;
+//     // `;
+//     // const menuResult = await pool.query(menuQuery, [user.role]);
+//     // const menu = menuResult.rows;
+
+//     // Step 3: Create JWT
+//     const token = jwt.sign(
+//       { userId: user.id, email: user.email },
+//       JWT_SECRET,
+//       { expiresIn: "1h" }
+//     );
+
+//     return res.status(200).json({
+//       message: "Login successful via Clerk",
+//       token,
+//       user: {
+//         id: user.id,
+//         name: user.name,
+//         email: user.email,
+//         role: user.role,
+//         menu:"",
+//       },
+//     });
+
+//   } catch (err) {
+//     console.error("❌ Clerk Auth Error:", err);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+export const clerkAuth = async (req, res) => {
+  try {
+    // 1. Extract and validate token
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing or invalid token" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    // 2. Verify Clerk JWT
+    const { sub: clerkUserId } = await verifyToken(token, {
+      secretKey: CLERK_SECRET_KEY,
+    });
+
+    // 3. Get user info from request
+    const { email, name } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // 4. Check if user exists
+    const checkQuery = `SELECT * FROM "Users" WHERE email = $1`;
+    const checkResult = await pool.query(checkQuery, [email]);
+
+    let user;
+    let menu = [];
+
+    if (checkResult.rows.length > 0) {
+      user = checkResult.rows[0];
+
+      // ✅ Step 5: Fetch role-based menu if role != 0
+      if (user.role !== 0) {
+        const menuQuery = `
+          SELECT m.*, r.privs
+          FROM "Menus" m
+          INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+          WHERE m.status = 1 AND r.role_id = $1
+          ORDER BY m.position ASC;
+        `;
+        const menuResult = await pool.query(menuQuery, [user.role]);
+        menu = menuResult.rows;
+      }
+    } else {
+      // 6. Create user if not found
+      const insertQuery = `
+        INSERT INTO "Users" (email, name, clerk_id, role, created_at)
+        VALUES ($1, $2, $3, $4, NOW())
+        RETURNING *;
+      `;
+      const insertValues = [email, name || "Guest", clerkUserId, 0];
+      const insertResult = await pool.query(insertQuery, insertValues);
+      user = insertResult.rows[0];
+    }
+
+
+    // Generate JWT
+    let tok = jwt.sign(
+      { userId: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      tok,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        menu: menu || [],
+      },
+    });
+  } catch (error) {
+    console.error("❌ Clerk Auth Error:", error.message);
+    return res.status(401).json({ error: "Authentication failed" });
   }
 };

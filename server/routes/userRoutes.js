@@ -9,6 +9,7 @@ import {
   loginUser,
   RegisterContractor,
   registerRea,
+  clerkAuth,
 //   changeUserStatus,
 //   resetPassword,
 } from "../controllers/userController.js";
@@ -17,6 +18,8 @@ const router = express.Router();
 
 // User Authentication
 router.post("/login", loginUser); // Authenticate user and return token
+
+router.post("/clerk-auth", clerkAuth); // Authenticate user and return token
 
 // User Management
 router.get("/", getAllUsers); // Retrieve all users

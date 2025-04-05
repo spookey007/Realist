@@ -18,6 +18,8 @@
     "start": "concurrently \"npm run node\" \"npm run serve\""
   },
   "dependencies": {
+    "@clerk/backend": "^1.26.0",
+    "@clerk/clerk-react": "^5.25.6",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-free": "^6.6.0",
@@ -93,6 +95,7 @@
     "react-router-dom": "^6.27.0",
     "react-simple-typewriter": "^5.0.1",
     "react-slick": "^0.30.2",
+    "react-social-icons": "^6.22.0",
     "sequelize": "^6.37.4",
     "serve": "^14.2.4",
     "slick-carousel": "^1.8.1",
