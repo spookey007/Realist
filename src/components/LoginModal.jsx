@@ -233,42 +233,6 @@ const LoginModal = ({ isOpen, closeModal }) => {
   </AnimatePresence> */}
 
   {/* Toggle Buttons */}
-  <div className="relative bg-white/10 backdrop-blur border border-white/20 rounded-full p-1 flex justify-between">
-
-    {/* {["Contractor", "Admin", "Real Estate"].map((role, i) => (
-      <button
-        key={role}
-        onClick={() => setSelectedRole(role)}
-        className="relative z-10 flex-1 text-sm font-medium text-white py-2 transition-all"
-      >
-        {role}
-      </button>
-    ))} */}
-
-    {/* Animated Slider */}
-    {/* <motion.div
-      layout
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="absolute top-1 bottom-1 w-1/3 rounded-full bg-cyan-600 z-0"
-      style={{
-        left: ["Contractor", "Admin", "Real Estate"].indexOf(selectedRole) * 33.3333 + "%",
-      }}
-    /> */}
-                <div className="flex flex-col space-y-3 mb-6">
-                      <button
-                        onClick={handleGoogleClick}
-                        className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
-                      >
-                        <img
-                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-                          alt="Google"
-                          className="w-5 h-5"
-                        />
-                        <span className="font-medium">Login with Google</span>
-                      </button>
-                    </div>
-
-              </div>
             </div>
 
 
@@ -291,6 +255,19 @@ const LoginModal = ({ isOpen, closeModal }) => {
             
             )}
           </Formik>
+          <div className="flex flex-col space-y-3 mb-6">
+                      <button
+                        onClick={handleGoogleClick}
+                        className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
+                      >
+                        <img
+                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                          alt="Google"
+                          className="w-5 h-5"
+                        />
+                        <span className="font-medium">Login with Google</span>
+                      </button>
+                    </div>
           </motion.div>
       </motion.div>
         )}

@@ -13,6 +13,7 @@ export default function GoogleCallback() {
   const hasSynced = useRef(false); // 🧠 prevents double run
 
   useEffect(() => {
+    setIsLoading(true);
     const syncUser = async () => {
       if (hasSynced.current) return; // ✅ prevent re-sync
       if (!isLoaded || !isSignedIn || !user) return;
@@ -43,6 +44,7 @@ export default function GoogleCallback() {
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("authToken", data.token);
           navigate("/dashboard");
+          setIsLoading(false);
         } else {
           alert("Failed to sync user.");
         }
