@@ -19,17 +19,18 @@ import { ThemeProvider } from './context/ThemeContext';
 import { DeviceProvider } from './context/DeviceContext';
 import { LoaderProvider, useLoader } from './context/LoaderContext';
 
+import { ToastContainer } from 'react-toastify';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
+window.alertify = alertify;
 
 import FullPageLoader from './components/FullPageLoader';
 
 import ClerkSyncHandler from "./components/ClerkSyncHandler";
 import GoogleCallback from "./components/GoogleCallback";
-
-window.alertify = alertify;
 
 const App = () => {
   const { isLoading, setIsLoading } = useLoader();
@@ -76,6 +77,17 @@ const AppWrapper = () => (
         <LoaderProvider>
           <FullPageLoader />
           <App />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </LoaderProvider>
       </DeviceProvider>
     </ThemeProvider>

@@ -40,11 +40,12 @@ export default function GoogleCallback() {
 
         const data = await res.json();
         if (res.ok) {
+          setIsLoading(false);
           setUser(data.user);
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("authToken", data.token);
           navigate("/dashboard");
-          setIsLoading(false);
+          
         } else {
           alert("Failed to sync user.");
         }
