@@ -20,9 +20,9 @@ export default function GoogleCallback() {
 
       hasSynced.current = true; // ✅ lock it
 
-    //   console.log("Clerk Loaded:", isLoaded);
-    //   console.log("Signed In:", isSignedIn);
-    //   console.log("User:", user);
+      console.log("Clerk Loaded:", isLoaded);
+      console.log("Signed In:", isSignedIn);
+      console.log("User:", user);
 
       const token = await getToken();
       const email = user?.emailAddresses?.[0]?.emailAddress;
