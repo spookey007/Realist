@@ -8,7 +8,7 @@ export default function GoogleCallback() {
   const { isLoaded, getToken } = useAuth();
   const { isSignedIn, user } = useUser();
   const { setIsLoading } = useLoader();
-  const { setUser } = useAppAuth();
+  const { setUser, login } = useAppAuth();
   const navigate = useNavigate();
   const hasSynced = useRef(false); // 🧠 prevents double run
 
@@ -40,6 +40,7 @@ export default function GoogleCallback() {
 
         const data = await res.json();
         if (res.ok) {
+          login(data.user, data.tok);
           setIsLoading(false);
           setUser(data.user);
           localStorage.setItem("user", JSON.stringify(data.user));

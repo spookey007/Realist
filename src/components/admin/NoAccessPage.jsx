@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Reports = () => {
+const NoAccessPage = () => {
     return (
       <AnimatePresence>
         <motion.div
@@ -9,14 +9,14 @@ const Reports = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} // smooth ease-out effect
-          className="fixed inset-0 flex items-center justify-center"
+          className="bg-white/10 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center bg-black/50"
         >
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-gray-200 rounded-2xl shadow-2xl p-8 w-full max-w-md modal-content"
+            className="bg-gray-500/20 rounded-2xl shadow-2xl p-8 w-full max-w-md modal-content"
           >
             <div className="flex flex-col items-center space-y-4">
               <div className="text-5xl mb-4">
@@ -25,7 +25,7 @@ const Reports = () => {
                 </span>
               </div>
               <h1 className="text-3xl font-semibold text-gray-800 mb-4">
-                Development In Progress.
+                You do not have permission to view this page.
               </h1>
               <p className="text-gray-600">
                 Please contact an admin if you believe this is a mistake.
@@ -42,4 +42,4 @@ const Reports = () => {
     );
   };
   
-  export default Reports;
+  export default NoAccessPage;

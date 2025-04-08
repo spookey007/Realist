@@ -666,10 +666,10 @@ export const clerkAuth = async (req, res) => {
       return res.status(401).json({ error: "Missing or invalid token" });
     }
 
-    const token = authHeader.split(" ")[1];
+    const authtoken = authHeader.split(" ")[1];
 
     // 2. Verify Clerk JWT
-    const { sub: clerkUserId } = await verifyToken(token, {
+    const { sub: clerkUserId } = await verifyToken(authtoken, {
       secretKey: CLERK_SECRET_KEY,
     });
 
@@ -702,8 +702,8 @@ export const clerkAuth = async (req, res) => {
     } else {
       // 6. Create user if not found
       const insertQuery = `
-        INSERT INTO "Users" (email, name, clerk_id, role, created_at)
-        VALUES ($1, $2, $3, $4, NOW())
+        INSERT INTO "Users" (email, name, clerk_id, role, "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
         RETURNING *;
       `;
       const insertValues = [email, name || "Guest", clerkUserId, 0];
@@ -713,7 +713,7 @@ export const clerkAuth = async (req, res) => {
 
 
     // Generate JWT
-    let tok = jwt.sign(
+    let token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -721,7 +721,7 @@ export const clerkAuth = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      tok,
+      token,
       user: {
         id: user.id,
         name: user.name,

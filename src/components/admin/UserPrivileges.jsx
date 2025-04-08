@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Reports = () => {
+const UserPrivileges = () => {
     return (
       <AnimatePresence>
         <motion.div
@@ -42,4 +42,4 @@ const Reports = () => {
     );
   };
   
-  export default Reports;
+  export default UserPrivileges;

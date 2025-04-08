@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 
@@ -11,7 +11,6 @@ import Contact from './components/Contact';
 import Invite from './components/Invite';
 import LoginPage from './components/admin/Login';
 import AdminRoutes from './components/admin/routes/AdminRoutes';
-import ProtectedRoute from './components/admin/ProtectedRoute';
 import NotFound from './components/NotFound';
 import ModalProvider from './components/ModalProvider';
 
@@ -32,9 +31,12 @@ import FullPageLoader from './components/FullPageLoader';
 import ClerkSyncHandler from "./components/ClerkSyncHandler";
 import GoogleCallback from "./components/GoogleCallback";
 
-const App = () => {
-  const { isLoading, setIsLoading } = useLoader();
+import { useAuth } from "../src/context/AuthContext"; 
 
+const App = () => {
+  const navigate = useNavigate();
+  const { isLoading, setIsLoading } = useLoader();
+  const { user } = useAuth();
   useEffect(() => {
     setIsLoading(true);
     const timeout = setTimeout(() => {
@@ -45,6 +47,16 @@ const App = () => {
 
   if (isLoading) return null;
 
+  const InvitePage = ({ params }) => {
+    // If the user is logged in, redirect to another page (e.g., dashboard)
+    if (user) {
+      navigate("/dashboard", { replace: true });
+      return null; // Avoid rendering the Invite page
+    }
+
+    // If not logged in, render the Invite page
+    return <Invite {...params} />;
+  };
   return (
     <div className="flex flex-col min-h-screen">
 
@@ -54,13 +66,11 @@ const App = () => {
             <Route path="/" element={<Hero />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/invite/:id" element={<Invite />} />
+            <Route path="/invite/:id" element={<InvitePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/google-callback" element={<GoogleCallback />} />
             <Route path="/*" element={
-              <ProtectedRoute>
                 <AdminRoutes />
-              </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -23,7 +23,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
   const [selectedDateTime, setSelectedDateTime] = useState(startOfToday);
   const [location, setLocation] = useState({ latitude: '', longitude: '' });
   const recaptchaRef = useRef();
-  const { login } = useAuth();
+  const { login,logout } = useAuth();
   const { setIsLoading } = useLoader();
   const [selectedRole, setSelectedRole] = useState("Contractor");
   // const { signIn } = useSignIn();
@@ -33,8 +33,9 @@ const LoginModal = ({ isOpen, closeModal }) => {
 
   
   const handleGoogleClick = async () => {
+    // await logout();
     if (!isLoaded || !signIn) return;
-  
+    setIsLoading(true);
     try {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
@@ -96,7 +97,8 @@ const LoginModal = ({ isOpen, closeModal }) => {
   
         login(data.user, data.token); // ✅ Call context login to set user globally
         resetForm();
-        recaptchaRef.current.reset();
+        // console.log(recaptchaRef);
+        // recaptchaRef.current.reset();
         closeModal();
         setTimeout(() => {
           setIsLoading(false);
