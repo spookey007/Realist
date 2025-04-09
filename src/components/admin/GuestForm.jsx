@@ -53,7 +53,7 @@ const GuestForm = () => {
     closeRModal();
 
     if (userType === 'contractor' && !inviteCode) {
-      alert("Invite code is required for contractors.");
+      alertify.error("Invite code is required for contractors.");
     } else {
       if (userType === 'contractor' && inviteCode) {
         // Validate invite code for contractors
@@ -62,15 +62,19 @@ const GuestForm = () => {
           const data = await response.json();
 
           if (response.ok) {
+            setisModalBOpen(false);
             setIsInviteValid(true);
             setIsInviteModalOpen(true);
+            console.log(isInviteModalOpen)
+            console.log(isInviteValid)
+            console.log(isRModalOpen)
           } else {
-            alert("Invalid invite code.");
+            alertify.error("Invalid invite code.");
             setIsInviteValid(false);
           }
         } catch (error) {
           console.error(error);
-          alert("Error validating invite code.");
+          alertify.error("Error validating invite code.");
         }
       } else {
         setIsInviteModalOpen(false);
@@ -167,13 +171,15 @@ const GuestForm = () => {
 
     {/* Conditionally show the Invite modal or Register modal */}
     {isInviteModalOpen && isInviteValid && (
-        <Invite id={inviteCode} />
+        <Invite id={inviteCode} existingUser={user} />
       )}
       
       {/* Show Register Modal for Real Estate Agent if no valid invite code */}
       {!isInviteModalOpen && isInviteValid && (
         <RegisterModal
-          isOpen={true} // Closing Register Modal
+          isOpen={true}
+          closeModal={() => {}}
+          existingUser={user}
         />
       )}
       </>

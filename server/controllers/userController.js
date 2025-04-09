@@ -79,7 +79,7 @@ export const createUserB = async (req, res) => {
   }
 };
 
-export const RegisterContractor = async (req, res) => {
+export const registerContractor = async (req, res) => {
   const {
     fullName,
     companyName,
@@ -224,6 +224,137 @@ export const RegisterContractor = async (req, res) => {
 };
 
 
+export const updateContractor = async (req, res) => {
+  const { id } = req.params;
+  // console.log(id)
+  const {
+    fullName,
+    companyName,
+    email,
+    phone,
+    website,
+    address,
+    city,
+    state,
+    zipCode,
+    serviceCategory,
+    yearsOfExperience,
+    coverageArea,
+    licenseNumber,
+    insurancePolicy,
+    references,
+    description,
+    files,
+    invite_id // Optional invite_id if updating invite status is required
+  } = req.body;
+
+  try {
+    // Check if contractor exists in the database
+    const userCheckQuery = `SELECT * FROM "Users" WHERE id = $1`; // Checking if the user exists
+    const userResult = await pool.query(userCheckQuery, [id]);
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // If the user is registered as a guest (role = 0), update role to contractor (role = 3)
+    let updatedRole = user.role;
+    if (updatedRole === 0) {  // If role is guest (0)
+      updatedRole = 3; // Change to contractor role
+    }
+
+    // Prepare the query to update contractor details
+    const updateQuery = `
+      UPDATE "Users" 
+      SET 
+        name = $1, 
+        company_name = $2, 
+        email = $3,
+        role = $4, -- Assign the updated role
+        status = 1, -- Ensuring status is active
+        phone = $5, 
+        website = $6, 
+        address = $7, 
+        city = $8, 
+        state = $9, 
+        postal_code = $10, 
+        service_category = $11, 
+        years_of_experience = $12, 
+        coverage_area = $13, 
+        license_number = $14, 
+        insurance_policy = $15, 
+        "references" = $16, 
+        description = $17, 
+        files = $18, 
+        "updatedAt" = NOW()
+      WHERE id = $19
+      RETURNING id, name, email, role;
+    `;
+
+    const values = [
+      fullName,              // name
+      companyName,           // company_name
+      email,                 // email
+      updatedRole,           // updated role (contractor if role was 0)
+      phone,                 // phone
+      website,               // website
+      address,               // address
+      city,                  // city
+      state,                 // state
+      zipCode,               // postal_code
+      serviceCategory,       // service_category
+      yearsOfExperience,     // years_of_experience
+      JSON.stringify(coverageArea), // coverage_area as JSON
+      licenseNumber,         // license_number
+      insurancePolicy,       // insurance_policy
+      JSON.stringify(references),  // references as JSON
+      description,           // description
+      JSON.stringify(files), // files as JSON
+      id                     // user id to be updated
+    ];
+
+    const result = await pool.query(updateQuery, values);
+    const updatedUser = result.rows[0];
+
+    // Optionally, update the invite status if invite_id is provided
+    if (invite_id) {
+      await pool.query(
+        `UPDATE "Invites" SET status = 0, "updated_at" = NOW() WHERE uuid = $1;`,
+        [invite_id]
+      );
+    }
+
+    // Fetch the menu based on the updated user's role
+    const menu = await getUserMenu(updatedUser.role);
+
+    // Prepare the response with updated user and menu
+    const responseJson = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      menu: menu // Attach the menu to the response
+    };
+
+    // Generate a token for the updated user
+    const token = generateToken(updatedUser, "1h");
+
+    // Send the response with the updated user and menu
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      token,
+      user: responseJson,
+    });
+
+  } catch (error) {
+    console.error('Error updating contractor:', error);
+    res.status(500).json({ message: 'Failed to update contractor', error: error.message });
+  }
+};
+
+
+
 export const registerRea = async (req, res) => {
   const {
     fullName,
@@ -364,6 +495,115 @@ export const registerRea = async (req, res) => {
   } catch (error) {
     console.error('Error registering contractor:', error);
     res.status(500).json({ message: 'Failed to register contractor', error: error.message });
+  }
+};
+
+export const updateRea = async (req, res) => {
+  const { id } = req.params; // Get user ID from the URL parameter
+  console.log(id)
+  const {
+    fullName,
+    companyName,
+    email,
+    phone,
+    website,
+    address,
+    city,
+    state,
+    zipCode,
+    serviceCategory,
+    yearsOfExperience,
+    coverageArea,
+    licenseNumber,
+    issuingAuthority,
+    specialties,
+    affiliations,
+    insurancePolicy,
+    references,
+    description,
+    files
+  } = req.body;
+
+  try {
+    // Update the user's details in the database
+    const updateQuery = `
+      UPDATE "Users" 
+      SET 
+        name = $1, 
+        company_name = $2, 
+        email = $3, 
+        status = 1, 
+        role = 2, 
+        phone = $4, 
+        website = $5, 
+        address = $6, 
+        city = $7, 
+        state = $8, 
+        postal_code = $9, 
+        service_category = $10, 
+        years_of_experience = $11, 
+        coverage_area = $12, 
+        license_number = $13, 
+        "issuingAuthority" = $14, 
+        specialties = $15, 
+        affiliations = $16, 
+        insurance_policy = $17, 
+        "references" = $18, 
+        description = $19, 
+        files = $20, 
+        "updatedAt" = NOW()
+      WHERE id = $21
+      RETURNING id, name, email, role;
+    `;
+
+    const values = [
+      fullName,              // name
+      companyName,           // company_name
+      email,                 // email
+      phone,                 // phone
+      website,               // website
+      address,               // address
+      city,                  // city
+      state,                 // state
+      zipCode,               // postal_code
+      serviceCategory,       // service_category
+      yearsOfExperience,     // years_of_experience
+      JSON.stringify(coverageArea), // coverage_area as JSON
+      licenseNumber,         // license_number
+      issuingAuthority,      // issuing_authority
+      JSON.stringify(specialties),  // specialties as JSON
+      JSON.stringify(affiliations), // affiliations as JSON
+      insurancePolicy,       // insurance_policy
+      JSON.stringify(references),  // references as JSON
+      description,           // description
+      JSON.stringify(files), // files as JSON
+      id                     // user id to be updated
+    ];
+
+    const result = await pool.query(updateQuery, values);
+    const updatedUser = result.rows[0];
+
+    // Fetch the menu based on the user's role
+    const menu = await getUserMenu(updatedUser.role);
+    // console.log(menu)
+    // Send response with the updated user and menu
+    const responseJson = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      menu: menu // Attach the menu
+    };
+    let token = generateToken(updatedUser, "1h");
+    // Send the response with the updated user and menu
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      token,
+      user: responseJson,
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };
 
@@ -547,11 +787,7 @@ export const loginUser = async (req, res) => {
     let menu = menuResult.rows;
 
     // Generate JWT
-    let token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    let token = generateToken(user, "1h");
 
     res.status(200).json({
       message: "Login successful",
@@ -713,11 +949,7 @@ export const clerkAuth = async (req, res) => {
 
 
     // Generate JWT
-    let token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    let token = generateToken(user, "1h");
 
     res.status(200).json({
       message: "Login successful",
@@ -734,4 +966,37 @@ export const clerkAuth = async (req, res) => {
     console.error("❌ Clerk Auth Error:", error.message);
     return res.status(401).json({ error: "Authentication failed" });
   }
+};
+
+//fetch menu against user role
+const getUserMenu = async (role) => {
+  const menuQuery = `
+    SELECT 
+      m.*,
+      r.privs
+    FROM "Menus" m
+    INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+    WHERE m.status = 1 AND r.role_id = $1
+    ORDER BY m.position ASC;
+  `;
+
+  const menuResult = await pool.query(menuQuery, [role]);
+  return menuResult.rows;
+};
+
+
+const generateToken = (user, expiry_time = "1h") => {
+  const JWT_SECRET_02 = process.env.JWT_SECRET; // Make sure JWT_SECRET is set in your environment variables
+
+  if (!JWT_SECRET_02) {
+    throw new Error("JWT_SECRET environment variable is not set");
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET_02,
+    { expiresIn: expiry_time }
+  );
+
+  return token;
 };

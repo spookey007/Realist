@@ -1,7 +1,9 @@
 import React, { useRef, useState,useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAuth as useAppAuth } from "../context/AuthContext";
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
 import { FilePond, registerPlugin } from 'react-filepond';
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,12 +71,14 @@ const validationSchema = Yup.object({
   issuingAuthority: Yup.string().required('Issuing Authority is required'),
 });
 
-const RegisterModal = ({ isOpen, closeModal }) => {
+const RegisterModal = ({ isOpen, closeModal, existingUser }) => {
+  const { login } = useAppAuth();
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const recaptchaRef = useRef();
   const [activeStep, setActiveStep] = useState(0);
   const filePondRef = useRef();
+  const navigate = useNavigate(); 
   const handleNext = async (validateForm, values, setTouched) => {
     const errors = await validateForm();
     const currentStepFields = stepFields[activeStep];
@@ -91,13 +95,17 @@ const RegisterModal = ({ isOpen, closeModal }) => {
   };
 
   const handleSubmit = async (values, { resetForm }) => {
-    console.log("submission received:", values);
+    const userId = existingUser?.id; // Get user id
+    const method = existingUser ? 'PUT' : 'POST'; // Use PUT if existingUser, else POST
+    const url = existingUser
+      ? `${import.meta.env.VITE_API_URL}/api/users/updateRea/${userId}` // Update URL
+      : `${import.meta.env.VITE_API_URL}/api/users/registerRea`; // Register URL
+  
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/registerRea`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Make the API request
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
           dateTime: selectedDateTime,
@@ -105,33 +113,51 @@ const RegisterModal = ({ isOpen, closeModal }) => {
           longitude: location.longitude,
         }),
       });
+  
       const responseData = await response.json();
-      // console.log(responseData)
+  
       if (response.ok) {
-        // alertify.success('User created successfully!');
-        resetForm(); // reset Formik
-        setActiveStep(0); // reset stepper
-        recaptchaRef.current.reset(); // reset captcha
-        filePondRef.current.removeFiles(); // ✅ reset FilePond files
-        closeModal(); // optional: close modal
-        alertify.alert(
-          "Thank You for Registering!",
-          `
-          <p>We have received your registration request on <strong>Realist</strong>. Our team is currently reviewing your application to ensure everything is in order.</p>
-          <p>You will receive a confirmation email once your account has been approved and activated.</p>
-          <p>In the meantime, if you have any questions, feel free to reach out to us.</p>
-          `, function () {
-          alertify.message("OK");
-          // navigate("/"); // Navigate to the home page after clicking OK
-        });
+        // Reset form and related UI states
+        resetForm();
+        setActiveStep(0);
+        recaptchaRef.current.reset();
+        filePondRef.current.removeFiles();
+  
+        // Update user state if the user exists
+        if (existingUser) {
+          login(responseData.user, responseData.tok);
+          handleSuccessAlert(existingUser, navigate);
+        } else {
+          handleSuccessAlert(existingUser, navigate); // No need to check again, just call it
+        }
       } else {
-        alertify.error(responseData.message);
+        alertify.error(responseData.message); // Display error if API response is not OK
       }
     } catch (error) {
       console.error(error);
       alertify.error('Something went wrong. Please try again.');
     }
   };
+  
+  // Handle success message and navigation
+  const handleSuccessAlert = (existingUser, navigate) => {
+    const message = existingUser
+      ? `<p>Your profile has been successfully updated!</p>`
+      : `<p>We have received your registration request on <strong>Realist</strong>. Our team is currently reviewing your application.</p>
+         <p>You will receive a confirmation email once your account has been approved and activated.</p>`;
+  
+    alertify.alert(
+      existingUser ? "Profile Updated!" : "Thank You for Registering!",
+      `${message}<p>In the meantime, if you have any questions, feel free to reach out to us.</p>`,
+      function () {
+        alertify.message("OK");
+        if (existingUser) {
+          //navigate("/dashboard"); // Redirect to dashboard if existing user
+        }
+      }
+    );
+  };
+  
   
 
   const fetchLocation = () => {
@@ -197,9 +223,9 @@ const RegisterModal = ({ isOpen, closeModal }) => {
           </Stepper>
           <Formik
               initialValues={{
-                fullName: '',
+                fullName: existingUser?.name || '',
                 companyName: '',
-                email: '',
+                email: existingUser?.email || '',
                 phone: '',
                 website: '',
                 address: '',
@@ -235,7 +261,12 @@ const RegisterModal = ({ isOpen, closeModal }) => {
                 )}
                 {activeStep === 1 && (
                   <>
-                    <Field name="email" placeholder="Email" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40" />
+                    <Field
+                      name="email"
+                      placeholder="Email"
+                      className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40"
+                      readOnly={!!existingUser?.email} // If there's an existing user with an email, make the field read-only
+                    />
                     <ErrorMessage name="email" component="div" className="text-red-600" />
                     <Field name="phone" placeholder="Phone" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                     <ErrorMessage name="phone" component="div" className="text-red-600" />

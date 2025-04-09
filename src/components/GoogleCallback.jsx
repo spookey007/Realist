@@ -8,7 +8,7 @@ export default function GoogleCallback() {
   const { isLoaded, getToken } = useAuth();
   const { isSignedIn, user } = useUser();
   const { setIsLoading } = useLoader();
-  const { setUser, login } = useAppAuth();
+  const { login } = useAppAuth();
   const navigate = useNavigate();
   const hasSynced = useRef(false); // 🧠 prevents double run
 
@@ -40,13 +40,9 @@ export default function GoogleCallback() {
 
         const data = await res.json();
         if (res.ok) {
-          login(data.user, data.tok);
+          login(data.user, data.token);
           setIsLoading(false);
-          setUser(data.user);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          localStorage.setItem("authToken", data.token);
-          navigate("/dashboard");
-          
+          navigate("/dashboard");          
         } else {
           alert("Failed to sync user.");
         }

@@ -3,6 +3,7 @@ import { useParams,useNavigate  } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAuth as useAppAuth } from "../context/AuthContext";
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
@@ -62,11 +63,13 @@ const validationSchema = Yup.object({
   captchaValue: Yup.string().required('Captcha is required'),
 });
 
-const Invite = () => {
+const Invite = ({ id: propId,existingUser }) => {
     const navigate = useNavigate();
-    const [isOpen, setisOpen] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const { login } = useAppAuth();
     // const [isModalOpen, setIsModalOpen] = useState(true);
-    const { id } = useParams(); // Invite ID from URL
+    const { id: urlId } = useParams(); // Invite ID from URL
+    const id = propId || urlId; 
     const [inviteValid, setInviteValid] = useState(false);
     const [loading, setLoading] = useState(true);
     const [inviteData, setInviteData] = useState(null); // to store invite if you want to prefill data later
@@ -96,50 +99,70 @@ const Invite = () => {
   };
 
   const handleSubmit = async (values, { resetForm }) => {
-    console.log("submission received:", values);
+    const userId = existingUser?.id; // Get user ID if existing user
+    const method = existingUser ? 'PUT' : 'POST'; // Use PUT if existing user, else POST
+    const url = existingUser
+      ? `${import.meta.env.VITE_API_URL}/api/users/updateContractor/${userId}` // Update URL
+      : `${import.meta.env.VITE_API_URL}/api/users/registerContractor`; // Register URL
+  
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/registerContractor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Make the API request
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
           dateTime: selectedDateTime,
           latitude: location.latitude,
           longitude: location.longitude,
-          invite_id:id
+          invite_id: id // Include invite_id if provided
         }),
       });
+  
       const responseData = await response.json();
-      // console.log(responseData)
-      if (response.ok)
-        {
-          resetForm(); // reset Formik
-          setActiveStep(0); // reset stepper
-          recaptchaRef.current.reset(); // reset captcha
-          filePondRef.current.removeFiles(); // ✅ reset FilePond files
-          closeModal?.();
-          alertify.alert(
-            "Thank You for Registering!",
-            `
-            <p>We have received your contractor registration request on <strong>Realist</strong>. Our team is currently reviewing your application to ensure everything is in order.</p>
-            <p>You will receive a confirmation email once your account has been approved and activated.</p>
-            <p>In the meantime, if you have any questions, feel free to reach out to us.</p>
-            `, function () {
-            alertify.message("OK");
-            navigate("/"); // Navigate to the home page after clicking OK
-          });
-        // alertify.success('User created successfully!');
-        
+  
+      if (response.ok) {
+        // Reset form and related UI states
+        resetForm();
+        setActiveStep(0);
+        recaptchaRef.current.reset();
+        filePondRef.current.removeFiles();
+  
+        // Handle success for existing user
+        if (existingUser) {
+          login(responseData.user, responseData.tok); // Update user login
+          handleSuccessAlert(existingUser, navigate); // Show success alert
+        } else {
+          handleSuccessAlert(existingUser, navigate); // New user, just call success alert
+        }
       } else {
-        alertify.error(responseData.message);
+        alertify.error(responseData.message); // Display error if API response is not OK
       }
     } catch (error) {
       console.error(error);
       alertify.error('Something went wrong. Please try again.');
     }
   };
+  
+  // Handle success message and navigation for Invite
+  const handleSuccessAlert = (existingUser, navigate) => {
+    const message = existingUser
+      ? `<p>Your contractor profile has been successfully updated!</p>`
+      : `<p>We have received your contractor registration request on <strong>Realist</strong>. Our team is currently reviewing your application.</p>
+         <p>You will receive a confirmation email once your account has been approved and activated.</p>`;
+  
+    alertify.alert(
+      existingUser ? "Profile Updated!" : "Thank You for Registering!",
+      `${message}<p>In the meantime, if you have any questions, feel free to reach out to us.</p>`,
+      function () {
+        alertify.message("OK");
+        if (existingUser) {
+          navigate("/dashboard"); // Redirect to dashboard for existing user
+        }
+      }
+    );
+  };
+  
   
 
   const fetchLocation = () => {
@@ -179,37 +202,44 @@ const Invite = () => {
 //   }, []);
 
 useEffect(() => {
+  // Only fetch invite data if `existingUser` is not provided
+  if (!existingUser) {
     const checkInvite = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/invites/${id}`);
         const data = await response.json();
 
         if (response.ok) {
-          
           setInviteValid(true);
           setInviteData(data.invite);
-          setisOpen(true);
-          // console.log(inviteData.email)
+          setIsOpen(true);
         } else {
           alertify.error(data.message || 'Invitation invalid or expired.');
           setInviteValid(false);
-          setisOpen(false);
-          setError(data.message)
+          setIsOpen(false);
+          setError(data.message);
         }
       } catch (error) {
-        setError(error)
+        setError(error);
         console.error('Error fetching invite:', error);
         alertify.error('Failed to validate invitation. Please try again later.');
         setInviteValid(false);
-        setError("Something went wrong please contact admin")
-        setisOpen(false);
+        setError("Something went wrong, please contact admin.");
+        setIsOpen(false);
       } finally {
         setLoading(false);
       }
     };
 
     checkInvite();
-  }, [id]);
+  } else {
+    // If existingUser is provided, use it directly and skip the fetch
+    setInviteData(existingUser);
+    setInviteValid(true); // If existingUser is passed, consider the invite valid
+    setIsOpen(true); // Show the modal since invite data exists
+    setLoading(false);
+  }
+}, [id, existingUser]);
 
   if (Error) {
     return <p className="text-center text-red-500 mt-8 font-bold">{Error}</p>; // ✅ Now will render if error exists
@@ -230,7 +260,7 @@ useEffect(() => {
           </Stepper>
           <Formik
               initialValues={{
-                fullName: '',
+                fullName: inviteData?.name || '',
                 companyName: '',
                 email: inviteData?.email || '',
                 phone: '',
