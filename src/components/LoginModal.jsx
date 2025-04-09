@@ -18,7 +18,8 @@ const now = new Date();
 const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
 
-const LoginModal = ({ isOpen, closeModal }) => {
+const LoginModal = ({ isOpen, closeModal,Method }) => {
+  const isSignIn = Method  === 1;
   const navigate = useNavigate();
   const [selectedDateTime, setSelectedDateTime] = useState(startOfToday);
   const [location, setLocation] = useState({ latitude: '', longitude: '' });
@@ -172,7 +173,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
           <button className="close-modal" onClick={closeModal}>
             &times;
           </button>
-          <h2 className="modal-title">Sign In</h2>
+          <h2 className="modal-title">{isSignIn ? "Sign In" : "Sign Up"}</h2>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -183,6 +184,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
               <div className=" p-6 rounded-xl space-y-6 ">
                 
                 {/* Email Field */}
+                {isSignIn && (
                 <div className="form-group">
                   <label htmlFor="email" className="block text-sm font-large text-gray-900">Email</label>
                   <Field
@@ -194,8 +196,9 @@ const LoginModal = ({ isOpen, closeModal }) => {
                   />
                   <ErrorMessage name="email" component="div" className="text-red-300 text-sm mt-1" />
                 </div>
-            
+                )}
                 {/* Password Field */}
+                {isSignIn && (
                 <div className="form-group">
                   <label htmlFor="password" className="block text-sm font-large text-gray-900">Password</label>
                   <Field
@@ -207,8 +210,9 @@ const LoginModal = ({ isOpen, closeModal }) => {
                   />
                   <ErrorMessage name="password" component="div" className="text-red-300 text-sm mt-1" />
                 </div>
-            
+                )}
                 {/* ReCAPTCHA */}
+                {isSignIn && (
                 <div className="form-group">
                   <ReCAPTCHA
                     ref={recaptchaRef}
@@ -217,59 +221,48 @@ const LoginModal = ({ isOpen, closeModal }) => {
                   />
                   <ErrorMessage name="captchaValue" component="div" className="text-red-300 text-sm mt-1" />
                 </div>
+                )}
             
-
+                
                 <div className="w-full max-w-xs mx-auto mb-6">
-  {/* Label */}
-  {/* <AnimatePresence mode="wait">
-    <motion.div
-      key={selectedRole}
-      initial={{ opacity: 0, y: -5 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 5 }}
-      transition={{ duration: 0.2 }}
-      className="text-center text-gray-500 font-semibold text-sm mb-3"
-    >
-      Signing in as: <span className="text-cyan-400">{selectedRole}</span>
-    </motion.div>
-  </AnimatePresence> */}
-
-  {/* Toggle Buttons */}
-            </div>
-
-
-                                {/* Submit Button */}
-                <button
-                type="submit"
-                disabled={isSubmitting}
-                className={` w-full group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
-                  ${
-                    isSubmitting
-                      ? "bg-white/30 text-white cursor-not-allowed border-white/20"
-                      : "bg-cyan-600 text-white border-neutral-200 hover:bg-cyan-700"
-                  }
-                  [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
-              >
-                {isSubmitting ? "Submitting..." : "Sign In"}
-              </button>
-              </div>
+                  </div>
+                  {/* Submit Button */}
+                  {isSignIn && (
+                      <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={` w-full group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
+                        ${
+                          isSubmitting
+                            ? "bg-white/30 text-white cursor-not-allowed border-white/20"
+                            : "bg-cyan-600 text-white border-neutral-200 hover:bg-cyan-700"
+                        }
+                        [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
+                    >
+                      {isSubmitting ? "Submitting..." : "Sign In"}
+                    </button>
+                    )}
+                  </div>
+                
             </Form>
             
             )}
           </Formik>
-          <div className="flex flex-col space-y-3 mb-6">
-                      <button
-                        onClick={handleGoogleClick}
-                        className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
-                      >
-                        <img
-                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-                          alt="Google"
-                          className="w-5 h-5"
-                        />
-                        <span className="font-medium">Login with Google</span>
-                      </button>
-                    </div>
+            <div className="flex flex-col space-y-3 mb-6">
+                <button
+                  onClick={handleGoogleClick}
+                  className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
+                >
+                  <img
+                    src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span className="font-medium">
+                    {isSignIn ? "Login with Google" : "Sign up with Google"}
+                  </span>
+                </button>
+            </div>
           </motion.div>
       </motion.div>
         )}

@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { useAuth } from "../context/AuthContext";
+import LoginModal from "./LoginModal";
 import heroImage from '../assets/images/front_info_03.png';
 import '../assets/css/hero.css';
 import Testimonials from './Testimonials';
 import Talk from './Talk';
-import RegisterModal from './RegisterModal'; // Import Modal
+// import RegisterModal from './RegisterModal'; // Import Modal
 
 const Hero = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { user } = useAuth();
     const threeRef = useRef(null);
     const modelPath = '/assets/anims/scene.gltf'; // Ensure the file is inside public/assets/anims/
   
@@ -118,6 +120,10 @@ const Hero = () => {
                   Realist combines advanced AI, detailed property data, and curated contractor networks to simplify your workflow and maximize client satisfaction.
                
               </div>
+              {user ? (
+              <div className="mt-6 text-center">
+              </div>
+            ) : (
               <div className="mt-6 text-center">
                 <button
                   onClick={openModal}
@@ -125,7 +131,9 @@ const Hero = () => {
                 >
                   Register
                 </button>
+                
               </div>
+            )}
             </section>
           </div>
         </div>
@@ -146,8 +154,8 @@ const Hero = () => {
       </div>
 
       {/* Include Modal */}
-      <RegisterModal isOpen={isModalOpen} closeModal={closeModal} />
-
+      {/* Method='0' means sign up */}
+      <LoginModal isOpen={isModalOpen} closeModal={closeModal} Method={0} />
       {/* <div className="container mx-auto px-6 py-12 bg-black/30 rounded-lg">
    
           <Testimonials />

@@ -59,8 +59,8 @@ const Header = () => {
           <Button onClick={handleConfirmLogout} color="error">Logout</Button>
         </DialogActions>
       </Dialog>
-
-      <LoginModal isOpen={isModalOpen} closeModal={closeLModal} />
+      {/* Method='1' means sign in */}
+      <LoginModal isOpen={isModalOpen} closeModal={closeLModal} Method={1} />
     </>
   );
 };
