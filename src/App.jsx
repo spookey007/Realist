@@ -29,7 +29,9 @@ window.alertify = alertify;
 import FullPageLoader from './components/FullPageLoader';
 
 import ClerkSyncHandler from "./components/ClerkSyncHandler";
+
 import GoogleCallback from "./components/GoogleCallback";
+import SsoCallback from './components/SsoCallback';
 
 import { useAuth } from "../src/context/AuthContext"; 
 
@@ -69,6 +71,8 @@ const App = () => {
             <Route path="/invite/:id" element={<InvitePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/google-callback" element={<GoogleCallback />} />
+            <Route path="/sso-callback" element={<SsoCallback />} />
+
             <Route path="/*" element={
                 <AdminRoutes />
             } />

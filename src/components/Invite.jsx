@@ -115,7 +115,7 @@ const Invite = ({ id: propId,existingUser }) => {
           dateTime: selectedDateTime,
           latitude: location.latitude,
           longitude: location.longitude,
-          invite_id: id // Include invite_id if provided
+          invite_id: id
         }),
       });
   

@@ -9,10 +9,13 @@ import '../assets/css/hero.css';
 import Testimonials from './Testimonials';
 import Talk from './Talk';
 // import RegisterModal from './RegisterModal'; // Import Modal
+import useClerkAuthHome from '../hooks/useClerkAuthHome'; // adjust path if needed
 
 const Hero = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { user } = useAuth();
+
+    useClerkAuthHome();
     const threeRef = useRef(null);
     const modelPath = '/assets/anims/scene.gltf'; // Ensure the file is inside public/assets/anims/
   

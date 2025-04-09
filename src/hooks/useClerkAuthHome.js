@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useLoader } from "../context/LoaderContext";
 import { useAuth as useAppAuth } from "../context/AuthContext";
 
-export default function GoogleCallback() {
+export default function useClerkAuthHome() {
   const { isLoaded, getToken } = useAuth();
   const { isSignedIn, user } = useUser();
   const { setIsLoading } = useLoader();
@@ -13,19 +13,16 @@ export default function GoogleCallback() {
   const hasSynced = useRef(false); // 🧠 prevents double run
 
   useEffect(() => {
-    setIsLoading(true);
     const syncUser = async () => {
-      console.log(isLoaded)
-      console.log(isSignedIn)
-      console.log(user)
       if (!isLoaded || !isSignedIn || !user) return;
-
       if (hasSynced.current) return;
       hasSynced.current = true;
-      
-      console.log("Clerk Loaded:", isLoaded);
-      console.log("Signed In:", isSignedIn);
-      console.log("User:", user);
+
+      setIsLoading(true);
+
+      console.log("🔄 Clerk Loaded:", isLoaded);
+      console.log("🔄 Signed In:", isSignedIn);
+      console.log("🔄 User:", user);
 
       const token = await getToken();
       const email = user?.emailAddresses?.[0]?.emailAddress;
@@ -45,17 +42,17 @@ export default function GoogleCallback() {
         if (res.ok) {
           login(data.user, data.token);
           setIsLoading(false);
-          navigate("/dashboard");          
+          navigate("/dashboard");
         } else {
           alert("Failed to sync user.");
+          setIsLoading(false);
         }
       } catch (err) {
-        console.error("❌ Sync error:", err);
+        console.error("❌ Clerk sync error:", err);
+        setIsLoading(false);
       }
     };
 
     syncUser();
   }, [isLoaded, isSignedIn, user]);
-
-  return <div className="p-8 text-white">Finishing Google login...</div>;
 }

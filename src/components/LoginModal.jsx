@@ -34,18 +34,27 @@ const LoginModal = ({ isOpen, closeModal,Method }) => {
 
   
   const handleGoogleClick = async () => {
-    // await logout();
     if (!isLoaded || !signIn) return;
     setIsLoading(true);
+  
     try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: `${window.location.origin}/google-callback`,
-        redirectUrlComplete: `${window.location.origin}/google-callback`,
-      });
-      
+      await signIn
+        .authenticateWithRedirect({
+          strategy: 'oauth_google', // or "oauth_facebook" for Facebook
+          redirectUrl: '/sso-callback',
+          redirectUrlComplete: `${window.location.origin}/`,
+        })
+        .then((res) => {
+          console.log("✅ Clerk redirect initiated:", res);
+        })
+        .catch((err) => {
+          console.log("❌ Clerk OAuth Error:", err?.errors);
+          console.error("OAuth Sign-in failed:", err);
+          setIsLoading(false);
+        });
     } catch (err) {
       console.error("Google login failed:", err);
+      setIsLoading(false);
     }
   };
   
