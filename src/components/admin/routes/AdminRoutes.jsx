@@ -9,6 +9,7 @@ import Roles from "../Roles";
 import Invites from "../Invites";
 import MenuManagement from "../MenuManagement";
 import Services from "../Services";
+import ServiceTypes from "../ServiceTypes";
 import Listings from "../Listings";
 import Reports from "../Reports";
 import UserPrivileges from "../UserPrivileges";
@@ -20,10 +21,10 @@ const AdminRoutes = () => {
   const { user, menu } = useAuth(); // Get user and menu from context or API response
 
   // Check if the user has no menu rights and role is 0 (guest)
-  if (user && Array.isArray(menu) && menu.length === 0 && user.role === 0) {
-    // If menu is empty and the role is 0 (guest), show the GuestForm
-    return <GuestForm />;
-  }
+  // if (user && Array.isArray(menu) && menu.length === 0 && user.role === 0) {
+  //   // If menu is empty and the role is 0 (guest), show the GuestForm
+  //   return <GuestForm />;
+  // }
 
   // Check if user has menu rights to access specific routes
   const hasPermission = (menuItem) => {
@@ -66,6 +67,10 @@ const AdminRoutes = () => {
         <Route
           path="services"
           element={hasPermission("/services") ? <Services /> : <Navigate to="/" />}
+        />
+        <Route
+          path="servicetype"
+          element={hasPermission("/servicetype") ? <ServiceTypes /> : <Navigate to="/" />}
         />
         <Route
           path="reports"

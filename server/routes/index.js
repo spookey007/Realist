@@ -8,7 +8,7 @@ import InviteRoutes from './InviteRoutes.js';
 import MenuRoutes from './MenuRoutes.js';
 import propertiesRoutes from './propertiesRoutes.js';
 import servicesRoutes from './servicesRoutes.js';
-import serviceTypeRoutes from './serviceTypes.js';
+import serviceTypeRoutes from './serviceTypesRoutes.js';
 
 const router = express.Router();
 

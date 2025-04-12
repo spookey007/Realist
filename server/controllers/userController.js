@@ -924,17 +924,26 @@ export const clerkAuth = async (req, res) => {
       user = checkResult.rows[0];
 
       // ✅ Step 5: Fetch role-based menu if role != 0
-      if (user.role !== 0) {
-        const menuQuery = `
-          SELECT m.*, r.privs
-          FROM "Menus" m
-          INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
-          WHERE m.status = 1 AND r.role_id = $1
-          ORDER BY m.position ASC;
-        `;
-        const menuResult = await pool.query(menuQuery, [user.role]);
-        menu = menuResult.rows;
-      }
+      // if (user.role !== 0) {
+      //   const menuQuery = `
+      //     SELECT m.*, r.privs
+      //     FROM "Menus" m
+      //     INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+      //     WHERE m.status = 1 AND r.role_id = $1
+      //     ORDER BY m.position ASC;
+      //   `;
+      //   const menuResult = await pool.query(menuQuery, [user.role]);
+      //   menu = menuResult.rows;
+      // }
+      const menuQuery = `
+        SELECT m.*, r.privs
+        FROM "Menus" m
+        INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
+        WHERE m.status = 1 AND r.role_id = $1
+        ORDER BY m.position ASC;
+      `;
+      const menuResult = await pool.query(menuQuery, [user.role]);
+      menu = menuResult.rows;
     } else {
       // 6. Create user if not found
       const insertQuery = `

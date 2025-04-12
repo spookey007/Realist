@@ -71,14 +71,28 @@ const validationSchema = Yup.object({
   issuingAuthority: Yup.string().required('Issuing Authority is required'),
 });
 
-const RegisterModal = ({ isOpen, closeModal, existingUser }) => {
+const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
+
   const { login } = useAppAuth();
+  const [isModalOpen, setIsModalOpen] = useState(isOpen);
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const recaptchaRef = useRef();
   const [activeStep, setActiveStep] = useState(0);
   const filePondRef = useRef();
   const navigate = useNavigate(); 
+
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    closeModal?.();
+  };
+  
+
+
   const handleNext = async (validateForm, values, setTouched) => {
     const errors = await validateForm();
     const currentStepFields = stepFields[activeStep];
@@ -198,7 +212,7 @@ const RegisterModal = ({ isOpen, closeModal, existingUser }) => {
 
   return (
 <AnimatePresence>
-  {isOpen && (
+  {isModalOpen && (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -213,7 +227,6 @@ const RegisterModal = ({ isOpen, closeModal, existingUser }) => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="bg-gray-500/20  rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[100vh] overflow-y-auto modal-content"
     >
-          <button className="close-modal" onClick={closeModal}>&times;</button>
           <h2 className="modal-title">Register</h2>
           <p className="text-center text-sm text-black-800 my-2 font-semibold">For Real Estate Agent</p>
           <Stepper activeStep={activeStep} alternativeLabel>
@@ -521,45 +534,46 @@ const RegisterModal = ({ isOpen, closeModal, existingUser }) => {
                   )}
 
                 <div className="flex justify-between mt-4">
-                {/* Back Button */}
-                <button
-                  disabled={activeStep === 0}
-                  onClick={() => setActiveStep((prev) => prev - 1)}
-                  className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
-                    ${
-                      activeStep === 0
-                        ? "bg-white/30 text-black cursor-not-allowed border-white/20"
-                        : "bg-white text-cyan-600 border-cyan-600 hover:bg-cyan-50"
-                    }
-                    [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
-                >
-                  Back
-                </button>
-
-                {/* Conditional Submit Button (Final Step) */}
-                {activeStep === steps.length - 1 ? (
+                  {/* Back Button - Fixed version */}
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
-                      ${
-                        isSubmitting
-                          ? "bg-cyan-600/60 text-white cursor-not-allowed"
-                          : "bg-cyan-600 text-white hover:bg-cyan-700"
+                    type="button"
+                    onClick={() => {
+                      if (activeStep === 0) {
+                        onBack?.();
+                      } else {
+                        setActiveStep((prev) => prev - 1); // Normal back navigation
                       }
-                      border-neutral-200
-                      [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
+                    }}
+                    className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100 bg-white/30 text-black border-white/20 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
                   >
-                    Submit
+                    Back
                   </button>
-                ) : (
-                  <button
-                    onClick={() => handleNext(validateForm, values, setTouched)}
-                    className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-blue-600 px-6 font-medium text-white transition-all duration-100 hover:bg-blue-700 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
-                  >
-                    Next
-                  </button>
-                )}
+
+                  {/* Next/Submit Button */}
+                  {activeStep === steps.length - 1 ? (
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
+                        ${
+                          isSubmitting
+                            ? "bg-cyan-600/60 text-white cursor-not-allowed"
+                            : "bg-cyan-600 text-white hover:bg-cyan-700"
+                        }
+                        border-neutral-200
+                        [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleNext(validateForm, values, setTouched)}
+                      className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-blue-600 px-6 font-medium text-white transition-all duration-100 hover:bg-blue-700 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                    >
+                      Next
+                    </button>
+                  )}
                 </div>
               </Form>
             )}

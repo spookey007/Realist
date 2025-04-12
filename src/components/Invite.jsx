@@ -6,6 +6,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { useAuth as useAppAuth } from "../context/AuthContext";
 import { Stepper, Step, StepLabel, Button } from '@mui/material';
 import { FilePond, registerPlugin } from 'react-filepond';
+import { motion, AnimatePresence } from "framer-motion";
 import 'filepond/dist/filepond.min.css';
 
 // Plugins
@@ -63,11 +64,9 @@ const validationSchema = Yup.object({
   captchaValue: Yup.string().required('Captcha is required'),
 });
 
-const Invite = ({ id: propId,existingUser }) => {
-    const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false);
+const Invite = ({ id: propId,existingUser, isOpen, closeModal, onBack }) => {
     const { login } = useAppAuth();
-    // const [isModalOpen, setIsModalOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(isOpen);
     const { id: urlId } = useParams(); // Invite ID from URL
     const id = propId || urlId; 
     const [inviteValid, setInviteValid] = useState(false);
@@ -79,23 +78,35 @@ const Invite = ({ id: propId,existingUser }) => {
     const recaptchaRef = useRef();
     const [activeStep, setActiveStep] = useState(0);
     const filePondRef = useRef();
-    const handleNext = async (validateForm, values, setTouched) => {
-    const errors = await validateForm();
-    const currentStepFields = stepFields[activeStep];
-    const stepErrors = Object.keys(errors).filter((key) => currentStepFields.includes(key));
-    if (stepErrors.length > 0) {
-      // Mark fields as touched to show errors
-      const touchedFields = {};
-      currentStepFields.forEach((field) => (touchedFields[field] = true));
-      setTouched(touchedFields);
-      alertify.error('Please fill out all required fields in this step.');
-    } else {
-      setActiveStep((prev) => prev + 1);
-    }
-  };
+    const navigate = useNavigate();
 
-  const closeModal = () => {
-    setisOpen(false);
+    const handleNext = async (validateForm, values, setTouched) => {
+      const errors = await validateForm();
+      const currentStepFields = stepFields[activeStep];
+      const stepErrors = Object.keys(errors).filter((key) => currentStepFields.includes(key));
+      if (stepErrors.length > 0) {
+        // Mark fields as touched to show errors
+        const touchedFields = {};
+        currentStepFields.forEach((field) => (touchedFields[field] = true));
+        setTouched(touchedFields);
+        alertify.error('Please fill out all required fields in this step.');
+      } else {
+        setActiveStep((prev) => prev + 1);
+      }
+    };
+
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
+
+  const handleClose = () => {
+    // Just call the parent's closeModal function
+    setIsModalOpen(false);
+    closeModal?.();
+    // Reset form state if needed
+    // setActiveStep(0);
+    if (recaptchaRef.current) recaptchaRef.current.reset();
+    if (filePondRef.current) filePondRef.current.removeFiles();
   };
 
   const handleSubmit = async (values, { resetForm }) => {
@@ -202,9 +213,10 @@ const Invite = ({ id: propId,existingUser }) => {
 //   }, []);
 
 useEffect(() => {
-  // Only fetch invite data if `existingUser` is not provided
-  if (!existingUser) {
-    const checkInvite = async () => {
+  const fetchOrSetInvite = async () => {
+    setLoading(true);
+
+    if (!existingUser) {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/invites/${id}`);
         const data = await response.json();
@@ -212,45 +224,57 @@ useEffect(() => {
         if (response.ok) {
           setInviteValid(true);
           setInviteData(data.invite);
-          setIsOpen(true);
+          setIsModalOpen(true);
         } else {
-          alertify.error(data.message || 'Invitation invalid or expired.');
           setInviteValid(false);
-          setIsOpen(false);
+          setIsModalOpen(false);
           setError(data.message);
+          alertify.error(data.message || 'Invitation invalid or expired.');
         }
       } catch (error) {
-        setError(error);
-        console.error('Error fetching invite:', error);
-        alertify.error('Failed to validate invitation. Please try again later.');
+        setError(error.message || 'Unknown error');
         setInviteValid(false);
-        setError("Something went wrong, please contact admin.");
-        setIsOpen(false);
+        setIsModalOpen(false);
+        alertify.error('Failed to validate invitation. Please try again later.');
       } finally {
         setLoading(false);
       }
-    };
+    } else {
+      // Handle local user as invite
+      setInviteData(existingUser);
+      setInviteValid(true);
+      setIsModalOpen(true);
+      setLoading(false);
+    }
+  };
 
-    checkInvite();
-  } else {
-    // If existingUser is provided, use it directly and skip the fetch
-    setInviteData(existingUser);
-    setInviteValid(true); // If existingUser is passed, consider the invite valid
-    setIsOpen(true); // Show the modal since invite data exists
-    setLoading(false);
-  }
-}, [id, existingUser]);
+  fetchOrSetInvite();
+}, [id, existingUser, isOpen, closeModal]);
+
 
   if (Error) {
     return <p className="text-center text-red-500 mt-8 font-bold">{Error}</p>; // ✅ Now will render if error exists
   }
   
-//   console.log(isOpen)
-  return (
-    isOpen && (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <button className="close-modal" onClick={closeModal}>&times;</button>
+
+return (
+  <AnimatePresence>
+    {isModalOpen && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} // smoother easeOutExpo
+        className="bg-white/10 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center bg-black/50" // darker backdrop
+      >
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 30 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-gray-500/20  rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[100vh] overflow-y-auto modal-content"
+      >
+
           <h2 className="modal-title">Registration Form </h2>
           <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Contractor</p>
           <Stepper activeStep={activeStep} alternativeLabel>
@@ -504,32 +528,65 @@ useEffect(() => {
                     </>
                   )}
 
-                <div className="flex justify-between mt-4">
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={() => setActiveStep((prev) => prev - 1)}
-                    variant="outlined"
-                  >
-                    Back
-                  </Button>
-                  {activeStep === steps.length - 1 ? (
-                    <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>Submit</Button>
-                  ) : (
-                    <Button
-                      onClick={() => handleNext(validateForm, values, setTouched)}
-                      variant="contained"
-                      color="primary"
+                  <div className="flex justify-between mt-4">
+                    {/* Back Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeStep === 0) {
+                          onBack?.(); // Handle custom back action for first step
+                        } else {
+                          setActiveStep((prev) => prev - 1); // Normal back navigation
+                        }
+                      }}
+                      className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100 bg-white/30 text-black border-white/20 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
                     >
-                      Next
-                    </Button>
-                  )}
-                </div>
-              </Form>
+                      Back
+                    </button>
+
+                    {/* Next/Submit Button */}
+                    {activeStep === steps.length - 1 ? (
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
+                          ${
+                            isSubmitting
+                              ? "bg-cyan-600/60 text-white cursor-not-allowed"
+                              : "bg-cyan-600 text-white hover:bg-cyan-700"
+                          }
+                          border-neutral-200
+                          [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
+                      >
+                        {isSubmitting ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                          </span>
+                        ) : (
+                          "Submit"
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleNext(validateForm, values, setTouched)}
+                        className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-blue-600 px-6 font-medium text-white transition-all duration-100 hover:bg-blue-700 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+                      >
+                        Next
+                      </button>
+                    )}
+                  </div>
+                </Form>
             )}
           </Formik>
-        </div>
-      </div>
-    )
+          </motion.div>
+      </motion.div>
+        )}
+</AnimatePresence>
   );
 };
 

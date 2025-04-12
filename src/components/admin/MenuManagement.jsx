@@ -474,7 +474,7 @@ const MenuManagement = () => {
                     : "border-green-500 text-green-600 [box-shadow:5px_5px_rgb(34_197_94)] hover:bg-green-100 active:[box-shadow:0px_0px_rgb(34_197_94)]"
                 }`}
               >
-                {editItem ? "Update" : "Send Invite"}
+                {editItem ? "Update" : "Submit"}
               </button>
             </DialogActions>
 
