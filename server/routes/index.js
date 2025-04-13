@@ -22,6 +22,6 @@ router.use('/invites', InviteRoutes);
 router.use('/menu', MenuRoutes);
 router.use('/properties', propertiesRoutes);
 router.use('/services', servicesRoutes);
-router.use('/servicestypes', serviceTypeRoutes);
+router.use('/service-types', serviceTypeRoutes);
 
 export default router;

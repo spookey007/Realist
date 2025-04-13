@@ -40,9 +40,16 @@ export default function useClerkAuthHome() {
 
         const data = await res.json();
         if (res.ok) {
+          console.log(data.user.role)
           login(data.user, data.token);
           setIsLoading(false);
-          navigate("/dashboard");
+          if(data.user.role==0){
+            navigate("/services");
+          }
+          else{
+            navigate("/dashboard");
+          }
+          
         } else {
           alert("Failed to sync user.");
           setIsLoading(false);

@@ -3,159 +3,253 @@ import { useDispatch, useSelector } from "react-redux";
 import { openModal, closeModal } from "../../redux/modalSlice";
 import MobileModal from "../modals/ServicesModal/MobileModal";
 import DesktopModal from "../modals/ServicesModal/DesktopModal";
+import ServiceTypeModal from "../modals/ServicesModal/ServiceTypeModal";
 import WebListings from "../ui/Services/WebListings";
 import MobileListings from "../ui/Services/MobileListings";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useDevice } from "../../context/DeviceContext";
 import { useAuth } from '../../context/AuthContext';
-
+import alertify from "alertifyjs";
+import "alertifyjs/build/css/alertify.css";
 
 const Services = () => {
   const { user } = useAuth();
   const dispatch = useDispatch();
-  const { isOpen, modalType } = useSelector((state) => state.modal);
+  const { isOpen, modalType, modalComponent } = useSelector((state) => state.modal);
   const [listingsData, setListingsData] = useState([]);
-  const { isMobile,isTablet } = useDevice();
-  const handleOpenModal = () => {
-    const deviceType = isMobile || isTablet ? "mobile" : "desktop";
-    dispatch(openModal({ modalType: deviceType, modalComponent: "Listings" }));
-  };
-  const add_allow_role = 3;
-  const edit_allow_roles = [1, 3];
-  const canEdit = edit_allow_roles.includes(user?.role);
+  const { isMobile, isTablet } = useDevice();
   
-   // Fetch properties from API
-   const fetchServices = async () => {
+  // Role constants
+  const ADMIN_ROLE = 1;
+  const CONTRACTOR_ROLE = 3;
+  const isAdmin = user?.role === ADMIN_ROLE;
+  const isContractor = user?.role === CONTRACTOR_ROLE;
+  const canEdit = [ADMIN_ROLE, CONTRACTOR_ROLE].includes(user?.role);
+
+  const handleOpenServiceModal = () => {
+    const deviceType = isMobile || isTablet ? "mobile" : "desktop";
+    dispatch(openModal({ modalType: deviceType, modalComponent: "Service" }));
+  };
+
+  const handleOpenServiceTypeModal = () => {
+    dispatch(openModal({ modalType: "desktop", modalComponent: "ServiceType" }));
+  };
+  
+  const fetchServices = async () => {
     try {
       const params = {};
   
       // If user has restricted role, only get active services
-      if (![1, 3].includes(user?.role)) {
+      if (![ADMIN_ROLE, CONTRACTOR_ROLE].includes(user?.role)) {
         params.status = 1;
       }
   
-      // Only send userId for allowed role (example: role 2)
-      if (user?.role === add_allow_role) {
+      // Only send userId for contractor role
+      if (user?.role === CONTRACTOR_ROLE) {
         params.userId = user.id;
       }
   
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/services/`,
+        `${import.meta.env.VITE_API_URL}/api/services`,
         { params }
       );
   
-      setListingsData(response.data);
+      // Handle the API response structure correctly
+      const { servicesByType } = response.data;
+      setListingsData(servicesByType || []);
     } catch (error) {
       console.error("Error fetching services:", error);
+      alertify.error("Failed to fetch services");
     }
   };
-  
-  
 
+  // Only fetch on mount
   useEffect(() => {
-    fetchServices();
-  }, []);
+    let isMounted = true;
+    let hasFetched = false;
 
-  const handleSubmit = async (values) => {
+    const fetchData = async () => {
+      if (!isMounted || hasFetched || !user?.id) return;
+      hasFetched = true;
+      await fetchServices();
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
+
+  const handleServiceSubmit = async (values) => {
     try {
-        console.log("Form Data:", values);
+      if (!user?.id) {
+        alertify.error("User is not logged in.");
+        return;
+      }
 
-        // Retrieve the logged-in user from localStorage
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || !user.id) {
-            alert("User is not logged in.");
-            return;
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/services`,
+        {
+          ...values,
+          user_id: user.id,
         }
+      );
 
-        const created_by = user.id; 
-
-        const { address, propertyType, price, ...otherDetails } = values;
-
-        const payload = {
-            created_by,  
-            service_name: values.service,
-            description: values.description
-        };
-        // console.log(payload)
-        // return false
-        // Send a POST request to create a new service
-        const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/api/services/`,
-            payload
-        );
-
-        if (response.data && response.data.message) {
-            alertify.success(response.data.message);
-        } else {
-            alertify.success("Service created successfully!");
-        }
-
+      if (response.status === 201) {
+        alertify.success("Service created successfully");
+        dispatch(closeModal());
         fetchServices();
-        dispatch(closeModal()); // Close the modal after successful submission
+      } else {
+        alertify.error("Something went wrong");
+      }
     } catch (error) {
-        console.error("Error submitting service:", error);
-        alertify.error("Error submitting service. Please try again later.");
+      console.error("Failed to create service:", error);
+      alertify.error("Something went wrong");
     }
-};
+  };
 
+  const handleServiceTypeSubmit = async (values) => {
+    try {
+      if (!user?.id) {
+        alertify.error("User is not logged in.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/service-types`,
+        values
+      );
+
+      if (response.status === 201) {
+        alertify.success("Service type created successfully");
+        dispatch(closeModal());
+        fetchServices();
+      } else {
+        alertify.error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Failed to create service type:", error);
+      alertify.error("Something went wrong");
+    }
+  };
 
   return (
-    <div className="pt-5 flex flex-col gap-5">
-      {/* Button for Desktop */}
-      {!isMobile && user?.role === add_allow_role && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-        >
-          <button
-            onClick={handleOpenModal}
-            className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
-          >
-            Add New Service
-          </button>
-        </motion.div>
-      )}
+    <div>
+      {!isMobile ? (
 
-      {/* Full-Width Sticky Button for Mobile */}
-      {isMobile && user?.role === add_allow_role && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="fixed left-0 mt-5 px-2 mb-10 top-12 w-full z-50"
-        >
-          <button
-            onClick={handleOpenModal}
-            className="group w-full relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-purple-500 text-white px-6 font-medium transition-all [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
-          >
-            Add New Service
-          </button>
-        </motion.div>
-      )}
+          <div className="flex flex-wrap gap-3 mb-6 md:mb-0">
+          {/* Add Service Button (Contractor) */}
+          {isContractor && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <button
+                onClick={handleOpenServiceModal}
+                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md px-6 font-medium transition-all border-neutral-200 bg-purple-500 text-white [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
+              >
+                Add New Service
+              </button>
+            </motion.div>
+          )}
+          
+          {/* Add Service Type Button (Admin) */}
+          {isAdmin && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <button
+                onClick={handleOpenServiceTypeModal}
+                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md px-6 font-medium transition-all border-neutral-200 bg-blue-500 text-white [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
+              >
+                Add New Service Type
+              </button>
+            </motion.div>
+          )}
+        </div>
+        ) : (
 
-      {/* Render Modal Based on Device Type */}
-      {modalType === "mobile" ? (
+
+          <div className="fixed bottom-[70px] left-0 right-0 bg-white border-t border-gray-200 p-4 flex flex-col gap-3 shadow-lg md:hidden">
+
+        {isContractor && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-full"
+          >
+            <button
+              onClick={handleOpenServiceModal}
+              className="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-md px-6 font-medium transition-all border-neutral-200 bg-purple-500 text-white [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
+            >
+              
+              Add New Service
+            </button>
+          </motion.div>
+        )}
+        
+        {/* Add Service Type Button (Admin) */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-full"
+          >
+            <button
+              onClick={handleOpenServiceTypeModal}
+              className="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-md px-6 font-medium transition-all border-neutral-200 bg-blue-500 text-white [box-shadow:0px_4px_1px_#a3a3a3] active:translate-y-[2px] active:shadow-none"
+            >
+              Add New Service Type
+            </button>
+          </motion.div>
+        )}
+      </div>
+        )}
+
+      {/* Modals */}
+      {modalType === "mobile" && modalComponent === "Service" ? (
         <MobileModal
-          onSubmit={handleSubmit}
+          onSubmit={handleServiceSubmit}
           isOpen={isOpen}
           onClose={() => dispatch(closeModal())}
         />
-      ) : (
+      ) : modalType === "desktop" && modalComponent === "Service" ? (
         <DesktopModal
-          onSubmit={handleSubmit}
+          onSubmit={handleServiceSubmit}
           isOpen={isOpen}
           onClose={() => dispatch(closeModal())}
         />
-      )}
+      ) : modalType === "desktop" && modalComponent === "ServiceType" ? (
+        <ServiceTypeModal
+          onSubmit={handleServiceTypeSubmit}
+          isOpen={isOpen}
+          onClose={() => dispatch(closeModal())}
+        />
+      ) : null}
 
-      {/* Listings Grid */}
-      {isMobile ? (
-        <MobileListings listings={listingsData} fetchServices={fetchServices} canEdit={canEdit}/>
-      ) : (
-        <WebListings listings={listingsData} fetchServices={fetchServices} canEdit={canEdit} />
-      )}
+      {/* Service Listings */}
+      <div className="mt-0 mb-10">
+        {isMobile ? (
+          <MobileListings 
+            listings={listingsData} 
+            fetchServices={fetchServices} 
+            canEdit={canEdit}
+          />
+        ) : (
+          <WebListings 
+            listings={listingsData} 
+            fetchServices={fetchServices} 
+            canEdit={canEdit}
+          />
+        )}
+      </div>
     </div>
   );
 };

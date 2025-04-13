@@ -29,11 +29,28 @@ export const getServiceTypeById = async (req, res) => {
 // POST /service-types
 export const createServiceType = async (req, res) => {
   const { service_type_name } = req.body;
+  
+  if (!service_type_name) {
+    return res.status(400).json({ error: 'Service type name is required' });
+  }
+  
   try {
-    const result = await pool.query(
-      'INSERT INTO "ServiceTypes" (id, service_type_name, created_at) VALUES (gen_random_uuid(), $1, NOW()) RETURNING *',
+    // Check if service type with the same name already exists
+    const existingType = await pool.query(
+      'SELECT * FROM "ServiceTypes" WHERE LOWER(service_type_name) = LOWER($1)',
       [service_type_name]
     );
+    
+    if (existingType.rows.length > 0) {
+      return res.status(409).json({ error: 'A service type with this name already exists' });
+    }
+    
+    // Create new service type with active status
+    const result = await pool.query(
+      'INSERT INTO "ServiceTypes" (id, service_type_name, created_at, status) VALUES (gen_random_uuid(), $1, NOW(), 1) RETURNING *',
+      [service_type_name]
+    );
+    
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error creating service type:', error);

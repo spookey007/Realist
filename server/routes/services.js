@@ -27,4 +27,4 @@ router.delete('/:serviceId', servicesController.deleteService);
 // Get services with type
 router.get('/with-type', servicesController.getServicesWithType);
 
-export default router;
+export default router; 

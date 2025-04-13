@@ -32,21 +32,61 @@ const allUserFields = {
     issuingAuthority: `u."issuingAuthority"`,
     specialties: `u.specialties`,
     affiliations: `u.affiliations`,
-  };
-  
-  export const userJoin = (
-    fieldRef = "s.created_by",
-    selectedFields = null // null means "use all"
-  ) => {
-    const joinClause = `LEFT JOIN "Users" u ON ${fieldRef} = u.id`;
-  
-    const userFields = selectedFields
-      ? selectedFields.map((key) => allUserFields[key]).filter(Boolean)
-      : Object.values(allUserFields); // default: include all
-  
-    return {
-      joinClause,
-      userFields,
-    };
-  };
+};
+
+export const userJoin = async (rows, fieldRef = "created_by") => {
+    if (!rows || !rows.length) return rows;
+
+    // Get all user IDs from the rows
+    const userIds = rows.map(row => row[fieldRef]).filter(Boolean);
+    if (!userIds.length) return rows;
+
+    // Get the pool from the db module
+    const { pool } = await import('../db/db.js');
+
+    // Fetch all users in a single query
+    const usersResult = await pool.query(
+        `SELECT * FROM "Users" WHERE id = ANY($1)`,
+        [userIds]
+    );
+
+    // Create a map of users by ID
+    const usersMap = usersResult.rows.reduce((acc, user) => {
+        acc[user.id] = user;
+        return acc;
+    }, {});
+
+    // Process each row and add the user data
+    return rows.map(row => {
+        const userId = row[fieldRef];
+        if (!userId) return row;
+
+        const user = usersMap[userId];
+        if (!user) return row;
+
+        return {
+            ...row,
+            [fieldRef]: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                address: user.address,
+                city: user.city,
+                state: user.state,
+                country: user.country,
+                postal_code: user.postal_code,
+                company_name: user.company_name,
+                website: user.website,
+                service_category: user.service_category,
+                years_of_experience: user.years_of_experience,
+                issuingAuthority: user.issuingAuthority,
+                coverage_area: user.coverage_area,
+                specialties: user.specialties,
+                affiliations: user.affiliations
+            }
+        };
+    });
+};
   
