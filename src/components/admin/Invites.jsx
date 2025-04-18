@@ -65,7 +65,7 @@ const Invites = () => {
         fetchedRoles = fetchedRoles.filter(role => role.id === 3);
       }
       else if (user.role === 1){
-        fetchedRoles = fetchedRoles.filter(role => role.id === 2);
+        fetchedRoles = fetchedRoles.filter(role => role.id === 3);
       }
       setRoles(fetchedRoles);
     } catch (error) {

@@ -10,7 +10,7 @@ export const createInvite = async (req, res) => {
   }
 
   try {
-    // ✅ Check if the user already exists
+    // Check if the user already exists
     const userCheckQuery = `SELECT * FROM "Users" WHERE email = $1;`;
     const userCheckResult = await pool.query(userCheckQuery, [email]);
 
@@ -18,7 +18,7 @@ export const createInvite = async (req, res) => {
       return res.status(409).json({ message: "User already joined." });
     }
 
-    // ✅ Check if invite already exists for this email
+    // Check if invite already exists for this email
     const inviteCheckQuery = `SELECT * FROM "Invites" WHERE email = $1;`;
     const inviteCheckResult = await pool.query(inviteCheckQuery, [email]);
 
@@ -26,7 +26,7 @@ export const createInvite = async (req, res) => {
       return res.status(409).json({ message: "An invite for this email already exists." });
     }
 
-    // ✅ Insert invite (uuid generated automatically by DB)
+    // Insert invite (uuid generated automatically by DB)
     const insertInviteQuery = `
       INSERT INTO "Invites" (email, role, "created_by", "created_at", "updated_at", "expires_at")
       VALUES ($1, $2, $3, NOW(), NOW(), NOW() + INTERVAL '3 days')
@@ -34,17 +34,10 @@ export const createInvite = async (req, res) => {
     `;
     const insertValues = [email, role, created_by];
     const result = await pool.query(insertInviteQuery, insertValues);
-    const { uuid } = result.rows[0]; // ✅ Extract generated UUID
+    const { uuid } = result.rows[0];
 
-    // ✅ Build invite link dynamically
-    const inviteLink = `https://realistapp.com/invite/${uuid}`;
-
-    // ✅ Optional: Store invite link back in table for reference
-    // const updateInviteLinkQuery = `UPDATE "Invites" SET invite_link = $1 WHERE uuid = $2;`;
-    // await pool.query(updateInviteLinkQuery, [inviteLink, uuid]);
-
-    // ✅ Send invite email
-    const emailSubject = "You're Invited! Complete Your Registration";
+    // Send invite email
+    const emailSubject = "Your Realist Invitation Code";
 
     const emailText = `
       <html>
@@ -54,15 +47,22 @@ export const createInvite = async (req, res) => {
               <td align="center">
                 <h2 style="color: #333;">Welcome to Realist!</h2>
                 <p style="font-size: 16px; color: #555;">
-                  You have been invited to join our platform. Please click the button below to complete your registration.
+                  You have been invited to join our platform. Here's your invitation code:
                 </p>
-                <a href="${inviteLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 20px 0;">
-                  Complete Registration
-                </a>
-                <p style="font-size: 14px; color: #777;">
-                  If the button doesn't work, copy and paste the link below into your browser:
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                  <p style="font-size: 24px; font-weight: bold; color: #007bff; margin: 0;">${uuid}</p>
+                </div>
+                <p style="font-size: 16px; color: #555;">
+                  To complete your registration:
                 </p>
-                <p style="font-size: 14px; color: #007bff;">${inviteLink}</p>
+                <ol style="text-align: left; color: #555;">
+                  <li>Visit <a href="https://realistapp.com" style="color: #007bff;">realistapp.com</a></li>
+                  <li>Click on get started and "Sign up with Google"</li>
+                  <li>Enter your invitation code when prompted</li>
+                </ol>
+                <p style="font-size: 14px; color: #777; margin-top: 20px;">
+                  This invitation code will expire in 3 days.
+                </p>
                 <p style="margin-top: 30px; color: #555;">Best regards,<br>Realist Team</p>
               </td>
             </tr>
@@ -73,7 +73,15 @@ export const createInvite = async (req, res) => {
 
     await sendEmail(email, emailSubject, emailText);
 
-    res.status(201).json({ message: "Invite created and sent successfully.", invite: { email, role, uuid, inviteLink } });
+    res.status(201).json({ 
+      message: "Invite created and sent successfully.", 
+      invite: { 
+        email, 
+        role, 
+        inviteCode: uuid,
+        instructions: "Please sign in with Google and use the invite code during registration."
+      } 
+    });
   } catch (error) {
     console.error("Error creating invite:", error);
     res.status(500).json({ message: "Failed to create invite." });
@@ -118,10 +126,10 @@ export const updateInvite = async (req, res) => {
 
 // Resend an invite email
 export const resendInvite = async (req, res) => {
-  const { id } = req.params; // This should be the UUID of the invite
+  const { id } = req.params;
 
   try {
-    // ✅ Fetch invite by UUID
+    // Fetch invite by UUID
     const fetchInviteQuery = `SELECT * FROM "Invites" WHERE id = $1;`;
     const fetchResult = await pool.query(fetchInviteQuery, [id]);
 
@@ -129,44 +137,47 @@ export const resendInvite = async (req, res) => {
       return res.status(404).json({ message: "Invite not found." });
     }
 
-    let { email, invite_link, expires_at } = fetchResult.rows[0];
+    const invite = fetchResult.rows[0];
 
-    // ✅ If expired, generate new invite link and update DB
-    if (!validate_expiry_date(expires_at)) {
-      // ✅ Extend expiration by 3 more days without changing UUID or invite_link
+    // If expired, extend expiration by 3 more days
+    if (!validate_expiry_date(invite.expires_at)) {
       const updateInviteQuery = `
         UPDATE "Invites"
         SET "updated_at" = NOW(), "expires_at" = NOW() + INTERVAL '3 days'
         WHERE id = $1
         RETURNING *;
       `;
-      const updateValues = [id]; // Use UUID as identifier
-      const updateResult = await pool.query(updateInviteQuery, updateValues);
-    
-      // Update invite_link in case you want to make sure you have the fresh one (though it's the same)
-      invite_link = updateResult.rows[0].invite_link;
+      const updateResult = await pool.query(updateInviteQuery, [id]);
+      invite.expires_at = updateResult.rows[0].expires_at;
     }
-    
 
-    // ✅ Send reminder email with invite link
-    const emailSubject = "Reminder: Your Invitation is Waiting!";
+    // Send reminder email with invite code
+    const emailSubject = "Your Realist Invitation Code (Reminder)";
+
     const emailText = `
       <html>
         <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
             <tr>
               <td align="center">
-                <h2 style="color: #333;">Hello!</h2>
+                <h2 style="color: #333;">Welcome to Realist!</h2>
                 <p style="font-size: 16px; color: #555;">
-                  We noticed you haven't completed your registration yet. Please click the button below to accept your invitation.
+                  Here's your invitation code again:
                 </p>
-                <a href="${invite_link}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 20px 0;">
-                  Complete Registration
-                </a>
-                <p style="font-size: 14px; color: #777;">
-                  If the button doesn't work, copy and paste this link into your browser:
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                  <p style="font-size: 24px; font-weight: bold; color: #007bff; margin: 0;">${invite.uuid}</p>
+                </div>
+                <p style="font-size: 16px; color: #555;">
+                  To complete your registration:
                 </p>
-                <p style="font-size: 14px; color: #007bff;">${invite_link}</p>
+                <ol style="text-align: left; color: #555;">
+                  <li>Visit <a href="https://realistapp.com" style="color: #007bff;">realistapp.com</a></li>
+                  <li>Click on get started and "Sign up with Google"</li>
+                  <li>Enter your invitation code when prompted</li>
+                </ol>
+                <p style="font-size: 14px; color: #777; margin-top: 20px;">
+                  This invitation code will expire in 3 days.
+                </p>
                 <p style="margin-top: 30px; color: #555;">Best regards,<br>Realist Team</p>
               </td>
             </tr>
@@ -175,9 +186,17 @@ export const resendInvite = async (req, res) => {
       </html>
     `;
 
-    await sendEmail(email, emailSubject, emailText);
+    await sendEmail(invite.email, emailSubject, emailText);
 
-    res.status(200).json({ message: "Invite resent successfully.", invite_link });
+    res.status(200).json({ 
+      message: "Invite resent successfully.", 
+      invite: { 
+        email: invite.email, 
+        role: invite.role, 
+        inviteCode: invite.uuid,
+        instructions: "Please sign in with Google and use the invite code during registration."
+      } 
+    });
   } catch (error) {
     console.error("Error resending invite:", error);
     res.status(500).json({ message: "Failed to resend invite." });
