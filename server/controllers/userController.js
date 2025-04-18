@@ -226,7 +226,6 @@ export const registerContractor = async (req, res) => {
 
 export const updateContractor = async (req, res) => {
   const { id } = req.params;
-  // console.log(id)
   const {
     fullName,
     companyName,
@@ -242,15 +241,13 @@ export const updateContractor = async (req, res) => {
     coverageArea,
     licenseNumber,
     insurancePolicy,
-    references,
-    description,
-    files,
-    invite_id // Optional invite_id if updating invite status is required
+    agreement,
+    invite_id
   } = req.body;
 
   try {
     // Check if contractor exists in the database
-    const userCheckQuery = `SELECT * FROM "Users" WHERE id = $1`; // Checking if the user exists
+    const userCheckQuery = `SELECT * FROM "Users" WHERE id = $1`;
     const userResult = await pool.query(userCheckQuery, [id]);
     const user = userResult.rows[0];
 
@@ -260,8 +257,8 @@ export const updateContractor = async (req, res) => {
 
     // If the user is registered as a guest (role = 0), update role to contractor (role = 3)
     let updatedRole = user.role;
-    if (updatedRole === 0) {  // If role is guest (0)
-      updatedRole = 3; // Change to contractor role
+    if (updatedRole === 0) {
+      updatedRole = 3;
     }
 
     // Prepare the query to update contractor details
@@ -271,8 +268,8 @@ export const updateContractor = async (req, res) => {
         name = $1, 
         company_name = $2, 
         email = $3,
-        role = $4, -- Assign the updated role
-        status = 1, -- Ensuring status is active
+        role = $4,
+        status = 1,
         phone = $5, 
         website = $6, 
         address = $7, 
@@ -283,41 +280,35 @@ export const updateContractor = async (req, res) => {
         years_of_experience = $12, 
         coverage_area = $13, 
         license_number = $14, 
-        insurance_policy = $15, 
-        "references" = $16, 
-        description = $17, 
-        files = $18, 
+        insurance_policy = $15,
         "updatedAt" = NOW()
-      WHERE id = $19
+      WHERE id = $16
       RETURNING id, name, email, role;
     `;
 
     const values = [
-      fullName,              // name
-      companyName,           // company_name
-      email,                 // email
-      updatedRole,           // updated role (contractor if role was 0)
-      phone,                 // phone
-      website,               // website
-      address,               // address
-      city,                  // city
-      state,                 // state
-      zipCode,               // postal_code
-      serviceCategory,       // service_category
-      yearsOfExperience,     // years_of_experience
-      JSON.stringify(coverageArea), // coverage_area as JSON
-      licenseNumber,         // license_number
-      insurancePolicy,       // insurance_policy
-      JSON.stringify(references),  // references as JSON
-      description,           // description
-      JSON.stringify(files), // files as JSON
-      id                     // user id to be updated
+      fullName,
+      companyName,
+      email,
+      updatedRole,
+      phone || null,
+      website || null,
+      address || null,
+      city,
+      state,
+      zipCode,
+      serviceCategory,
+      yearsOfExperience,
+      JSON.stringify(coverageArea),
+      licenseNumber,
+      insurancePolicy,
+      id
     ];
 
     const result = await pool.query(updateQuery, values);
     const updatedUser = result.rows[0];
 
-    // Optionally, update the invite status if invite_id is provided
+    // Update the invite status if invite_id is provided
     if (invite_id) {
       await pool.query(
         `UPDATE "Invites" SET status = 0, "updated_at" = NOW() WHERE uuid = $1;`,
@@ -334,7 +325,7 @@ export const updateContractor = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      menu: menu // Attach the menu to the response
+      menu: menu
     };
 
     // Generate a token for the updated user
@@ -500,11 +491,13 @@ export const registerRea = async (req, res) => {
 
 export const updateRea = async (req, res) => {
   const { id } = req.params; // Get user ID from the URL parameter
-  console.log(id)
+  // console.log('User ID:', id);
+  const updatedData = req.body;
+  // console.log('Updated Data:', updatedData);
+
   const {
     fullName,
     companyName,
-    email,
     phone,
     website,
     address,
@@ -524,6 +517,27 @@ export const updateRea = async (req, res) => {
     files
   } = req.body;
 
+  // Debug logging for all received values
+  // console.log('Received Form Data:', {
+  //   fullName,
+  //   companyName,
+  //   email,
+  //   phone,
+  //   website,
+  //   address,
+  //   city,
+  //   state,
+  //   zipCode,
+  //   serviceCategory,
+  //   yearsOfExperience,
+  //   coverageArea,
+  //   licenseNumber,
+  //   issuingAuthority,
+  //   specialties,
+  //   affiliations,
+  //   insurancePolicy
+  // });
+
   try {
     // Update the user's details in the database
     const updateQuery = `
@@ -531,7 +545,6 @@ export const updateRea = async (req, res) => {
       SET 
         name = $1, 
         company_name = $2, 
-        email = $3, 
         status = 1, 
         role = 2, 
         phone = $4, 
@@ -548,11 +561,8 @@ export const updateRea = async (req, res) => {
         specialties = $15, 
         affiliations = $16, 
         insurance_policy = $17, 
-        "references" = $18, 
-        description = $19, 
-        files = $20, 
         "updatedAt" = NOW()
-      WHERE id = $21
+      WHERE id = $18
       RETURNING id, name, email, role;
     `;
 
@@ -574,18 +584,22 @@ export const updateRea = async (req, res) => {
       JSON.stringify(specialties),  // specialties as JSON
       JSON.stringify(affiliations), // affiliations as JSON
       insurancePolicy,       // insurance_policy
-      JSON.stringify(references),  // references as JSON
-      description,           // description
-      JSON.stringify(files), // files as JSON
       id                     // user id to be updated
     ];
 
+    // // Debug logging for the query and values
+    // console.log('SQL Query:', updateQuery);
+    // console.log('Query Values:', values);
+
     const result = await pool.query(updateQuery, values);
+    // console.log('Query Result:', result.rows[0]);
+
     const updatedUser = result.rows[0];
 
     // Fetch the menu based on the user's role
     const menu = await getUserMenu(updatedUser.role);
-    // console.log(menu)
+    // console.log('User Menu:', menu);
+
     // Send response with the updated user and menu
     const responseJson = {
       id: updatedUser.id,
@@ -595,6 +609,8 @@ export const updateRea = async (req, res) => {
       menu: menu // Attach the menu
     };
     let token = generateToken(updatedUser, "1h");
+    console.log('Generated Token:', token);
+    
     // Send the response with the updated user and menu
     res.status(200).json({
       message: 'Profile updated successfully',
@@ -603,6 +619,7 @@ export const updateRea = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating profile:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };

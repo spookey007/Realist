@@ -1,9 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from '../../../context/AuthContext';
-import GuestForm from "../GuestForm"; // Guest form for updating user menu/role
 import Dashboard from "../Dashboard";
-import Appointments from "../Appointments";
 import Users from "../Users";
 import Roles from "../Roles";
 import Invites from "../Invites";
@@ -18,13 +16,8 @@ import ProtectedRoute from "../ProtectedRoute";
 import AdminLayout from "../AdminLayout";
 
 const AdminRoutes = () => {
-  const { user, menu } = useAuth(); // Get user and menu from context or API response
+  const { menu } = useAuth(); // Get user and menu from context or API response
 
-  // Check if the user has no menu rights and role is 0 (guest)
-  // if (user && Array.isArray(menu) && menu.length === 0 && user.role === 0) {
-  //   // If menu is empty and the role is 0 (guest), show the GuestForm
-  //   return <GuestForm />;
-  // }
 
   // Check if user has menu rights to access specific routes
   const hasPermission = (menuItem) => {
@@ -39,10 +32,6 @@ const AdminRoutes = () => {
         <Route
           path="dashboard"
           element={hasPermission("/dashboard") ? <Dashboard /> : <Navigate to="/" />}
-        />
-        <Route
-          path="appointments"
-          element={hasPermission("/appointments") ? <Appointments /> : <Navigate to="/" />}
         />
         <Route
           path="users"

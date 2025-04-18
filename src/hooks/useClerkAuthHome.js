@@ -13,7 +13,9 @@ export default function useClerkAuthHome() {
   const hasSynced = useRef(false); // 🧠 prevents double run
 
   useEffect(() => {
-    const syncUser = async () => {
+      const syncUser = async () => {
+      const tokenExists = localStorage.getItem('authToken');
+      if (tokenExists) return;
       if (!isLoaded || !isSignedIn || !user) return;
       if (hasSynced.current) return;
       hasSynced.current = true;
@@ -49,7 +51,6 @@ export default function useClerkAuthHome() {
           else{
             navigate("/dashboard");
           }
-          
         } else {
           alert("Failed to sync user.");
           setIsLoading(false);
@@ -62,4 +63,9 @@ export default function useClerkAuthHome() {
 
     syncUser();
   }, [isLoaded, isSignedIn, user]);
+
+  return {
+    isAuthenticated: isSignedIn,
+    isLoading: !isLoaded
+  };
 }

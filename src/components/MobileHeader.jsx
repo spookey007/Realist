@@ -17,9 +17,9 @@ const MobileHeader = ({ user, openLModal, handleLogoutClick, toggleMenu, isMenuO
         <div className="md:hidden flex items-center justify-center">
           <button 
             onClick={toggleMenu} 
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-black text-white transition-all duration-300 shadow-lg hover:bg-black active:scale-90"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 text-white transition-all duration-300 hover:bg-white/30 active:scale-90"
           >
-            <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl transition-all duration-300`}></i>
+            <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-xl transition-all duration-300`}></i>
           </button>
         </div>
 
@@ -27,9 +27,9 @@ const MobileHeader = ({ user, openLModal, handleLogoutClick, toggleMenu, isMenuO
           <Link to="/" onClick={closeMenu} className="py-2 px-4 text-white text-lg hover:text-gray-200 transition duration-300">Home</Link>
           <Link to="/about" onClick={closeMenu} className="py-2 px-4 text-white text-lg hover:text-gray-200 transition duration-300">About Us</Link>
           {user ? (
-            <button onClick={handleLogoutClick} className="py-2 px-4 text-white text-lg border border-white rounded-md hover:bg-white hover:text-blue-500 transition duration-300">Logout</button>
+            <button onClick={handleLogoutClick} className="py-2 px-4 text-white text-lg border border-white rounded-md hover:bg-white hover:text-cyan-600 transition duration-300">Logout</button>
           ) : (
-            <button onClick={openLModal} className="py-2 px-4 bg-white text-blue-500 text-lg rounded-md hover:bg-gray-100 transition duration-300">Sign In</button>
+            <button onClick={openLModal} className="py-2 px-4 bg-white text-cyan-600 text-lg rounded-md hover:bg-gray-100 transition duration-300">Sign In</button>
           )}
         </nav>
       </div>
@@ -42,29 +42,59 @@ const MobileHeader = ({ user, openLModal, handleLogoutClick, toggleMenu, isMenuO
             animate={{ y: 0 }}
             exit={{ y: "-100%" }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-full h-full bg-white shadow-md z-50"
+            className="fixed top-0 left-0 w-full h-full bg-cyan-600 shadow-md z-50"
           >
-            <button 
-              onClick={toggleMenu} 
-              className="absolute top-4 right-4 p-2 bg-black text-white rounded-full text-2xl"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-            <ul className="mt-16 text-center space-y-6">
-              <li>
-                <Link to="/" onClick={closeMenu} className="text-2xl text-gray-800 hover:text-blue-500">Home</Link>
-              </li>
-              <li>
-                <Link to="/about" onClick={closeMenu} className="text-2xl text-gray-800 hover:text-blue-500">About Us</Link>
-              </li>
-              <li>
-                {user ? (
-                  <button onClick={handleLogoutClick} className="text-2xl text-gray-800 hover:text-red-500">Logout</button>
-                ) : (
-                  <button onClick={() => { openLModal(); closeMenu(); }} className="text-2xl text-gray-800 hover:text-green-500">Sign In</button>
-                )}
-              </li>
-            </ul>
+            <div className="flex justify-between items-center p-4 border-b border-white/20">
+              <Link to="/" onClick={closeMenu}>
+                <img src={logo} alt="Realist" className="w-auto h-8" />
+              </Link>
+              <button 
+                onClick={toggleMenu} 
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 text-white transition-all duration-300 hover:bg-white/30"
+              >
+                <i className="fas fa-times text-xl"></i>
+              </button>
+            </div>
+            
+            <div className="p-4">
+              <ul className="space-y-4">
+                <li>
+                  <Link 
+                    to="/" 
+                    onClick={closeMenu} 
+                    className="block py-3 px-4 text-white text-lg hover:bg-white/10 rounded-lg transition duration-300"
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/about" 
+                    onClick={closeMenu} 
+                    className="block py-3 px-4 text-white text-lg hover:bg-white/10 rounded-lg transition duration-300"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  {user ? (
+                    <button 
+                      onClick={handleLogoutClick} 
+                      className="w-full py-3 px-4 text-white text-lg border border-white rounded-lg hover:bg-white hover:text-cyan-600 transition duration-300"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => { openLModal(); closeMenu(); }} 
+                      className="w-full py-3 px-4 bg-white text-cyan-600 text-lg rounded-lg hover:bg-gray-100 transition duration-300"
+                    >
+                      Sign In
+                    </button>
+                  )}
+                </li>
+              </ul>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

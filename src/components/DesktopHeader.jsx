@@ -7,7 +7,7 @@ const DesktopHeader = ({ user, openLModal, handleLogoutClick, closeMenu }) => {
         <header className="fixed top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-[80%] shadow-md  h-16 w-4/5 md:w-2/5 z-50">
         <div className="px-3 py-8 flex justify-between items-center h-full relative transition-all duration-500 bg-cyan-600 rounded-lg">
             <Link to="/" onClick={closeMenu}>
-            <img src={logo} alt="Realist" className="w-full h-auto max-w-[70px]" />
+              <img src={logo} alt="Realist" className="w-full h-auto max-w-[70px]" />
             </Link>
 
             <nav className="hidden  md:flex md:space-x-6 items-center">

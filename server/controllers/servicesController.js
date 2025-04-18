@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 // GET /services - Retrieve all services with service type names
 const getAllServices = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, user_limit } = req.query;
     const offset = (page - 1) * limit;
 
     // Get all service types with accurate count
@@ -18,7 +18,8 @@ const getAllServices = async (req, res) => {
                FROM "Services" s 
                WHERE s.service_type_id = st.id) as service_count
        FROM "ServiceTypes" st
-       ORDER BY st.service_type_name`
+       ORDER BY st.service_type_name
+       ${user_limit !== undefined && user_limit !== null ? `LIMIT ${user_limit}` : ''}`
     );
 
     const servicesByType = serviceTypesResult.rows.map(type => ({

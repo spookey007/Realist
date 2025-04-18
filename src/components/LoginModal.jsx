@@ -163,104 +163,127 @@ const LoginModal = ({ isOpen, closeModal,Method }) => {
   // }, []);
 
   return (
-<AnimatePresence>
-  {isOpen && (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} // smoother easeOutExpo
-      className="bg-white/10 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center bg-black/50" // darker backdrop
-    >
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 30 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-gray-500/20  rounded-2xl shadow-2xl p-6 w-full max-w-md modal-content"
-    >
-          <button className="close-modal" onClick={closeModal}>
-            &times;
-          </button>
-          <h2 className="modal-title">{isSignIn ? "Sign In" : "Sign Up"}</h2>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="relative w-full max-w-md mx-4"
           >
-            {({ isSubmitting, setFieldValue }) => (
-              <Form>
-              <div className=" p-6 rounded-xl space-y-6 ">
-                
-                {/* Email Field */}
-                {isSignIn && (
-                <div className="form-group">
-                  <label htmlFor="email" className="block text-sm font-large text-gray-900">Email</label>
-                  <Field
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40"
-                  />
-                  <ErrorMessage name="email" component="div" className="text-red-300 text-sm mt-1" />
-                </div>
-                )}
-                {/* Password Field */}
-                {isSignIn && (
-                <div className="form-group">
-                  <label htmlFor="password" className="block text-sm font-large text-gray-900">Password</label>
-                  <Field
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter password"
-                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40"
-                  />
-                  <ErrorMessage name="password" component="div" className="text-red-300 text-sm mt-1" />
-                </div>
-                )}
-                {/* ReCAPTCHA */}
-                {isSignIn && (
-                <div className="form-group">
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                    onChange={(value) => setFieldValue('captchaValue', value)}
-                  />
-                  <ErrorMessage name="captchaValue" component="div" className="text-red-300 text-sm mt-1" />
-                </div>
-                )}
-            
-                
-                <div className="w-full max-w-xs mx-auto mb-6">
+            <div className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Modal Content */}
+              <div className="p-8">
+                <h2 className="text-3xl font-bold text-white mb-2">
+                  {isSignIn ? "Welcome Back" : "Join Our Network"}
+                </h2>
+                <p className="text-white/70 mb-8">
+                  {isSignIn ? "Sign in to access your professional dashboard" : "Create an account to get started"}
+                </p>
+
+                <Formik
+                  initialValues={initialValues}
+                  validationSchema={validationSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ isSubmitting, setFieldValue }) => (
+                    <Form className="space-y-6">
+                      {/* Email Field */}
+                      {isSignIn && (
+                        <div className="space-y-2">
+                          <label htmlFor="email" className="block text-sm font-medium text-white/90">
+                            Email
+                          </label>
+                          <Field
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                          />
+                          <ErrorMessage name="email" component="div" className="text-red-400 text-sm" />
+                        </div>
+                      )}
+
+                      {/* Password Field */}
+                      {isSignIn && (
+                        <div className="space-y-2">
+                          <label htmlFor="password" className="block text-sm font-medium text-white/90">
+                            Password
+                          </label>
+                          <Field
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                          />
+                          <ErrorMessage name="password" component="div" className="text-red-400 text-sm" />
+                        </div>
+                      )}
+
+                      {/* ReCAPTCHA */}
+                      {isSignIn && (
+                        <div className="space-y-2">
+                          <ReCAPTCHA
+                            ref={recaptchaRef}
+                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                            onChange={(value) => setFieldValue('captchaValue', value)}
+                            className="flex justify-center"
+                          />
+                          <ErrorMessage name="captchaValue" component="div" className="text-red-400 text-sm" />
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      {isSignIn && (
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200
+                            ${isSubmitting
+                              ? 'bg-cyan-600/50 text-white/70 cursor-not-allowed'
+                              : 'bg-cyan-600 text-white hover:bg-cyan-500 active:bg-cyan-600'
+                            }`}
+                        >
+                          {isSubmitting ? "Signing in..." : "Sign In"}
+                        </button>
+                      )}
+                    </Form>
+                  )}
+                </Formik>
+
+                {/* Divider */}
+                <div className="relative my-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
                   </div>
-                  {/* Submit Button */}
-                  {isSignIn && (
-                      <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={` w-full group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100
-                        ${
-                          isSubmitting
-                            ? "bg-white/30 text-white cursor-not-allowed border-white/20"
-                            : "bg-cyan-600 text-white border-neutral-200 hover:bg-cyan-700"
-                        }
-                        [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]`}
-                    >
-                      {isSubmitting ? "Submitting..." : "Sign In"}
-                    </button>
-                    )}
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-gray-900/95 text-white/70">Or continue with</span>
                   </div>
-                
-            </Form>
-            
-            )}
-          </Formik>
-            <div className="flex flex-col space-y-3 mb-6">
+                </div>
+
+                {/* Google Sign In */}
                 <button
                   onClick={handleGoogleClick}
-                  className="w-full flex items-center justify-center gap-3 bg-white text-black rounded-md py-2 px-4 shadow hover:bg-gray-100 transition"
+                  className="w-full flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 text-white rounded-lg py-3 px-4 transition-all duration-200 border border-white/10"
                 >
                   <img
                     src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
@@ -268,14 +291,15 @@ const LoginModal = ({ isOpen, closeModal,Method }) => {
                     className="w-5 h-5"
                   />
                   <span className="font-medium">
-                    {isSignIn ? "Login with Google" : "Sign up with Google"}
+                    {isSignIn ? "Sign in with Google" : "Sign up with Google"}
                   </span>
                 </button>
+              </div>
             </div>
           </motion.div>
-      </motion.div>
-        )}
-</AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

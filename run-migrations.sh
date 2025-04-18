@@ -2,8 +2,8 @@
 
 # Run migrations
 echo "Running migrations..."
-node server/db/migrate.cjs
+npx sequelize-cli db:migrate
 
 # Run seeders
 echo "Running seeders..."
-node server/db/seed.cjs 
+npx sequelize-cli db:seed:all 
