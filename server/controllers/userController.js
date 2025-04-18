@@ -569,7 +569,6 @@ export const updateRea = async (req, res) => {
     const values = [
       fullName,              // name
       companyName,           // company_name
-      email,                 // email
       phone,                 // phone
       website,               // website
       address,               // address
