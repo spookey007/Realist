@@ -287,21 +287,21 @@ export const updateContractor = async (req, res) => {
     `;
 
     const values = [
-      fullName,
-      companyName,
-      email,
-      updatedRole,
+      fullName || null,
+      companyName || null,
+      email || null,
+      updatedRole || 3,
       phone || null,
       website || null,
       address || null,
-      city,
-      state,
-      zipCode,
-      serviceCategory,
-      yearsOfExperience,
-      JSON.stringify(coverageArea),
-      licenseNumber,
-      insurancePolicy,
+      city || null,
+      state || null,
+      zipCode || null,
+      serviceCategory || null,
+      yearsOfExperience || null,
+      coverageArea ? JSON.stringify(coverageArea) : null,
+      licenseNumber || null,
+      insurancePolicy || null,
       id
     ];
 
@@ -490,11 +490,7 @@ export const registerRea = async (req, res) => {
 };
 
 export const updateRea = async (req, res) => {
-  const { id } = req.params; // Get user ID from the URL parameter
-  // console.log('User ID:', id);
-  const updatedData = req.body;
-  // console.log('Updated Data:', updatedData);
-
+  const { id } = req.params;
   const {
     fullName,
     companyName,
@@ -511,32 +507,8 @@ export const updateRea = async (req, res) => {
     issuingAuthority,
     specialties,
     affiliations,
-    insurancePolicy,
-    references,
-    description,
-    files
+    insurancePolicy
   } = req.body;
-
-  // Debug logging for all received values
-  // console.log('Received Form Data:', {
-  //   fullName,
-  //   companyName,
-  //   email,
-  //   phone,
-  //   website,
-  //   address,
-  //   city,
-  //   state,
-  //   zipCode,
-  //   serviceCategory,
-  //   yearsOfExperience,
-  //   coverageArea,
-  //   licenseNumber,
-  //   issuingAuthority,
-  //   specialties,
-  //   affiliations,
-  //   insurancePolicy
-  // });
 
   try {
     // Update the user's details in the database
@@ -547,57 +519,50 @@ export const updateRea = async (req, res) => {
         company_name = $2, 
         status = 1, 
         role = 2, 
-        phone = $4, 
-        website = $5, 
-        address = $6, 
-        city = $7, 
-        state = $8, 
-        postal_code = $9, 
-        service_category = $10, 
-        years_of_experience = $11, 
-        coverage_area = $12, 
-        license_number = $13, 
-        "issuingAuthority" = $14, 
-        specialties = $15, 
-        affiliations = $16, 
-        insurance_policy = $17, 
+        phone = $3, 
+        website = $4, 
+        address = $5, 
+        city = $6, 
+        state = $7, 
+        postal_code = $8, 
+        service_category = $9, 
+        years_of_experience = $10, 
+        coverage_area = $11, 
+        license_number = $12, 
+        "issuingAuthority" = $13, 
+        specialties = $14, 
+        affiliations = $15, 
+        insurance_policy = $16, 
         "updatedAt" = NOW()
-      WHERE id = $18
+      WHERE id = $17
       RETURNING id, name, email, role;
     `;
 
     const values = [
-      fullName,              // name
-      companyName,           // company_name
-      phone,                 // phone
-      website,               // website
-      address,               // address
-      city,                  // city
-      state,                 // state
-      zipCode,               // postal_code
-      serviceCategory,       // service_category
-      yearsOfExperience,     // years_of_experience
-      JSON.stringify(coverageArea), // coverage_area as JSON
-      licenseNumber,         // license_number
-      issuingAuthority,      // issuing_authority
-      JSON.stringify(specialties),  // specialties as JSON
-      JSON.stringify(affiliations), // affiliations as JSON
-      insurancePolicy,       // insurance_policy
-      id                     // user id to be updated
+      fullName || null,
+      companyName || null,
+      phone || null,
+      website || null,
+      address || null,
+      city || null,
+      state || null,
+      zipCode || null,
+      serviceCategory || null,
+      yearsOfExperience || null,
+      coverageArea ? JSON.stringify(coverageArea) : null,
+      licenseNumber || null,
+      issuingAuthority || null,
+      specialties ? JSON.stringify(specialties) : null,
+      affiliations ? JSON.stringify(affiliations) : null,
+      insurancePolicy || null,
+      id
     ];
 
-    // // Debug logging for the query and values
-    // console.log('SQL Query:', updateQuery);
-    // console.log('Query Values:', values);
-
     const result = await pool.query(updateQuery, values);
-    // console.log('Query Result:', result.rows[0]);
-
     const updatedUser = result.rows[0];
 
     // Fetch the menu based on the user's role
     const menu = await getUserMenu(updatedUser.role);
-    // console.log('User Menu:', menu);
 
     // Send response with the updated user and menu
     const responseJson = {
@@ -605,12 +570,11 @@ export const updateRea = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      menu: menu // Attach the menu
+      menu: menu
     };
-    let token = generateToken(updatedUser, "1h");
-    console.log('Generated Token:', token);
+
+    const token = generateToken(updatedUser, "1h");
     
-    // Send the response with the updated user and menu
     res.status(200).json({
       message: 'Profile updated successfully',
       token,
@@ -618,7 +582,6 @@ export const updateRea = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating profile:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };
