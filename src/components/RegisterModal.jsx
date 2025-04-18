@@ -234,7 +234,7 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
   const handleSuccessAlert = (existingUser, navigate) => {
     const message = existingUser
       ? `<div class="space-y-3">
-          <p class="text-lg font-semibold">Welcome back to Realist! 🎉</p>
+          <p class="text-lg font-semibold">Welcome to Realist! 🎉</p>
           <p>Your profile has been successfully updated. We're excited to have you continue your journey with us.</p>
           <p>You'll be redirected to your dashboard where you can access all your tools and features.</p>
         </div>`
