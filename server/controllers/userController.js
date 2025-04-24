@@ -765,6 +765,12 @@ export const loginUser = async (req, res) => {
 
     let menu = menuResult.rows;
 
+    // Check eligibility for role 2 (REA)
+    let eligibility = 1;
+    if (user.role === 2) {
+      eligibility = await verifyInvites(user.id);
+    }
+
     // Generate JWT
     let token = generateToken(user, "1h");
 
@@ -777,6 +783,7 @@ export const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         menu: menu || [],
+        eligibility
       },
     });
   } catch (error) {
@@ -898,22 +905,12 @@ export const clerkAuth = async (req, res) => {
 
     let user;
     let menu = [];
+    let eligibility = 1;
 
     if (checkResult.rows.length > 0) {
       user = checkResult.rows[0];
 
-      // ✅ Step 5: Fetch role-based menu if role != 0
-      // if (user.role !== 0) {
-      //   const menuQuery = `
-      //     SELECT m.*, r.privs
-      //     FROM "Menus" m
-      //     INNER JOIN "RoleMenuRights" r ON m.id = r.menu_id
-      //     WHERE m.status = 1 AND r.role_id = $1
-      //     ORDER BY m.position ASC;
-      //   `;
-      //   const menuResult = await pool.query(menuQuery, [user.role]);
-      //   menu = menuResult.rows;
-      // }
+      // Fetch role-based menu
       const menuQuery = `
         SELECT m.*, r.privs
         FROM "Menus" m
@@ -923,8 +920,13 @@ export const clerkAuth = async (req, res) => {
       `;
       const menuResult = await pool.query(menuQuery, [user.role]);
       menu = menuResult.rows;
+
+      // Check eligibility for role 2 (REA)
+      if (user.role === 2) {
+        eligibility = await verifyInvites(user.id);
+      }
     } else {
-      // 6. Create user if not found
+      // Create user if not found
       const insertQuery = `
         INSERT INTO "Users" (email, name, clerk_id, role, "createdAt", "updatedAt")
         VALUES ($1, $2, $3, $4, NOW(), NOW())
@@ -934,7 +936,6 @@ export const clerkAuth = async (req, res) => {
       const insertResult = await pool.query(insertQuery, insertValues);
       user = insertResult.rows[0];
     }
-
 
     // Generate JWT
     let token = generateToken(user, "1h");
@@ -948,6 +949,7 @@ export const clerkAuth = async (req, res) => {
         email: user.email,
         role: user.role,
         menu: menu || [],
+        eligibility
       },
     });
   } catch (error) {
@@ -987,4 +989,24 @@ const generateToken = (user, expiry_time = "1h") => {
   );
 
   return token;
+};
+
+const verifyInvites = async (userId) => {
+  try {
+    const query = `
+      SELECT COUNT(*) as invite_count 
+      FROM "Invites" 
+      WHERE status = 0 
+      AND created_by = $1
+    `;
+    
+    const result = await pool.query(query, [userId]);
+    const inviteCount = parseInt(result.rows[0].invite_count);
+
+    // Return 1 if count >= 3, else return 0
+    return inviteCount >= 3 ? 1 : 0;
+  } catch (error) {
+    console.error('Error verifying invites:', error);
+    return 0; // Return 0 in case of error
+  }
 };

@@ -21,10 +21,24 @@ registerPlugin(FilePondPluginFileValidateSize, FilePondPluginFileValidateType);
 
 const steps = ['Basic Info', 'Company Info', 'Service Info', 'Final Submission'];
 
+// Configuration for which steps are enabled/disabled
+const stepConfig = {
+  basicInfo: true,
+  companyInfo: true,
+  serviceInfo: false, // Disabled for now
+  finalSubmission: true
+};
+
+// Get active steps based on configuration
+const activeSteps = steps.filter((_, index) => {
+  const stepKeys = ['basicInfo', 'companyInfo', 'serviceInfo', 'finalSubmission'];
+  return stepConfig[stepKeys[index]];
+});
+
 const stepFields = [
   ['fullName', 'companyName'], // Step 0
   ['email', 'phone', 'website', 'address'], // Step 1
-  ['city', 'state', 'zipCode', 'serviceCategory', 'yearsOfExperience', 'coverageArea', 'licenseNumber', 'insurancePolicy'], // Step 2
+  [], // Step 2 - Service Info (now optional)
   ['agreement', 'captchaValue'], // Step 3
 ];
 
@@ -53,26 +67,15 @@ const validationSchema = Yup.object({
     .nullable()
     .transform((value) => (value === '' ? null : value))
     .min(5, 'Address must be at least 5 characters'),
-  city: Yup.string()
-    .required('City is required'),
-  state: Yup.string()
-    .required('State is required'),
-  zipCode: Yup.string()
-    .required('Zip Code is required')
-    .matches(/^\d{5}(-\d{4})?$/, 'Invalid zip code format'),
-  serviceCategory: Yup.string()
-    .required('Service Category is required'),
-  yearsOfExperience: Yup.number()
-    .min(0, 'Years of experience cannot be negative')
-    .required('Years of Experience is required'),
-  coverageArea: Yup.array()
-    .min(1, 'Select at least one coverage area')
-    .required('Coverage Area is required'),
-  licenseNumber: Yup.string()
-    .required('License Number is required')
-    .matches(/^[A-Za-z0-9-]+$/, 'Invalid license number format'),
-  insurancePolicy: Yup.string()
-    .required('Insurance Policy is required'),
+  // Service Info fields are now optional
+  city: Yup.string().nullable(),
+  state: Yup.string().nullable(),
+  zipCode: Yup.string().nullable(),
+  serviceCategory: Yup.string().nullable(),
+  yearsOfExperience: Yup.number().nullable(),
+  coverageArea: Yup.array().nullable(),
+  licenseNumber: Yup.string().nullable(),
+  insurancePolicy: Yup.string().nullable(),
   agreement: Yup.boolean()
     .oneOf([true], 'You must agree to the terms and conditions')
     .required('You must agree to the terms and conditions'),
@@ -114,7 +117,13 @@ const Invite = ({ id: propId, existingUser, isOpen, closeModal, onBack }) => {
       alertify.error('Please fill out all required fields in this step.');
       return false;
     }
-    setActiveStep((prev) => prev + 1);
+
+    // Skip disabled steps
+    let nextStep = activeStep + 1;
+    while (nextStep < steps.length && !stepConfig[Object.keys(stepConfig)[nextStep]]) {
+      nextStep++;
+    }
+    setActiveStep(nextStep);
     return true;
   };
 
@@ -138,7 +147,7 @@ const Invite = ({ id: propId, existingUser, isOpen, closeModal, onBack }) => {
         ? `${import.meta.env.VITE_API_URL}/api/users/updateContractor/${userId}`
         : `${import.meta.env.VITE_API_URL}/api/users/registerContractor`;
 
-      // Prepare the data object
+      // Prepare the data object with null/empty values for optional fields
       const data = {
         fullName: values.fullName,
         companyName: values.companyName,
@@ -146,14 +155,20 @@ const Invite = ({ id: propId, existingUser, isOpen, closeModal, onBack }) => {
         phone: values.phone || null,
         website: values.website || null,
         address: values.address || null,
-        city: values.city,
-        state: values.state,
-        zipCode: values.zipCode,
-        serviceCategory: values.serviceCategory,
-        yearsOfExperience: values.yearsOfExperience,
-        coverageArea: values.coverageArea,
-        licenseNumber: values.licenseNumber,
-        insurancePolicy: values.insurancePolicy,
+        // Service Info fields - always included but can be null
+        city: values.city || null,
+        state: values.state || null,
+        zipCode: values.zipCode || null,
+        serviceCategory: values.serviceCategory || null,
+        yearsOfExperience: values.yearsOfExperience || null,
+        coverageArea: values.coverageArea || [],
+        licenseNumber: values.licenseNumber || null,
+        insurancePolicy: values.insurancePolicy || null,
+        // Optional fields
+        references: [],
+        description: null,
+        files: [],
+        // Required fields
         agreement: values.agreement,
         captchaValue: values.captchaValue,
         dateTime: selectedDateTime.toISOString(),
@@ -336,7 +351,7 @@ const Invite = ({ id: propId, existingUser, isOpen, closeModal, onBack }) => {
             <h2 className="modal-title">Registration Form</h2>
             <p className="text-center text-sm text-gray-500 my-2 font-semibold">For Contractor</p>
             <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label) => (
+              {activeSteps.map((label) => (
                 <Step key={label}><StepLabel>{label}</StepLabel></Step>
               ))}
             </Stepper>
@@ -348,14 +363,15 @@ const Invite = ({ id: propId, existingUser, isOpen, closeModal, onBack }) => {
                 phone: '',
                 website: '',
                 address: '',
-                city: '',
-                state: '',
-                zipCode: '',
-                serviceCategory: '',
-                yearsOfExperience: '',
+                // Service Info fields with null defaults
+                city: null,
+                state: null,
+                zipCode: null,
+                serviceCategory: null,
+                yearsOfExperience: null,
                 coverageArea: [],
-                licenseNumber: '',
-                insurancePolicy: '',
+                licenseNumber: null,
+                insurancePolicy: null,
                 agreement: false,
                 captchaValue: '',
               }}

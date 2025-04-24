@@ -278,6 +278,7 @@ const Services = () => {
                 fetchServices={fetchServices} 
                 canEdit={canEdit}
                 isLocked={user?.role === 0}
+                isEligible={user?.eligibility === 1}
               />
             ) : (
               <WebListings 
@@ -285,6 +286,7 @@ const Services = () => {
                 fetchServices={fetchServices} 
                 canEdit={canEdit}
                 isLocked={user?.role === 0}
+                isEligible={user?.eligibility === 1}
               />
             )}
           </div>
@@ -396,6 +398,7 @@ const Services = () => {
                 fetchServices={fetchServices} 
                 canEdit={canEdit}
                 isLocked={user?.role === 0}
+                isEligible={user?.eligibility === 1}
               />
             ) : (
               <WebListings 
@@ -403,6 +406,7 @@ const Services = () => {
                 fetchServices={fetchServices} 
                 canEdit={canEdit}
                 isLocked={user?.role === 0}
+                isEligible={user?.eligibility === 1}
               />
             )}
 

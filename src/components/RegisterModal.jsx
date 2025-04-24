@@ -20,11 +20,26 @@ registerPlugin(FilePondPluginFileValidateSize, FilePondPluginFileValidateType);
 
 const steps = ['License Validation', 'Basic Info', 'Company Info', 'Service Info', 'Final Submission'];
 
+// Configuration for which steps are enabled/disabled
+const stepConfig = {
+  licenseValidation: true,
+  basicInfo: true,
+  companyInfo: true,
+  serviceInfo: false, // Disabled for now
+  finalSubmission: true
+};
+
+// Get active steps based on configuration
+const activeSteps = steps.filter((_, index) => {
+  const stepKeys = ['licenseValidation', 'basicInfo', 'companyInfo', 'serviceInfo', 'finalSubmission'];
+  return stepConfig[stepKeys[index]];
+});
+
 const stepFields = [
   ['licenseNumber'], // Step 0
   ['fullName', 'companyName'], // Step 1
   ['email', 'phone', 'website', 'address'], // Step 2
-  ['city', 'state', 'zipCode', 'serviceCategory', 'yearsOfExperience', 'coverageArea', 'insurancePolicy', 'issuingAuthority', 'specialties', 'affiliations'], // Step 3
+  [], // Step 3 - Service Info (now optional)
   ['captchaValue', 'agreement'], // Step 4
 ];
 
@@ -39,28 +54,21 @@ const validationSchema = Yup.object({
     ),
   website: Yup.string().url('Invalid URL'),
   address: Yup.string(),
-  city: Yup.string().required('City is required'),
-  state: Yup.string().required('State is required'),
-  zipCode: Yup.string().required('Zip Code is required'),
-  serviceCategory: Yup.string().required('Service Category is required'),
-  yearsOfExperience: Yup.number()
-    .min(0, 'Years of experience cannot be negative')
-    .required('Years of Experience is required'),
-  coverageArea: Yup.array()
-    .min(1, 'Select at least one coverage area')
-    .required('Coverage Area is required'),
-  insurancePolicy: Yup.string().required('Insurance Policy is required'),
+  // Service Info fields are now optional
+  city: Yup.string().nullable(),
+  state: Yup.string().nullable(),
+  zipCode: Yup.string().nullable(),
+  serviceCategory: Yup.string().nullable(),
+  yearsOfExperience: Yup.number().nullable(),
+  coverageArea: Yup.array().nullable(),
+  insurancePolicy: Yup.string().nullable(),
+  issuingAuthority: Yup.string().nullable(),
+  specialties: Yup.array().nullable(),
+  affiliations: Yup.array().nullable(),
   captchaValue: Yup.string().required('Captcha is required'),
   agreement: Yup.boolean()
     .oneOf([true], 'You must agree to the terms')
     .required('You must agree to the terms'),
-  affiliations: Yup.array()
-    .min(1, 'Select at least one affiliation or certification')
-    .required('Affiliations & Certifications are required'),
-  specialties: Yup.array()
-    .min(1, 'Select at least one specialty')
-    .required('Specialties are required'),
-  issuingAuthority: Yup.string().required('Issuing Authority is required'),
 });
 
 const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
@@ -143,7 +151,13 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
         return;
       }
     }
-    setActiveStep((prev) => prev + 1);
+
+    // Skip disabled steps
+    let nextStep = activeStep + 1;
+    while (nextStep < steps.length && !stepConfig[Object.keys(stepConfig)[nextStep]]) {
+      nextStep++;
+    }
+    setActiveStep(nextStep);
   };
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -156,7 +170,7 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
         ? `${import.meta.env.VITE_API_URL}/api/users/updateRea/${userId}`
         : `${import.meta.env.VITE_API_URL}/api/users/registerRea`;
 
-      // Prepare JSON data
+      // Prepare JSON data with null/empty values for optional fields
       const requestData = {
         fullName: values.fullName,
         companyName: values.companyName,
@@ -164,17 +178,23 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
         phone: values.phone || '',
         website: values.website || '',
         address: values.address,
-        city: values.city,
-        state: values.state,
-        zipCode: values.zipCode,
-        serviceCategory: values.serviceCategory,
-        yearsOfExperience: values.yearsOfExperience,
+        // Service Info fields - always included but can be null
+        city: values.city || null,
+        state: values.state || null,
+        zipCode: values.zipCode || null,
+        serviceCategory: values.serviceCategory || null,
+        yearsOfExperience: values.yearsOfExperience || null,
         coverageArea: values.coverageArea || [],
         licenseNumber: values.licenseNumber,
-        issuingAuthority: values.issuingAuthority,
+        issuingAuthority: values.issuingAuthority || null,
         specialties: values.specialties || [],
         affiliations: values.affiliations || [],
-        insurancePolicy: values.insurancePolicy,
+        insurancePolicy: values.insurancePolicy || null,
+        // Optional fields
+        references: [],
+        description: null,
+        files: [],
+        // Required fields
         captchaValue: values.captchaValue,
         agreement: values.agreement,
         dateTime: selectedDateTime,
@@ -437,7 +457,7 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
           <h2 className="modal-title">Register</h2>
           <p className="text-center text-sm text-black-800 my-2 font-semibold">For Real Estate Agent</p>
           <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((label) => (
+            {activeSteps.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>
             ))}
           </Stepper>
@@ -552,7 +572,7 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
                     <ErrorMessage name="address" component="div" className="text-red-600" />
                   </>
                 )}
-                {activeStep === 3 && (
+                {activeStep === 3 && stepConfig.serviceInfo && (
                   <>
                     {/* State - Select Field */}
                     <div>
@@ -590,14 +610,6 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
                         name="zipCode" 
                         placeholder="Zip Code" 
                         className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
-                        validate={(value) => {
-                          if (!value) return 'Zip Code is required';
-                          if (!/^\d{5}$/.test(value)) return 'Zip Code must be 5 digits';
-                          if (!validateZipCode(value, values.city, values.state)) {
-                            return 'Invalid Zip Code for selected city and state';
-                          }
-                          return undefined;
-                        }}
                       />
                       <ErrorMessage name="zipCode" component="div" className="text-red-600" />
                     </div>
@@ -616,7 +628,7 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
                       <ErrorMessage name="serviceCategory" component="div" className="text-red-600" />
                     </div>
 
-                    {/* Years of Experience - Number Field with Min Validation */}
+                    {/* Years of Experience - Number Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mt-2">Years of Experience</label>
                       <Field
@@ -680,57 +692,60 @@ const RegisterModal = ({ isOpen, closeModal, onBack, existingUser }) => {
                       </div>
                       <ErrorMessage name="coverageArea" component="div" className="text-red-600 mt-2" />
                     </div>
-                    {/* License Number - Input Field */}
+
+                    {/* Insurance Policy */}
                     <div>
                       <Field name="insurancePolicy" placeholder="Insurance Policy" className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2" />
                       <ErrorMessage name="insurancePolicy" component="div" className="text-red-600" />
                     </div>
+
                     {/* License Issuing Authority */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Issuing Authority</label>
-                  <Field
-                    name="issuingAuthority"
-                    placeholder="Issuing Authority"
-                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
-                  />
-                  <ErrorMessage name="issuingAuthority" component="div" className="text-red-600" />
+                    <label className="block text-sm font-medium text-gray-700 mt-4">Issuing Authority</label>
+                    <Field
+                      name="issuingAuthority"
+                      placeholder="Issuing Authority"
+                      className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
+                    />
+                    <ErrorMessage name="issuingAuthority" component="div" className="text-red-600" />
 
-                  {/* Specialties - Multi Select */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Specialties</label>
-                  <Field
-                    as="select"
-                    name="specialties"
-                    multiple
-                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
-                    onChange={(event) => {
-                      const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
-                      setFieldValue('specialties', selectedOptions);
-                    }}
-                  >
-                    <option value="Residential">Residential</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Industrial">Industrial</option>
-                    <option value="Land">Land</option>
-                    <option value="Luxury">Luxury</option>
-                  </Field>
-                  <ErrorMessage name="specialties" component="div" className="text-red-600" />
+                    {/* Specialties - Multi Select */}
+                    <label className="block text-sm font-medium text-gray-700 mt-4">Specialties</label>
+                    <Field
+                      as="select"
+                      name="specialties"
+                      multiple
+                      className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
+                      onChange={(event) => {
+                        const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
+                        setFieldValue('specialties', selectedOptions);
+                      }}
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Industrial">Industrial</option>
+                      <option value="Land">Land</option>
+                      <option value="Luxury">Luxury</option>
+                    </Field>
+                    <ErrorMessage name="specialties" component="div" className="text-red-600" />
 
-                  {/* Affiliations - Multi Select */}
-                  <label className="block text-sm font-medium text-gray-700 mt-4">Affiliations & Certifications</label>
-                  <Field
-                    as="select"
-                    name="affiliations"
-                    multiple
-                    className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
-                    onChange={(event) => {
-                      const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
-                      setFieldValue('affiliations', selectedOptions);
-                    }}
-                  >
-                    <option value="NAR">National Association of Realtors (NAR)</option>
-                    <option value="CREA">Canadian Real Estate Association (CREA)</option>
-                    <option value="LEED">LEED Certification</option>
-                    <option value="Luxury Certified">Luxury Certified</option>
-                  </Field>
+                    {/* Affiliations - Multi Select */}
+                    <label className="block text-sm font-medium text-gray-700 mt-4">Affiliations & Certifications</label>
+                    <Field
+                      as="select"
+                      name="affiliations"
+                      multiple
+                      className="w-full rounded-md px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-white/40 mt-2"
+                      onChange={(event) => {
+                        const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
+                        setFieldValue('affiliations', selectedOptions);
+                      }}
+                    >
+                      <option value="NAR">National Association of Realtors (NAR)</option>
+                      <option value="CREA">Canadian Real Estate Association (CREA)</option>
+                      <option value="LEED">LEED Certification</option>
+                      <option value="Luxury Certified">Luxury Certified</option>
+                    </Field>
+                    <ErrorMessage name="affiliations" component="div" className="text-red-600" />
                   </>
                 )}
                   {activeStep === 4 && (

@@ -8,7 +8,7 @@ import "alertifyjs/build/css/alertify.css";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const WebListings = ({ listings, fetchServices, canEdit, isLocked }) => {
+const WebListings = ({ listings, fetchServices, canEdit, isLocked, isEligible }) => {
   const navigate = useNavigate();
   const [sortType, setSortType] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,7 +369,7 @@ const WebListings = ({ listings, fetchServices, canEdit, isLocked }) => {
                                           <div className="text-4xl mb-2">🔒</div>
                                           <h3 className="text-lg font-semibold text-gray-900">Complete Your Profile</h3>
                                           <p className="text-sm text-gray-600 mt-1">
-                                              To access all services, Complete your{' '}
+                                            To access all services, Complete your{' '}
                                             <button 
                                               onClick={() => navigate('/dashboard')}
                                               className="font-bold text-blue-600 hover:text-blue-700 underline"
@@ -401,7 +401,94 @@ const WebListings = ({ listings, fetchServices, canEdit, isLocked }) => {
                                 }
                               })}
                             </div>
-                          ) : categoryServices[category.id]?.length > 0 ? (
+                          ) : !isEligible ? (
+                            <div className="space-y-6 py-4">
+                              {[...Array(5)].map((_, index) => {
+                                // First 2 cards: actual service data
+                                if (index < 2 && categoryServices[category.id]?.length > 0) {
+                                  const service = categoryServices[category.id][index];
+                                  return (
+                                    <div key={index} className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                      <div className="p-4">
+                                        <div className="flex justify-between items-start">
+                                          <div className="flex-1">
+                                            <h4 className="text-base font-medium text-gray-900">
+                                              {service.service_name}
+                                            </h4>
+                                            <div className="flex items-center gap-2 mt-2">
+                                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                service.status === 1 
+                                                  ? 'bg-green-100 text-green-600' 
+                                                  : 'bg-red-100 text-red-600'
+                                              }`}>
+                                                {service.status === 1 ? 'Active' : 'Inactive'}
+                                              </span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+                                              {service.description}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        {service.created_by && (
+                                          <div className="mt-3 flex flex-col gap-1 text-sm text-gray-500">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium">Service Provider:</span>
+                                              <span>{service.created_by.name}</span>
+                                            </div>
+                                            {service.created_by.company_name && (
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-gray-400">•</span>
+                                                <span className="text-gray-600">{service.created_by.company_name}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                // Next 3 cards: visible with lock overlay
+                                if (index >= 2 && index < 5) {
+                                  return (
+                                    <div key={index} className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+                                        <div className="text-center">
+                                          <div className="text-4xl mb-2">🔒</div>
+                                          <h3 className="text-lg font-semibold text-gray-900">Invite Service Providers</h3>
+                                          <p className="text-sm text-gray-600 mt-1">
+                                            To access all services, invite at least 3 service providers{' '}
+                                            <button 
+                                              onClick={() => navigate('/invite')}
+                                              className="font-bold text-blue-600 hover:text-blue-700 underline"
+                                            >
+                                              Invite Now
+                                            </button>
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="p-4">
+                                        <div className="flex justify-between items-start">
+                                          <div className="flex-1">
+                                            <h4 className="text-base font-medium text-gray-900">
+                                              Premium Service {index + 1}
+                                            </h4>
+                                            <div className="flex items-center gap-2 mt-2">
+                                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600">
+                                                Active
+                                              </span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+                                              This is a premium service that requires inviting service providers to access.
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              })}
+                            </div>
+                          ) : (
                             <div className="space-y-6 py-4">
                               {filterListings(sortListings(categoryServices[category.id], sortType)).map((service) => (
                                 <motion.div
@@ -512,10 +599,6 @@ const WebListings = ({ listings, fetchServices, canEdit, isLocked }) => {
                                   </button>
                                 </div>
                               )}
-                            </div>
-                          ) : (
-                            <div className="text-center text-gray-500 py-6">
-                              No services available in this category
                             </div>
                           )}
                         </>
