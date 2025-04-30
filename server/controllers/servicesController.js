@@ -249,14 +249,14 @@ const getServiceById = async (req, res) => {
 // POST /services - Create a new service
 const createService = async (req, res) => {
   try {
-    const { service_name, description, service_type_id, status = 1, user_id } = req.body;
+    const { service, description, service_type_id, status = 1, user_id } = req.body;
     // const created_by = req.user_id || uuidv4(); // Use user ID if available, otherwise generate UUID
-
+    console.log(req.body);
     const result = await pool.query(
-      `INSERT INTO "Services" (service_name, description, service_type_id, status, created_by)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO "Services" (service_name, description, service_type_id, status, created_by, created_at, "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [service_name, description, service_type_id, status, user_id]
+      [service, description, service_type_id, status, user_id, new Date(), new Date()]
     );
 
     res.status(201).json(result.rows[0]);
